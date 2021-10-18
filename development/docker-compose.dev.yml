@@ -27,9 +27,3 @@ services:
     volumes:
       - "./nautobot_config.py:/opt/nautobot/nautobot_config.py"
       - "../:/source"
-  postgres:
-    ports:
-      - "5432:5432"
-  redis:
-    ports:
-      - "6379:6379"
