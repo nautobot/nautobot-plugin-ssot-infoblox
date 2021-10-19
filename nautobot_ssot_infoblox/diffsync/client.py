@@ -13,7 +13,7 @@ from dns import reversename
 logger = logging.getLogger("rq.worker")
 
 
-class NautobotPluginChatopsInfoblox:  # pylint: disable=too-few-public-methods
+class InfobloxApi:  # pylint: disable=too-few-public-methods
     """Representation and methods for interacting with infoblox."""
 
     def __init__(
