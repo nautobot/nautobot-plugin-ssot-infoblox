@@ -27,8 +27,9 @@ class Vlan(DiffSyncModel):
 
     vid: int
     name: str
+    status: str
     description: Optional[str]
-    status: Optional[str]
+    
     
 
 class IPAddress(DiffSyncModel):
