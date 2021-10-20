@@ -79,6 +79,23 @@ class InfobloxApi:  # pylint: disable=too-few-public-methods,  too-many-instance
         logger.info(response.text)
         return response.text
 
+    def _update(self, resource, **params):
+        """Delete a resource from Infoblox.
+
+        Args:
+            resource (str): Resource to update
+            params (dict): Parameters to update within a resource
+
+        Returns:
+            (str): Resource String
+
+        Returns Response:
+            "network/ZG5zLm5ldHdvcmskMTkyLjAuMi4wLzI0LzA:192.0.2.0/24/default"
+        """
+        response = self._request("PUT", path=resource, params=params)
+        logger.info(response.text)
+        return response.text
+
     def get_all_ipv4address_networks(self, prefix):
         """Gets all used / unused IPv4 addresses within the supplied network.
 
@@ -173,7 +190,22 @@ class InfobloxApi:  # pylint: disable=too-few-public-methods,  too-many-instance
         Returns Response:
             "network/ZG5zLm5ldHdvcmskMTkyLjAuMi4wLzI0LzA:192.0.2.0/24/default"
         """
-        self._delete(resource)
+        return self._delete(resource)
+
+    def update_network(self, resource, **params):
+        """Create a network.
+
+        Args:
+            resource (str): _ref network resource to update.
+            params (dict): parameters to update.
+
+        Returns:
+            (str) of reference network
+
+        Return Response:
+            "network/ZG5zLm5ldHdvcmskMTkyLjE2OC4wLjAvMjMvMA:192.168.0.0/23/default"
+        """
+        return self._update(resource, params)
 
     def get_host_record_by_name(self, fqdn):
         """Gets the host record by using FQDN.
