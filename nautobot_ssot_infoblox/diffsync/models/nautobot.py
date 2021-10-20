@@ -33,7 +33,7 @@ class NautobotIPAddress(IPAddress):
     @classmethod
     def create(cls, diffsync, ids, attrs):
         """Create IPAddress object in Nautobot."""
-        _pf = OrmPrefix.objects.get(prefix=attrs["network"])
+        _pf = OrmPrefix.objects.get(prefix=ids["prefix"])
         _ip = OrmIPAddress(
             address=f"{ids['address']}/{_pf.prefix_length}",
             status=OrmStatus.objects.get(name="Active")
