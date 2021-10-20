@@ -616,6 +616,56 @@ class InfobloxApi:  # pylint: disable=too-few-public-methods,  too-many-instance
         logger.info("Infoblox PTR record created: %s", response.json())
         return response.json().get("result")
 
+    def get_vlans(self):
+        """Retrieve all VLANs from Infoblox.
+        
+        Returns:
+            List: list of dictionaries  
+        
+        Return Response:
+        [
+            {
+                "_ref": "vlan/ZG5zLnZsYW4kLmNvbS5pbmZvYmxveC5kbnMudmxhbl92aWV3JFZMVmlldzEuMTAuMjAuMTA:VLView1/VL10/10",
+                "description": "Test VL10",
+                "id": 10,
+                "name": "VL10"
+            },
+            {
+                "_ref": "vlan/ZG5zLnZsYW4kLmNvbS5pbmZvYmxveC5kbnMudmxhbl92aWV3JFZMVmlldzEuMTAuMjAuMTE:VLView1/test11/11",
+                "id": 11,
+                "name": "test11"
+            }
+        ]
+        """
+        url_path = "vlan"
+        params = {"_return_fields": "id,name,description,parent"}
+        response = self._request("GET", url_path, params=params)
+        logger.info(response.json)
+        return response.json()
+
+    def create_vlan(self, vlan_id, vlan_name, parent_id):
+        """Create a VLAN in Infoblox.
+
+        Args:
+            vlan_id (Int): VLAN ID (1-4094)
+            vlan_name (Str): VLAN name
+            parent_id (Str): The _ref ID of the parent VlanView in Infoblox
+        
+        Returns:
+            Str: _ref to created vlan 
+        
+        Return Response:
+        "vlan/ZG5zLnZsYW4kLmNvbS5pbmZvYmxveC5kbnMudmxhbl92aWV3JFZMVmlldzEuMTAuMjAuMTE:VLView1/test11/11"
+        """
+        url_path = "vlan"
+        params = {}
+        payload = {"parent": parent_id,
+                    "id": vlan_id,
+                    "name": vlan_name}
+        response = self._request("POST", url_path, params=params, json=payload)
+        logger.info(response.json)
+        return response.json()
+
     @staticmethod
     def get_ipaddr_type(ip_record: dict) -> str:
         """Method to determine the IPAddress type based upon types and usage keys."""
