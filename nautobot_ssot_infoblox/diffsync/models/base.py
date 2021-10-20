@@ -3,14 +3,11 @@
 from typing import Optional, List
 from diffsync import DiffSyncModel
 
-<<<<<<< HEAD
 from nautobot.ipam.models import IPAddress as OrmIPAddress
 from nautobot.ipam.models import Prefix as OrmPrefix
 from nautobot.ipam.models import VLAN as OrmVlan
 from nautobot.extras.models import Status as OrmStatus
 
-=======
->>>>>>> main
 
 
 class Network(DiffSyncModel):
