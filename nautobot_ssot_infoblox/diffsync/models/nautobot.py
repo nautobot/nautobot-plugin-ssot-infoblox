@@ -1,5 +1,8 @@
 """Nautobot Models for Infoblox integration with SSoT plugin."""
 from nautobot_ssot_infoblox.diffsync.models.base import *
+from nautobot.ipam.models import IPAddress as OrmIPAddress
+from nautobot.ipam.models import Prefix as OrmPrefix
+from nautobot.extras.models import Status as OrmStatus
 
 
 class NautobotNetwork(Network):
