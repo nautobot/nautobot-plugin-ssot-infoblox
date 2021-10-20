@@ -40,7 +40,7 @@ class Network(DiffSyncModel):
     def delete(self):
         """Delete Prefix object in Nautobot."""
         self.diffsync.job.log_warning(f"Prefix {self.network} will be deleted.")
-        _prefix = OrmPrefix.objects.get(**self.get_identifiers())
+        _prefix = OrmPrefix.objects.get(prefix=self.get_identifiers()["network"])
         _prefix.delete()
         return super().delete()
 
@@ -85,6 +85,6 @@ class IPAddress(DiffSyncModel):
     def delete(self):
         """Delete IPAddress object in Nautobot."""
         self.diffsync.job.log_warning(f"IP Address {self.address} will be deleted.")
-        _prefix = OrmPrefix.objects.get(**self.get_identifiers())
+        _prefix = OrmPrefix.objects.get(address=self.get_identifiers()["address"])
         _prefix.delete()
         return super().delete()
