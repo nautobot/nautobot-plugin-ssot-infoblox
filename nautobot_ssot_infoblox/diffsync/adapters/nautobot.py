@@ -45,7 +45,8 @@ class NautobotAdapter(DiffSync):
                 address=addr,
                 prefix=prefix,
                 status=ipaddr.status.name,
-                
+                description=ipaddr.description,
+                dns_name=ipaddr.dns_name,
                 )
             print(self.ipaddress)
 
