@@ -63,12 +63,11 @@ class InfobloxApi:  # pylint: disable=too-few-public-methods
         resp.raise_for_status()
         return resp
 
-    def get_all_ipv4address_networks(self, prefix, status):
+    def get_all_ipv4address_networks(self, prefix):
         """Gets all used / unused IPv4 addresses within the supplied network.
 
         Args:
             prefix (str): Network prefix - '10.220.0.0/22'
-            status (str): USED or UNUSED
 
         Returns:
             (list): IPv4 dict objects
@@ -122,7 +121,7 @@ class InfobloxApi:  # pylint: disable=too-few-public-methods
             }
         ]
         """
-        params = {"network": prefix, "status": status, "_return_as_object": 1}
+        params = {"network": prefix, "_return_as_object": 1}
         api_path = "ipv4address"
         response = self._request("GET", api_path, params=params)
         logger.info(response.json)
