@@ -305,6 +305,7 @@ def pylint(context):
 @task
 def yamllint(context):
     """Run yamllint to validate formating adheres to NTC defined YAML standards.
+
     Args:
         context (obj): Used to run specific commands
     """

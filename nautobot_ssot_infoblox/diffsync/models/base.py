@@ -1,15 +1,10 @@
 """Base Shared Models for Infoblox integration with SSoT plugin."""
-
-from typing import Optional, List
+from typing import Optional
 from diffsync import DiffSyncModel
-
-from nautobot.ipam.models import IPAddress as OrmIPAddress
-from nautobot.ipam.models import Prefix as OrmPrefix
-from nautobot.extras.models import Status as OrmStatus
 
 
 class Network(DiffSyncModel):
-    """Network model for DiffSync"""
+    """Network model for DiffSync."""
 
     _modelname = "prefix"
     _identifiers = ("network",)
@@ -18,7 +13,7 @@ class Network(DiffSyncModel):
 
 
 class IPAddress(DiffSyncModel):
-    """IPAddress model for DiffSync"""
+    """IPAddress model for DiffSync."""
 
     _modelname = "ipaddress"
     _identifiers = ("address", "prefix")
