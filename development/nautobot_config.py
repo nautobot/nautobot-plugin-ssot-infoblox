@@ -70,6 +70,39 @@ CACHES = {
     }
 }
 
+RQ_QUEUES = {
+    "default": {
+        "USE_REDIS_CACHE": "default",
+        "DEFAULT_TIMEOUT": 3600,
+    },
+    "check_releases": {
+        "USE_REDIS_CACHE": "default",
+    },
+    "custom_fields": {
+        "USE_REDIS_CACHE": "default",
+    },
+    "webhooks": {
+        "USE_REDIS_CACHE": "default",
+    },
+}
+
+# duplicate queues setting from RQ for Celery
+CELERY_QUEUES = {
+    "default": {
+        "USE_REDIS_CACHE": "default",
+        "DEFAULT_TIMEOUT": 3600,
+    },
+    "check_releases": {
+        "USE_REDIS_CACHE": "default",
+    },
+    "custom_fields": {
+        "USE_REDIS_CACHE": "default",
+    },
+    "webhooks": {
+        "USE_REDIS_CACHE": "default",
+    },
+}
+
 # This key is used for secure generation of random numbers and strings. It must never be exposed outside of this file.
 # For optimal security, SECRET_KEY should be at least 50 characters in length and contain a mix of letters, numbers, and
 # symbols. Nautobot will not run without this defined. For more information, see
