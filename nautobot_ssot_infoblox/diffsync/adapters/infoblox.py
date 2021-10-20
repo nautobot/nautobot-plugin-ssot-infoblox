@@ -1,5 +1,6 @@
 """Infoblox Adapter for Infoblox integration with SSoT plugin."""
 from diffsync import DiffSync
+from nautobot_ssot_infoblox.diffsync.client import InfobloxApi
 from nautobot_ssot_infoblox.diffsync.models import NautobotIPAddress, NautobotNetwork
 
 
@@ -21,3 +22,33 @@ class InfobloxAdapter(DiffSync):
         super().__init__(*args, **kwargs)
         self.job = job
         self.sync = sync
+        self.conn = InfobloxApi()
+        self.subnets = []
+
+    def load_prefixes(self):
+        """Method to load NautobotNetwork DiffSync model."""
+        for _pf in self.conn.get_all_subnets():
+            self.subnets.append(_pf["network"])
+            new_pf = self.prefix(
+                prefix=_pf["network"],
+                description=_pf["comment"] if _pf.get("comment") else "",
+            )
+            self.add(new_pf)
+
+    def load_ipaddresses(self):
+        """Method to load NautobotIPAddress DiffSync model."""
+        for _prefix in self.subnets:
+            for _ip in self.conn.get_all_ipv4address_networks(prefix=_prefix):
+                new_ip = self.ipaddress(
+                    address=_ip["ip_address"],
+                    prefix=_ip["network"],
+                    status=_ip["status"],
+                    type=self.conn.get_ipaddr_type(_ip),
+                    description=_ip["comment"],
+                )
+                self.add(new_ip)
+
+    def load(self):
+        """Method for one stop shop loading of all models."""
+        self.load_prefixes()
+        self.load_ipaddresses()

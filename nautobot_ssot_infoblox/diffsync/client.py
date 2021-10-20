@@ -13,14 +13,14 @@ from dns import reversename
 logger = logging.getLogger("rq.worker")
 
 
-class InfobloxApi:  # pylint: disable=too-few-public-methods
+class InfobloxApi:  # pylint: disable=too-few-public-methods,  too-many-instance-attributes
     """Representation and methods for interacting with infoblox."""
 
     def __init__(
         self,
-        url=os.environ["NAUTOBOT_INFOBLOX_URL"],
-        username=os.environ["NAUTOBOT_INFOBLOX_USERNAME"],
-        password=os.environ["NAUTOBOT_INFOBLOX_PASSWORD"],
+        url=os.getenv("NAUTOBOT_INFOBLOX_URL", ""),
+        username=os.getenv("NAUTOBOT_INFOBLOX_USERNAME", ""),
+        password=os.getenv("NAUTOBOT_INFOBLOX_PASSWORD", ""),
         verify_ssl=is_truthy(os.getenv("NAUTOBOT_INFOBLOX_VERIFY_SSL", "true")),
         wapi_version=os.getenv("NAUTOBOT_INFOBLOX_WAPI_VERSION", "v2.11"),
         cookie=None,
@@ -79,12 +79,11 @@ class InfobloxApi:  # pylint: disable=too-few-public-methods
         logger.info(response.text)
         return response.text
 
-    def get_all_ipv4address_networks(self, prefix, status):
+    def get_all_ipv4address_networks(self, prefix):
         """Gets all used / unused IPv4 addresses within the supplied network.
 
         Args:
             prefix (str): Network prefix - '10.220.0.0/22'
-            status (str): USED or UNUSED
 
         Returns:
             (list): IPv4 dict objects
@@ -138,7 +137,7 @@ class InfobloxApi:  # pylint: disable=too-few-public-methods
             }
         ]
         """
-        params = {"network": prefix, "status": status, "_return_as_object": 1}
+        params = {"network": prefix, "_return_as_object": 1}
         api_path = "ipv4address"
         response = self._request("GET", api_path, params=params)
         logger.info(response.json)
@@ -488,7 +487,7 @@ class InfobloxApi:  # pylint: disable=too-few-public-methods
         ]
         """
         url_path = "network"
-        params = {"_return_as_object": 1}
+        params = {"_return_as_object": 1, "_return_fields": "network,comment"}
         response = self._request("GET", url_path, params=params)
         logger.info(response.json)
         return response.json().get("result")
@@ -616,3 +615,12 @@ class InfobloxApi:  # pylint: disable=too-few-public-methods
         response = self._request("POST", url_path, params=params, json=payload)
         logger.info("Infoblox PTR record created: %s", response.json())
         return response.json().get("result")
+
+    @staticmethod
+    def get_ipaddr_type(ip_record: dict) -> str:
+        """Method to determine the IPAddress type based upon types and usage keys."""
+        if "UNUSED" in ip_record["status"]:
+            return "Reserved"
+        if "DHCP" in ip_record["usage"]:
+            return "DHCP"
+        return "Active"
