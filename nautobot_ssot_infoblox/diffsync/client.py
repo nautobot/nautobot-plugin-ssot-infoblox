@@ -154,7 +154,7 @@ class InfobloxApi:  # pylint: disable=too-few-public-methods,  too-many-instance
                 break
             else:
                 results.append(response.json().get("result"))
-                params = params["_page_id"] = response.json()["next_page_id"]
+                params["_page_id"] = response.json()["next_page_id"]
                 response = self._request("GET", api_path, params=params)
         return results
 
