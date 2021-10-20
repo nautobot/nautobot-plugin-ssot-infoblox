@@ -28,7 +28,7 @@ class InfobloxDataSource(DataSource, Job):
         """Shows mapping of models between Infoblox and Nautobot."""
         return (
             DataMapping("network", None, "Prefix", reverse("ipam:prefix_list")),
-            DataMapping("ipaddress", None, "IP Address", reverse("ipam:ipaddress")),
+            DataMapping("ipaddress", None, "IP Address", reverse("ipam:ipaddress_list")),
         )
 
     def sync_data(self):
@@ -73,7 +73,7 @@ class InfobloxDataTarget(DataTarget, Job):
         """Shows mapping of models between Nautobot and Infoblox."""
         return (
             DataMapping("Prefix", reverse("ipam:prefix_list"), "network", None),
-            DataMapping("IP Address", reverse("ipam:ipaddress"), "ipaddress", None),
+            DataMapping("IP Address", reverse("ipam:ipaddress_list"), "ipaddress", None),
         )
 
     def sync_data(self):
