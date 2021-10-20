@@ -1,4 +1,4 @@
-"""Adapters for Infoblox integration with SSoT plugin."""
+"""Nautobot Adapter for Infoblox integration with SSoT plugin."""
 
 from diffsync import DiffSync
 from .models import NautobotPrefix
