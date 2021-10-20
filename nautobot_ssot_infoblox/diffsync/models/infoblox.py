@@ -1,5 +1,5 @@
 """Infoblox Models for Infoblox integration with SSoT plugin."""
-from nautobot_ssot_infoblox.diffsync.models import Network
+from nautobot_ssot_infoblox.diffsync.models.base import Network
 
 
 class InfobloxNetwork(Network):

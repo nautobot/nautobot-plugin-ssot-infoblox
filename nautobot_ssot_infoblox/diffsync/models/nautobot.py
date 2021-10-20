@@ -2,7 +2,7 @@
 from nautobot.extras.models import Status as OrmStatus
 from nautobot.ipam.models import IPAddress as OrmIPAddress
 from nautobot.ipam.models import Prefix as OrmPrefix
-from . import IPAddress, Network
+from nautobot_ssot_infoblox.diffsync.models.base import Network, IPAddress
 
 
 class NautobotNetwork(Network):
