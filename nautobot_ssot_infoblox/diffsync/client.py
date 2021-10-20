@@ -137,11 +137,26 @@ class InfobloxApi:  # pylint: disable=too-few-public-methods,  too-many-instance
             }
         ]
         """
-        params = {"network": prefix, "_return_as_object": 1}
+        params = {
+            "network": prefix,
+            "_return_as_object": 1,
+            "_paging": 1,
+            "_max_results": 1000,
+            "_return_fields": "ip_address,mac_address,names,network,objects,status,types,usage,comment",
+        }
         api_path = "ipv4address"
         response = self._request("GET", api_path, params=params)
         logger.info(response.json)
-        return response.json().get("result")
+        results = []
+        while True:
+            if "next_page_id" not in response.json():
+                results.append(response.json().get("result"))
+                break
+            else:
+                results.append(response.json().get("result"))
+                params = params["_page_id"] = response.json()["next_page_id"]
+                response = self._request("GET", api_path, params=params)
+        return results
 
     def create_network(self, prefix):
         """Create a network.
