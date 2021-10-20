@@ -30,4 +30,23 @@ class InfobloxDataSource(DataSource, Job):
         self.log_info(message="Connecting to Infoblox")
 
 
-jobs = [InfobloxDataSource]
+class InfobloxDataTarget(DataTarget, Job):
+
+    debug = BooleanVar(description="Enable for verbose debug logging.")
+
+    class Meta:
+
+        name = "Infoblox"
+        data_target = "Infoblox"
+        data_target_icon = static("nautobot_ssot_infoblox/infoblox_logo.png")
+        description = "Sync infomation from Nautobot to Infoblox"
+
+    @classmethod
+    def data_mappings(cls):
+        return (DataMapping("Prefix", reverse("ipam:prefix_list"), "network", None),)
+
+    def sync_data(self):
+        self.log_info(message="Connecting to Infoblox")
+
+
+jobs = [InfobloxDataSource, InfobloxDataTarget]
