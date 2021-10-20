@@ -624,3 +624,30 @@ class InfobloxApi:  # pylint: disable=too-few-public-methods,  too-many-instance
         if "DHCP" in ip_record["usage"]:
             return "DHCP"
         return "Active"
+
+    def update_network(self, prefix, **kwargs):
+        """Update a Network object with a given prefix.
+
+        Args:
+            prefix (str): Valid IP prefix
+            kwargs (str): dict with keyword attributes to update
+
+        Returns:
+            Dict: Dictionary of _ref and name
+
+        Return Response:
+        {
+            "_ref": "network/ZG5zLm5ldHdvcmskMS4xLjEuMC8yNC8w:1.1.1.0/24/default",
+            "network": "1.1.1.0/24",
+            "network_view": "default"
+        }
+        """
+        network_ref = self._find_network_reference(prefix)
+        if not network_ref:
+            return
+        url_path = network_ref[0].get("_ref")
+        params = {"_return_fields": "network", "_return_as_object": 1}
+        payload = dict(**kwargs)
+        response = self._request("PUT", url_path, params=params, json=payload)
+        logger.info("Infoblox Network updated: %s", response.json())
+        return response.json()
