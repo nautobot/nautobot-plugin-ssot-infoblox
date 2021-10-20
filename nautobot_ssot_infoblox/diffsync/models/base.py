@@ -19,7 +19,7 @@ class Vlan(DiffSyncModel):
 
     _modelname = "vlan"
     _identifiers = ("vid",)
-    _attributes = ("name", "description")
+    _attributes = ("name", "description", "status")
 
     vid: int
     name: str
