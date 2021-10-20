@@ -63,6 +63,22 @@ class InfobloxApi:  # pylint: disable=too-few-public-methods,  too-many-instance
         resp.raise_for_status()
         return resp
 
+    def _delete(self, resource):
+        """Delete a resource from Infoblox.
+
+        Args:
+            resource (str): Resource to delete
+
+        Returns:
+            (str): Resource String
+
+        Returns Response:
+            "network/ZG5zLm5ldHdvcmskMTkyLjAuMi4wLzI0LzA:192.0.2.0/24/default"
+        """
+        response = self._request("DELETE", resource)
+        logger.info(response.text)
+        return response.text
+
     def get_all_ipv4address_networks(self, prefix):
         """Gets all used / unused IPv4 addresses within the supplied network.
 
@@ -137,14 +153,27 @@ class InfobloxApi:  # pylint: disable=too-few-public-methods,  too-many-instance
             (str) of reference network
 
         Return Response:
-        "network/ZG5zLm5ldHdvcmskMTkyLjE2OC4wLjAvMjMvMA:192.168.0.0/23/default"
+            "network/ZG5zLm5ldHdvcmskMTkyLjE2OC4wLjAvMjMvMA:192.168.0.0/23/default"
         """
         params = {"network": prefix}
         api_path = "network"
         response = self._request("POST", api_path, params=params)
-        response.raise_for_status()
         logger.info(response.text)
         return response.text
+
+    def delete_network(self, resource):
+        """Delete a network.
+
+        Args:
+            resource (str): _ref network resource to delete.
+
+        Returns:
+            (str) of reference network.
+
+        Returns Response:
+            "network/ZG5zLm5ldHdvcmskMTkyLjAuMi4wLzI0LzA:192.0.2.0/24/default"
+        """
+        self._delete(resource)
 
     def get_host_record_by_name(self, fqdn):
         """Gets the host record by using FQDN.
