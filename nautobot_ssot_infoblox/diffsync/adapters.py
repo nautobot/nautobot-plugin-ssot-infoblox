@@ -3,10 +3,10 @@
 from diffsync import DiffSync
 from .models import NautobotPrefix
 
-class NautobotAdapter(DiffSync):
+# class NautobotAdapter(DiffSync):
 
-    prefix = NautobotPrefix
+#     prefix = NautobotPrefix
 
-    top_level = ("prefix")
+#     top_level = ("prefix")
 
-    def __init__
+#     def __init__
