@@ -49,5 +49,6 @@ class InfobloxAdapter(DiffSync):
                 self.add(new_ip)
 
     def load(self):
+        """Method for one stop shop loading of all models."""
         self.load_prefixes()
         self.load_ipaddresses()

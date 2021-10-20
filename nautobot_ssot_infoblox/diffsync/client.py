@@ -13,7 +13,7 @@ from dns import reversename
 logger = logging.getLogger("rq.worker")
 
 
-class InfobloxApi:  # pylint: disable=too-few-public-methods
+class InfobloxApi:  # pylint: disable=too-few-public-methods,  too-many-instance-attributes
     """Representation and methods for interacting with infoblox."""
 
     def __init__(
@@ -587,7 +587,8 @@ class InfobloxApi:  # pylint: disable=too-few-public-methods
         logger.info("Infoblox PTR record created: %s", response.json())
         return response.json().get("result")
 
-    def get_ipaddr_type(self, ip_record: dict):
+    @staticmethod
+    def get_ipaddr_type(ip_record: dict) -> str:
         """Method to determine the IPAddress type based upon types and usage keys."""
         if "UNUSED" in ip_record["status"]:
             return "Reserved"

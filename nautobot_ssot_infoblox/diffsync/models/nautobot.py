@@ -7,7 +7,7 @@ from nautobot_ssot_infoblox.diffsync.models.base import Network, IPAddress, Vlan
 
 
 class NautobotNetwork(Network):
-    """Nautobot Implementation of the Network Model."""
+    """Nautobot implementation of the Network Model."""
 
     @classmethod
     def create(cls, diffsync, ids, attrs):
@@ -28,7 +28,7 @@ class NautobotNetwork(Network):
 
 
 class NautobotIPAddress(IPAddress):
-    """Nautobot Implementation of the IPAddress Model."""
+    """Nautobot implementation of the IPAddress Model."""
 
     @classmethod
     def create(cls, diffsync, ids, attrs):
@@ -57,7 +57,10 @@ class NautobotIPAddress(IPAddress):
         _ipaddr.delete()
         return super().delete()
 
+
 class NautobotVlan(Vlan):
+    """Nautobot implementation of the Vlan model."""
+
     @classmethod
     def create(cls, diffsync, ids, attrs):
         """Create VLAN object in Nautobot."""
@@ -79,7 +82,7 @@ class NautobotVlan(Vlan):
         return super().update(attrs)
 
     def delete(self):
-        """Delete IPAddress object in Nautobot."""
+        """Delete VLAN object in Nautobot."""
         self.diffsync.job.log_warning(f"VLAN {self.vid} will be deleted.")
         _vlan = OrmPrefix.objects.get(vid=self.get_identifiers()["vid"])
         _vlan.delete()

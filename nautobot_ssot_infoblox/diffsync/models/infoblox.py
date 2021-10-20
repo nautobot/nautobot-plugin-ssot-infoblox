@@ -13,14 +13,17 @@ class InfobloxNetwork(Network):
         # TODO call Infoblox Network Create.
         return super().create(ids=ids, diffsync=diffsync, attrs=attrs)
 
+
 class InfobloxVLAN(Vlan):
     """Infoblox Implementation of the VLAN Model."""
 
     @classmethod
     def create(cls, diffsync, ids, attrs):
         """Create VLAN object in Infoblox."""
+        new_vlan = None
+        new_vlan.validated_save()
         # TODO call Infoblox VLAN Create.
-        pass
+        return super().create(ids=ids, diffsync=diffsync, attrs=attrs)
 
 
 # Not sure we will sync IPAddress to Infoblox as that would be creating a reservation.
