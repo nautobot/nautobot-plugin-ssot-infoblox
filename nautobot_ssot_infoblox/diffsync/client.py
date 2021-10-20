@@ -22,6 +22,7 @@ class InfobloxApi:  # pylint: disable=too-few-public-methods
         username=os.environ["NAUTOBOT_INFOBLOX_USERNAME"],
         password=os.environ["NAUTOBOT_INFOBLOX_PASSWORD"],
         verify_ssl=is_truthy(os.getenv("NAUTOBOT_INFOBLOX_VERIFY_SSL", "true")),
+        wapi_version=os.getenv("NAUTOBOT_INFOBLOX_WAPI_VERSION", "v2.11"),
         cookie=None,
     ):  # pylint: disable=too-many-arguments
         """Initialization of infoblox class."""
@@ -29,6 +30,7 @@ class InfobloxApi:  # pylint: disable=too-few-public-methods
         self.username = username
         self.password = password
         self.verify_ssl = verify_ssl
+        self.wapi_version = wapi_version
         self.cookie = cookie
         if self.verify_ssl is False:
             requests.packages.urllib3.disable_warnings(  # pylint: disable=no-member
@@ -49,7 +51,7 @@ class InfobloxApi:  # pylint: disable=too-few-public-methods
         """
         kwargs["verify"] = self.verify_ssl
         kwargs["headers"] = self.headers
-        api_path = f"/wapi/v2.12/{path}"
+        api_path = f"/wapi/{self.wapi_version}/{path}"
         url = urljoin(self.url, api_path)
 
         if self.cookie:
@@ -125,6 +127,25 @@ class InfobloxApi:  # pylint: disable=too-few-public-methods
         response = self._request("GET", api_path, params=params)
         logger.info(response.json)
         return response.json().get("result")
+
+    def create_network(self, prefix):
+        """Create a network.
+
+        Args:
+            prefix (str): IP network to create.
+
+        Returns:
+            (str) of reference network
+
+        Return Response:
+        "network/ZG5zLm5ldHdvcmskMTkyLjE2OC4wLjAvMjMvMA:192.168.0.0/23/default"
+        """
+        params = {"network": prefix}
+        api_path = "network"
+        response = self._request("POST", api_path, params=params)
+        response.raise_for_status()
+        logger.info(response.text)
+        return response.text
 
     def get_host_record_by_name(self, fqdn):
         """Gets the host record by using FQDN.

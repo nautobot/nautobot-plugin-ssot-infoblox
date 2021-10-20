@@ -1,5 +1,8 @@
 """Nautobot Models for Infoblox integration with SSoT plugin."""
-from nautobot_ssot_infoblox.diffsync.models.base import *
+from nautobot.extras.models import Status as OrmStatus
+from nautobot.ipam.models import IPAddress as OrmIPAddress
+from nautobot.ipam.models import Prefix as OrmPrefix
+from nautobot_ssot_infoblox.diffsync.models.base import Network, IPAddress
 
 
 class NautobotNetwork(Network):
@@ -24,6 +27,8 @@ class NautobotNetwork(Network):
 
 
 class NautobotIPAddress(IPAddress):
+    """Nautobot Implementation of the IPAddress Model."""
+
     @classmethod
     def create(cls, diffsync, ids, attrs):
         """Create IPAddress object in Nautobot."""
@@ -49,4 +54,32 @@ class NautobotIPAddress(IPAddress):
         self.diffsync.job.log_warning(f"IP Address {self.address} will be deleted.")
         _ipaddr = OrmPrefix.objects.get(address=self.get_identifiers()["address"])
         _ipaddr.delete()
+        return super().delete()
+
+class NautobotVlan(Vlan):
+    @classmethod
+    def create(cls, diffsync, ids, attrs):
+        """Create VLAN object in Nautobot."""
+        _vlan = OrmVlan(
+            vid=ids["vid"],
+            status=OrmStatus.objects.get(name="Active")
+            if not attrs.get("status")
+            else OrmStatus.objects.get(name=attrs["status"]),
+        )
+        _vlan.validated_save()
+        return super().create(ids=ids, diffsync=diffsync, attrs=attrs)
+
+    def update(self, attrs):
+        """Update VLAN object in Nautobot."""
+        _vlan = OrmIPAddress.objects.get(vid=self.vid)
+        if attrs.get("status"):
+            _vlan.status = OrmStatus.objects.get(name=attrs["status"])
+        _vlan.validated_save()
+        return super().update(attrs)
+
+    def delete(self):
+        """Delete IPAddress object in Nautobot."""
+        self.diffsync.job.log_warning(f"VLAN {self.vid} will be deleted.")
+        _vlan = OrmPrefix.objects.get(vid=self.get_identifiers()["vid"])
+        _vlan.delete()
         return super().delete()
