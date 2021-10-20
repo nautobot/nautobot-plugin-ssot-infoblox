@@ -9,7 +9,7 @@ from nautobot_ssot_infoblox.diffsync.models.base import IPAddress
 class NautobotAdapter(DiffSync):
 
     prefix = NautobotNetwork
-    ipaddr = NautobotIPAddress
+    ipaddress = NautobotIPAddress
 
     top_level = "prefix"
 
