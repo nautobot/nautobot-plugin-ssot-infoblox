@@ -617,8 +617,8 @@ class InfobloxApi:  # pylint: disable=too-few-public-methods,  too-many-instance
         return response.json().get("result")
 
     @staticmethod
-    def get_ipaddr_type(ip_record: dict) -> str:
-        """Method to determine the IPAddress type based upon types and usage keys."""
+    def get_ipaddr_status(ip_record: dict) -> str:
+        """Method to determine the IPAddress status based upon types and usage keys."""
         if "UNUSED" in ip_record["status"]:
             return "Reserved"
         if "DHCP" in ip_record["usage"]:
