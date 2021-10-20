@@ -1,9 +1,9 @@
 """Infoblox Models for Infoblox integration with SSoT plugin."""
-from nautobot_ssot_infoblox.diffsync.models.base import Network, Vlan
+from nautobot_ssot_infoblox.diffsync.models.base import Network, IPAddress, Vlan
 
 
 class InfobloxNetwork(Network):
-    """Infoblox Implementation of the Network Model."""
+    """Infoblox implementation of the Network Model."""
 
     @classmethod
     def create(cls, diffsync, ids, attrs):
@@ -15,7 +15,7 @@ class InfobloxNetwork(Network):
 
 
 class InfobloxVLAN(Vlan):
-    """Infoblox Implementation of the VLAN Model."""
+    """Infoblox implementation of the VLAN Model."""
 
     @classmethod
     def create(cls, diffsync, ids, attrs):
@@ -26,8 +26,13 @@ class InfobloxVLAN(Vlan):
         return super().create(ids=ids, diffsync=diffsync, attrs=attrs)
 
 
-# Not sure we will sync IPAddress to Infoblox as that would be creating a reservation.
-# We would need a mac address to do that with, which would mean checking for the interface
-# associated with the ip address in Nautobot. This will currently be out of scope, but neat
-# to add if time.
-# class InfobloxIPAdress(IPAddress):
+class InfobloxIPAddress(IPAddress):
+    """Infoblox implementation of the VLAN Model."""
+
+    @classmethod
+    def create(cls, diffsync, ids, attrs):
+        """Create VLAN object in Infoblox."""
+        new_ip = None
+        new_ip.validated_save()
+        # TODO call Infoblox VLAN Create.
+        return super().create(ids=ids, diffsync=diffsync, attrs=attrs)
