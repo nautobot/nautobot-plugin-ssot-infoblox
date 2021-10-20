@@ -88,6 +88,10 @@ notes = """,
     XXX,
     """
 
+[tool.pylint.similarities]
+# Allow for 12 similar lines
+min-similarity-lines=12
+
 [tool.pydocstyle]
 convention = "google"
 inherit = false
