@@ -16,6 +16,12 @@ class Network(DiffSyncModel):
 
     network: str
 
+class Vlan(DiffSyncModel):
+    """VLAN model for DiffSync."""
+
+    _modelname = "vlan"
+    _identifiers = ("vid", )
+    _attributes = ("name", "description")
 
 class IPAddress(DiffSyncModel):
     """IPAddress model for DiffSync"""
