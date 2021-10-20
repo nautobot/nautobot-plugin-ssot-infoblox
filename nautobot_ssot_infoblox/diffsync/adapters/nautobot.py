@@ -8,24 +8,24 @@ from nautobot_ssot_infoblox.diffsync.models.base import IPAddress
 
 class NautobotAdapter(DiffSync):
 
-    network = NautobotNetwork
+    prefix = NautobotNetwork
     ipaddr = NautobotIPAddress
 
-    top_level = "network"
+    top_level = "prefix"
 
     def __init__(self, *args, job=None, **kwargs):
         """Instantiate this class, but do not load data immediately from the local system."""
         super().__init__(*args, **kwargs)
         self.job = job
 
-    def load_networks(self):
-        for network in Prefix.objects.all():
-            _network = self.network(network=str(network.prefix))
-            self.add(_network)
+    def load_prefixs(self):
+        for prefix in Prefix.objects.all():
+            _prefix = self.prefix(network=str(prefix.prefix))
+            self.add(_prefix)
 
     def load_ipaddresses(self):
         for ipaddress in IPAddress.objects.all():
             pass
 
     def load(self):
-        self.load_networks()
+        self.load_prefixs()
