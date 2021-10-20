@@ -10,8 +10,10 @@ from nautobot.extras.models import Status as OrmStatus
 class Prefix(DiffSyncModel):
 
     _modelname = "prefix"
-    _identifiers = ("prefix")
-    _shortname = ("network")
+    _identifiers = "prefix"
+    _shortname = "network"
+
+    prefix: str
 
 
 class IPAddress(DiffSyncModel):
@@ -27,12 +29,11 @@ class IPAddress(DiffSyncModel):
 
 
 class NautobotPrefix(Prefix):
-
     @classmethod
     def create(cls, diffsync, ids, attrs):
         _prefix = OrmPrefix(
-            prefix = ids['prefix'],
-            status = OrmStatus.objects.get(name="Active"),
+            prefix=ids["prefix"],
+            status=OrmStatus.objects.get(name="Active"),
         )
         _prefix.validated_save()
         return super().create(ids=ids, diffsync=diffsync, attrs=attrs)
@@ -42,3 +43,10 @@ class NautobotPrefix(Prefix):
         _prefix = OrmPrefix.objects.get(**self.get_identifiers())
         _prefix.delete()
         return super().delete()
+
+
+class InfobloxNetwork(Prefix):
+    @classmethod
+    def create(cls, diffsync, ids, attrs):
+        # TODO call Infoblox Network Create.
+        pass
