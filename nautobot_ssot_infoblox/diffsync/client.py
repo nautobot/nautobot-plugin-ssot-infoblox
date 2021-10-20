@@ -18,9 +18,9 @@ class InfobloxApi:  # pylint: disable=too-few-public-methods
 
     def __init__(
         self,
-        url=os.environ["NAUTOBOT_INFOBLOX_URL"],
-        username=os.environ["NAUTOBOT_INFOBLOX_USERNAME"],
-        password=os.environ["NAUTOBOT_INFOBLOX_PASSWORD"],
+        url=os.getenv("NAUTOBOT_INFOBLOX_URL", ""),
+        username=os.getenv("NAUTOBOT_INFOBLOX_USERNAME", ""),
+        password=os.getenv("NAUTOBOT_INFOBLOX_PASSWORD", ""),
         verify_ssl=is_truthy(os.getenv("NAUTOBOT_INFOBLOX_VERIFY_SSL", "true")),
         wapi_version=os.getenv("NAUTOBOT_INFOBLOX_WAPI_VERSION", "v2.11"),
         cookie=None,
@@ -459,7 +459,7 @@ class InfobloxApi:  # pylint: disable=too-few-public-methods
         ]
         """
         url_path = "network"
-        params = {"_return_as_object": 1}
+        params = {"_return_as_object": 1, "_return_fields": "network,comment"}
         response = self._request("GET", url_path, params=params)
         logger.info(response.json)
         return response.json().get("result")
@@ -587,3 +587,11 @@ class InfobloxApi:  # pylint: disable=too-few-public-methods
         response = self._request("POST", url_path, params=params, json=payload)
         logger.info("Infoblox PTR record created: %s", response.json())
         return response.json().get("result")
+
+    def get_ipaddr_type(self, ip_record: dict):
+        """Method to determine the IPAddress type based upon types and usage keys."""
+        if "UNUSED" in ip_record["status"]:
+            return "Reserved"
+        if "DHCP" in ip_record["usage"]:
+            return "DHCP"
+        return "Active"
