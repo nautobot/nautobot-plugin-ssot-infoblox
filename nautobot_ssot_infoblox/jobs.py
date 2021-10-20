@@ -48,4 +48,5 @@ class InfobloxDataTarget(DataTarget, Job):
     def sync_data(self):
         self.log_info(message="Connecting to Infoblox")
 
+
 jobs = [InfobloxDataSource, InfobloxDataTarget]

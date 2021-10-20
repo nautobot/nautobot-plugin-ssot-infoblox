@@ -62,7 +62,6 @@ class InfobloxNetwork(Network):
 
 
 class NautobotIPAddress(IPAddress):
-
     @classmethod
     def create(cls, diffsync, ids, attrs):
         """Create IPAddress object in Nautobot."""
@@ -79,9 +78,7 @@ class NautobotIPAddress(IPAddress):
         """Update IPAddress object in Nautobot."""
         _ipaddr = OrmIPAddress.objects.get(address=self.address)
         if attrs.get("status"):
-            _ipaddr.status = (
-                OrmStatus.objects.get(name=attrs["status"])
-            )
+            _ipaddr.status = OrmStatus.objects.get(name=attrs["status"])
         _ipaddr.validated_save()
         return super().update(attrs)
 
