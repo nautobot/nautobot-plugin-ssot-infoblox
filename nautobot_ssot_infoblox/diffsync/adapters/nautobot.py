@@ -1,5 +1,6 @@
 """Nautobot Adapter for Infoblox integration with SSoT plugin."""
 from diffsync import DiffSync
+import re
 from nautobot.ipam.models import Prefix
 from nautobot_ssot_infoblox.diffsync.models.base import IPAddress
 from nautobot_ssot_infoblox.diffsync.models import NautobotNetwork, NautobotIPAddress
@@ -27,13 +28,25 @@ class NautobotAdapter(DiffSync):
     def load_prefixes(self):
         """Method to load Prefixes from Infoblox."""
         for prefix in Prefix.objects.all():
-            _prefix = self.prefix(network=str(prefix.prefix))
+            _prefix = self.prefix(
+                network=str(prefix.prefix),
+                description=prefix.description,
+            )
             self.add(_prefix)
 
     def load_ipaddresses(self):
         """Method to load IP Addresses from Infoblox."""
-        for ipaddress in IPAddress.objects.all():
-            print(ipaddress)
+        for ipaddr in IPAddress.objects.all():
+            addr = re.sub(ipaddr.address, "")
+            _pf = Prefix.objects.net_contains(addr)
+            # the last Prefix is the most specific and is assumed the one the IP address resides in
+            prefix = _pf[len(_pf) - 1]
+            _ip = self.ipaddress(
+                address=addr,
+                prefix=prefix,
+                status=ipaddr.status.name,
+                
+                )
             print(self.ipaddress)
 
     def load(self):
