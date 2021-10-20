@@ -11,7 +11,7 @@ class NautobotAdapter(DiffSync):
     prefix = NautobotNetwork
     ipaddress = NautobotIPAddress
 
-    top_level = "prefix"
+    top_level = ("prefix", "ipaddress")
 
     def __init__(self, *args, job=None, **kwargs):
         """Instantiate this class, but do not load data immediately from the local system."""
