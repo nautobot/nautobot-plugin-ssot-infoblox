@@ -1,8 +1,8 @@
 """Nautobot Models for Infoblox integration with SSoT plugin."""
-from nautobot_ssot_infoblox.diffsync.models.base import *
+from nautobot.extras.models import Status as OrmStatus
 from nautobot.ipam.models import IPAddress as OrmIPAddress
 from nautobot.ipam.models import Prefix as OrmPrefix
-from nautobot.extras.models import Status as OrmStatus
+from nautobot_ssot_infoblox.diffsync.models.base import Network, IPAddress
 
 
 class NautobotNetwork(Network):
@@ -27,6 +27,8 @@ class NautobotNetwork(Network):
 
 
 class NautobotIPAddress(IPAddress):
+    """Nautobot Implementation of the IPAddress Model."""
+
     @classmethod
     def create(cls, diffsync, ids, attrs):
         """Create IPAddress object in Nautobot."""

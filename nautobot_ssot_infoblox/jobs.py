@@ -1,22 +1,22 @@
 """Jobs for Infoblox integration with SSoT plugin."""
 
-from diffsync.exceptions import ObjectNotCreated
-from django.urls import reverse
 from django.templatetags.static import static
-from nautobot.extras.jobs import Job, BooleanVar
-from nautobot_ssot.jobs.base import DataSource, DataTarget, DataMapping
-from diffsync import DiffSyncFlags
-from nautobot_ssot_infoblox.diffsync.adapters import infoblox, nautobot
+from django.urls import reverse
+from nautobot.extras.jobs import BooleanVar, Job
+from nautobot_ssot.jobs.base import DataMapping, DataSource, DataTarget
 
-# from nautobot_ssot_infoblox.diffsync.adapters import NautobotAdapter
-# from nautobot_ssot_infoblox import PluginConfig
+from diffsync import DiffSyncFlags
+from diffsync.exceptions import ObjectNotCreated
+from nautobot_ssot_infoblox.diffsync.adapters import infoblox, nautobot
 
 
 class InfobloxDataSource(DataSource, Job):
+    """Infoblox SSoT Data Source."""
 
     debug = BooleanVar(description="Enable for verbose debug logging.")
 
-    class Meta:
+    class Meta:  # pylint: disable=too-few-public-methods
+        """Information about the Job."""
 
         name = "Infoblox"
         data_source = "Infoblox"
@@ -25,12 +25,14 @@ class InfobloxDataSource(DataSource, Job):
 
     @classmethod
     def data_mappings(cls):
+        """Shows mapping of models between Infoblox and Nautobot."""
         return (
             DataMapping("network", None, "Prefix", reverse("ipam:prefix_list")),
             DataMapping("ipaddress", None, "IP Address", reverse("ipam:ip_addresses")),
         )
 
     def sync_data(self):
+        """Method to handle synchronization of data to Nautobot."""
         self.log_info(message="Connecting to Infoblox")
         infoblox_adapter = infoblox.InfobloxAdapter(job=self, sync=self.sync)
         self.log_info(message="Loading data from Infoblox...")
@@ -54,10 +56,12 @@ class InfobloxDataSource(DataSource, Job):
 
 
 class InfobloxDataTarget(DataTarget, Job):
+    """Infoblox SSoT Data Target."""
 
     debug = BooleanVar(description="Enable for verbose debug logging.")
 
-    class Meta:
+    class Meta:  # pylint: disable=too-few-public-methods
+        """Information about the Job."""
 
         name = "Infoblox"
         data_target = "Infoblox"
@@ -66,12 +70,14 @@ class InfobloxDataTarget(DataTarget, Job):
 
     @classmethod
     def data_mappings(cls):
+        """Shows mapping of models between Nautobot and Infoblox."""
         return (
             DataMapping("Prefix", reverse("ipam:prefix_list"), "network", None),
             DataMapping("IP Address", reverse("ipam:ip_addresses"), "ipaddress", None),
         )
 
     def sync_data(self):
+        """Method to handle synchronization of data to Infoblox."""
         self.log_info(message="Connecting to Infoblox")
         infoblox_adapter = infoblox.InfobloxAdapter(job=self, sync=self.sync)
         self.log_info(message="Loading data from Infoblox...")

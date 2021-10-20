@@ -21,6 +21,7 @@ packages = [
 nautobot = { version = "*", optional = true }
 python = "^3.6"
 nautobot-ssot = "^1.0.1"
+dnspython = "^2.1.0"
 
 [tool.poetry.dev-dependencies]
 bandit = "*"
@@ -86,6 +87,10 @@ notes = """,
     FIXME,
     XXX,
     """
+
+[tool.pylint.similarities]
+# Allow for 12 similar lines
+min-similarity-lines=12
 
 [tool.pydocstyle]
 convention = "google"

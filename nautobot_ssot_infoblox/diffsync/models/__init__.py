@@ -1,12 +1,10 @@
-from nautobot_ssot_infoblox.diffsync.models.base import *
-from nautobot_ssot_infoblox.diffsync.models.nautobot import *
-from nautobot_ssot_infoblox.diffsync.models.infoblox import *
+"""Initialize models for Nautobot and Infoblox."""
+from .nautobot import NautobotNetwork, NautobotIPAddress
+from .infoblox import InfobloxNetwork
 
 
-__all__ = {
-    "Network": Network,
-    "IPAddress": IPAddress,
-    "NautobotNetwork": NautobotNetwork,
-    "NautobotIPAddress": NautobotIPAddress,
-    "InfobloxNetwork": InfobloxNetwork,
-}
+__all__ = [
+    "NautobotNetwork",
+    "NautobotIPAddress",
+    "InfobloxNetwork",
+]

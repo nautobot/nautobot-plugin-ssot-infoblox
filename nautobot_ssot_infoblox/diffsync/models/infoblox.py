@@ -1,5 +1,5 @@
 """Infoblox Models for Infoblox integration with SSoT plugin."""
-from nautobot_ssot_infoblox.diffsync.models.base import *
+from nautobot_ssot_infoblox.diffsync.models.base import Network
 
 
 class InfobloxNetwork(Network):
@@ -8,8 +8,10 @@ class InfobloxNetwork(Network):
     @classmethod
     def create(cls, diffsync, ids, attrs):
         """Create Network object in Infoblox."""
+        new_net = None
+        new_net.validated_save()
         # TODO call Infoblox Network Create.
-        pass
+        return super().create(ids=ids, diffsync=diffsync, attrs=attrs)
 
 
 # Not sure we will sync IPAddress to Infoblox as that would be creating a reservation.
