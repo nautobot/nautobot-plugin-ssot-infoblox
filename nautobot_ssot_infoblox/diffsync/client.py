@@ -150,10 +150,10 @@ class InfobloxApi:  # pylint: disable=too-few-public-methods,  too-many-instance
         results = []
         while True:
             if "next_page_id" not in response.json():
-                results.append(response.json().get("result"))
+                results.extend(response.json().get("result"))
                 break
             else:
-                results.append(response.json().get("result"))
+                results.extend(response.json().get("result"))
                 params["_page_id"] = response.json()["next_page_id"]
                 response = self._request("GET", api_path, params=params)
         return results
