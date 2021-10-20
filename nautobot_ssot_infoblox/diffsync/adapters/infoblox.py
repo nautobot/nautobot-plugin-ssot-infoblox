@@ -42,8 +42,7 @@ class InfobloxAdapter(DiffSync):
                 new_ip = self.ipaddress(
                     address=_ip["ip_address"],
                     prefix=_ip["network"],
-                    status=_ip["status"],
-                    type=self.conn.get_ipaddr_type(_ip),
+                    status=self.conn.get_ipaddr_status(_ip),
                     description=_ip["comment"],
                 )
                 self.add(new_ip)
