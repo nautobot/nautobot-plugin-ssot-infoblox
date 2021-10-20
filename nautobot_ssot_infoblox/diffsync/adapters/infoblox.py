@@ -1,14 +1,14 @@
 """Infoblox Adapter for Infoblox integration with SSoT plugin."""
 from diffsync import DiffSync
 from nautobot_ssot_infoblox.diffsync.client import InfobloxApi
-from nautobot_ssot_infoblox.diffsync.models import NautobotIPAddress, NautobotNetwork
+from nautobot_ssot_infoblox.diffsync.models.infoblox import InfobloxIPAddress, InfobloxNetwork
 
 
 class InfobloxAdapter(DiffSync):
     """DiffSync adapter using requests to communicate to Infoblox server."""
 
-    prefix = NautobotNetwork
-    ipaddress = NautobotIPAddress
+    prefix = InfobloxNetwork
+    ipaddress = InfobloxIPAddress
 
     top_level = ["prefix", "ipaddress"]
 
@@ -30,7 +30,7 @@ class InfobloxAdapter(DiffSync):
         for _pf in self.conn.get_all_subnets():
             self.subnets.append(_pf["network"])
             new_pf = self.prefix(
-                prefix=_pf["network"],
+                network=_pf["network"],
                 description=_pf["comment"] if _pf.get("comment") else "",
             )
             self.add(new_pf)
