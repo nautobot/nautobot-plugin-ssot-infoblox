@@ -96,6 +96,22 @@ class InfobloxApi:  # pylint: disable=too-few-public-methods,  too-many-instance
         logger.info(response.text)
         return response.text
 
+    def _get_network_ref(self, prefix):
+        """Fetch the _ref of a prefix resource.
+
+        Args:
+            prefix (str): IPv4 Prefix to fetch the _ref for.
+
+        Returns:
+            (str) network _ref or None
+
+        Returns Response:
+            "network/ZG5zLm5ldHdvcmskMTkyLjAuMi4wLzI0LzA:192.0.2.0/24/default"
+        """
+        for item in self.get_all_networks(prefix):
+            if item["network"] == prefix:
+                return item["_ref"]
+
     def get_all_ipv4address_networks(self, prefix):
         """Gets all used / unused IPv4 addresses within the supplied network.
 
@@ -160,6 +176,35 @@ class InfobloxApi:  # pylint: disable=too-few-public-methods,  too-many-instance
         logger.info(response.json)
         return response.json().get("result")
 
+    def get_all_networks(self, prefix):
+        """Gets all IPv4 networks.
+
+        Args:
+            prefix (str): Network prefix - '10.220.0.0/22'
+
+        Returns:
+            (list): IPv4 dict objects
+
+        Return Response:
+        [
+            {
+                "_ref": "network/ZG5zLm5ldHdvcmskMTAuMjIzLjAuMC8yMS8w:10.223.0.0/21/default",
+                "network": "10.223.0.0/21",
+                "network_view": "default"
+            },
+            {
+                "_ref": "network/ZG5zLm5ldHdvcmskMTAuMjIwLjY0LjAvMjEvMA:10.220.64.0/21/default",
+                "network": "10.220.64.0/21",
+                "network_view": "default"
+            }
+        ]
+        """
+        params = {"network": prefix, "_return_as_object": 1}
+        api_path = "network"
+        response = self._request("GET", api_path, params=params)
+        logger.info(response.json)
+        return response.json().get("result")
+
     def create_network(self, prefix):
         """Create a network.
 
@@ -178,34 +223,52 @@ class InfobloxApi:  # pylint: disable=too-few-public-methods,  too-many-instance
         logger.info(response.text)
         return response.text
 
-    def delete_network(self, resource):
+    def delete_network(self, prefix):
         """Delete a network.
 
         Args:
-            resource (str): _ref network resource to delete.
+            prefix (str): IPv4 prefix to delete.
 
         Returns:
-            (str) of reference network.
+            (dict) deleted prefix.
 
         Returns Response:
-            "network/ZG5zLm5ldHdvcmskMTkyLjAuMi4wLzI0LzA:192.0.2.0/24/default"
+            {"deleted": "network/ZG5zLm5ldHdvcmskMTkyLjAuMi4wLzI0LzA:192.0.2.0/24/default"}
         """
-        return self._delete(resource)
+        resource = self._get_network_ref(prefix)
 
-    def update_network(self, resource, **params):
-        """Create a network.
+        if resource:
+            self._delete(resource)
+            response = {"deleted": resource}
+        else:
+            response = {"error": f"{prefix} not found."}
+
+        logger.info(response)
+        return response
+
+    def update_network(self, prefix, comment=None):
+        """Update a network.
 
         Args:
-            resource (str): _ref network resource to update.
-            params (dict): parameters to update.
+            (str): IPv4 prefix to update.
+            comment (str): IPv4 prefix update comment.
 
         Returns:
-            (str) of reference network
+            (dict) updated prefix.
 
         Return Response:
-            "network/ZG5zLm5ldHdvcmskMTkyLjE2OC4wLjAvMjMvMA:192.168.0.0/23/default"
+            {"updated": "network/ZG5zLm5ldHdvcmskMTkyLjE2OC4wLjAvMjMvMA:192.168.0.0/23/default"}
         """
-        return self._update(resource, params)
+        resource = self._get_network_ref(prefix)
+
+        if resource:
+            params = {"network": prefix, "comment": comment}
+            self._update(resource, **params)
+            response = {"updated": resource}
+        else:
+            response = {"error": f"error updating {prefix}"}
+        logger.info(response)
+        return response
 
     def get_host_record_by_name(self, fqdn):
         """Gets the host record by using FQDN.
