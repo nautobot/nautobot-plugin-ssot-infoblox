@@ -8,8 +8,10 @@ class Network(DiffSyncModel):
 
     _modelname = "prefix"
     _identifiers = ("network",)
+    _attributes = ("description",)
 
     network: str
+    description: Optional[str]
 
 
 class Vlan(DiffSyncModel):
