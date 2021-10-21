@@ -5,6 +5,7 @@ import os
 import copy
 import re
 import requests
+import json
 
 from nautobot.core.settings_funcs import is_truthy
 from requests.compat import urljoin
