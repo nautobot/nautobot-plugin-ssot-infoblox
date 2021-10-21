@@ -45,10 +45,9 @@ class IPAddress(DiffSyncModel):
     _modelname = "ipaddress"
     _identifiers = ("address", "prefix")
     _shortname = ("address",)
-    _attributes = ("status", "description", "dns_name")
+    _attributes = ("status", "description")
 
     address: str
     prefix: str
     status: str
     description: Optional[str]
-    dns_name: Optional[str]
