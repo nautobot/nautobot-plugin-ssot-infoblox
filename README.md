@@ -24,11 +24,15 @@ Once installed, the plugin needs to be enabled in your `nautobot_config.py`
 # In your nautobot_config.py
 PLUGINS = ["nautobot_ssot_infoblox"]
 
-# PLUGINS_CONFIG = {
-#   "nautobot_ssot_infoblox": {
-#     ADD YOUR SETTINGS HERE
-#   }
-# }
+PLUGINS_CONFIG = {
+    "nautobot_ssot_infoblox": {
+        "NAUTOBOT_INFOBLOX_URL": os.getenv("NAUTOBOT_INFOBLOX_URL", ""),
+        "NAUTOBOT_INFOBLOX_USERNAME": os.getenv("NAUTOBOT_INFOBLOX_USERNAME", ""),
+        "NAUTOBOT_INFOBLOX_PASSWORD": os.getenv("NAUTOBOT_INFOBLOX_PASSWORD", ""),
+        "NAUTOBOT_INFOBLOX_VERIFY_SSL": os.getenv("NAUTOBOT_INFOBLOX_VERIFY_SSL", "true"),
+        "NAUTOBOT_INFOBLOX_WAPI_VERSION": os.getenv("NAUTOBOT_INFOBLOX_WAPI_VERSION", "v2.12"),
+    }
+}
 ```
 
 The plugin behavior can be controlled with the following list of settings
