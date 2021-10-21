@@ -102,18 +102,29 @@ class NautobotVlan(Vlan):
         _vlan = OrmVlan(
             vid=ids["vid"],
             name=attrs["name"],
-            status=OrmStatus.objects.get(name="Active")
-            if not attrs.get("status")
-            else OrmStatus.objects.get(name=attrs["status"]),
+            status=OrmStatus.objects.get(name=cls.get_vlan_status(attrs["status"])),
+            description=attrs["description"],
         )
         _vlan.validated_save()
         return super().create(ids=ids, diffsync=diffsync, attrs=attrs)
+
+    @staticmethod
+    def get_vlan_status(status: str) -> str:
+        """Method to return VLAN Status from mapping."""
+        statuses = {
+            "ASSIGNED": "Active",
+            "UNASSIGNED": "Deprecated",
+            "RESERVED": "Reserved",
+        }
+        return statuses[status]
 
     def update(self, attrs):
         """Update VLAN object in Nautobot."""
         _vlan = OrmVlan.objects.get(vid=self.vid)
         if attrs.get("status"):
-            _vlan.status = OrmStatus.objects.get(name=attrs["status"])
+            _vlan.status = self.get_vlan_status(attrs["status"])
+        if attrs.get("description"):
+            _vlan.description = attrs["description"]
         _vlan.validated_save()
         return super().update(attrs)
 
