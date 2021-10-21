@@ -1,6 +1,6 @@
 # Nautobot SSoT Infoblox
 
-A plugin for [Nautobot](https://github.com/nautobot/nautobot).
+Using the [Nautobot SSoT](https://github.com/nautobot/nautobot-plugin-ssot) framework, the SSoT plugin for Infoblox allows for syncronizing source of IP network and VLAN data between [Infoblox](https://infoblox.com/) and [Nautobot](https://github.com/nautobot/nautobot).
 
 ## Installation
 
@@ -24,18 +24,31 @@ Once installed, the plugin needs to be enabled in your `nautobot_config.py`
 # In your nautobot_config.py
 PLUGINS = ["nautobot_ssot_infoblox"]
 
-# PLUGINS_CONFIG = {
-#   "nautobot_ssot_infoblox": {
-#     ADD YOUR SETTINGS HERE
-#   }
-# }
+PLUGINS_CONFIG = {
+  "nautobot_ssot_infoblox": {
+    "url": os.getenv("NAUTOBOT_INFOBLOX_URL"),
+    "username": os.getenv("NAUTOBOT_INFOBLOX_USERNAME"),
+    "password": os.getenv("NAUTOBOT_INFOBLOX_PASSWORD"),
+    "verify_ssl": os.getenv("NAUTOBOT_INFOBLOX_VERIFY_SSL", "true"),
+    "wapi_version": os.getenv("NAUTOBOT_INFOBLOX_WAPI_VERSION", "v2.11")
+  }
+}
 ```
+The data fields that can be syncronized are:
 
-The plugin behavior can be controlled with the following list of settings
+| Infoblox  | Nautobot   |
+------------|-------------
+| network   | Prefix     |
+| ipaddress | IP Address |
+| vlan      | VLAN       |
+| vlanview  | VLANGroup  |
 
-- TODO
 
 ## Usage
+
+![Infoblox SSoT Status](./ssot-status.png)
+
+![Infoblox SSot Logs](./ssot-logs.png)
 
 ### API
 
