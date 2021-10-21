@@ -731,6 +731,40 @@ class InfobloxApi:  # pylint: disable=too-many-public-methods,  too-many-instanc
         logger.info("Infoblox PTR record created: %s", response.json())
         return response.json().get("result")
 
+    def get_vlanviews(self):
+        """Retrieve all VLANViews from Infoblox.
+
+        Returns:
+            List: list of dictionaries
+
+        Return Response:
+        [
+            {
+                "_ref": "vlanview/ZG5zLnZsYW5fdmlldyRWTFZpZXcxLjEwLjIw:VLView1/10/20",
+                "end_vlan_id": 20,
+                "name": "VLView1",
+                "start_vlan_id": 10
+            },
+            {
+                "_ref": "vlanview/ZG5zLnZsYW5fdmlldyRWTFZpZXcyLjEwMC4yMDA:VLView2/100/200",
+                "end_vlan_id": 200,
+                "name": "VLView2",
+                "start_vlan_id": 100
+            },
+            {
+                "_ref": "vlanview/ZG5zLnZsYW5fdmlldyROYXV0b2JvdC4xLjQwOTQ:Nautobot/1/4094",
+                "end_vlan_id": 4094,
+                "name": "Nautobot",
+                "start_vlan_id": 1
+            }
+        ]
+        """
+        url_path = "vlanview"
+        params = {"_return_fields": "name,comment,start_vlan_id,end_vlan_id"}
+        response = self._request("GET", url_path, params=params)
+        logger.info(response.json)
+        return response.json()
+
     def get_vlans(self):
         """Retrieve all VLANs from Infoblox.
 
