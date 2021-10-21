@@ -76,8 +76,12 @@ class InfobloxApi:  # pylint: disable=too-many-public-methods,  too-many-instanc
             "network/ZG5zLm5ldHdvcmskMTkyLjAuMi4wLzI0LzA:192.0.2.0/24/default"
         """
         response = self._request("DELETE", resource)
-        logger.info(response.text)
-        return response.text
+        try:
+            logger.info(response.json())
+            return response.json()
+        except json.decoder.JSONDecodeError:
+            logger.info(response.text)
+            return response.text
 
     def _update(self, resource, **params):
         """Delete a resource from Infoblox.
@@ -93,8 +97,12 @@ class InfobloxApi:  # pylint: disable=too-many-public-methods,  too-many-instanc
             "network/ZG5zLm5ldHdvcmskMTkyLjAuMi4wLzI0LzA:192.0.2.0/24/default"
         """
         response = self._request("PUT", path=resource, params=params)
-        logger.info(response.text)
-        return response.text
+        try:
+            logger.info(response.json())
+            return response.json()
+        except json.decoder.JSONDecodeError:
+            logger.info(response.text)
+            return response.text
 
     def _get_network_ref(self, prefix):  # pylint: disable=inconsistent-return-statements
         """Fetch the _ref of a prefix resource.
