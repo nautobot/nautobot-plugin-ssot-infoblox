@@ -37,7 +37,7 @@ class InfobloxVLANView(VlanView):
             vlan_name=attrs["vlan_name"],
             vlan_view=attrs["vlangroup"] if attrs.get("vlangroup") else "nautobot",
         )
-        return NotImplementedError
+        return super().create(ids=ids, diffsync=diffsync, attrs=attrs)
 
 
 class InfobloxVLAN(Vlan):
