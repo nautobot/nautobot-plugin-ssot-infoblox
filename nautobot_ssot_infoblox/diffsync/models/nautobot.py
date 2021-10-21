@@ -1,9 +1,11 @@
 """Nautobot Models for Infoblox integration with SSoT plugin."""
+from django.utils.text import slugify
 from nautobot.extras.models import Status as OrmStatus
 from nautobot.ipam.models import IPAddress as OrmIPAddress
 from nautobot.ipam.models import Prefix as OrmPrefix
 from nautobot.ipam.models import VLAN as OrmVlan
-from nautobot_ssot_infoblox.diffsync.models.base import Network, IPAddress, Vlan
+from nautobot.ipam.models import VLANGroup as OrmVlanGroup
+from nautobot_ssot_infoblox.diffsync.models.base import Network, IPAddress, Vlan, VlanView
 
 
 class NautobotNetwork(Network):
@@ -56,6 +58,28 @@ class NautobotIPAddress(IPAddress):
         self.diffsync.job.log_warning(f"IP Address {self.address} will be deleted.")
         _ipaddr = OrmPrefix.objects.get(address=self.get_identifiers()["address"])
         _ipaddr.delete()
+        return super().delete()
+
+
+class NautobotVlanGroup(VlanView):
+    """Nautobot implementation of the VLANView model."""
+
+    @classmethod
+    def create(cls, diffsync, ids, attrs):
+        """Create VLANGroup object in Nautobot."""
+        _vg = OrmVlanGroup(
+            name=ids["name"],
+            slug=slugify(ids["name"]),
+            description=attrs["description"],
+        )
+        _vg.validated_save()
+        return super().create(ids=ids, diffsync=diffsync, attrs=attrs)
+
+    def delete(self):
+        """Delete VLANGroup object in Nautobot."""
+        self.diffsync.job.log_warning(f"VLAN Group {self.name} will be deleted.")
+        _vg = OrmVlanGroup.objects.get(**self.get_identifiers())
+        _vg.delete()
         return super().delete()
 
 
