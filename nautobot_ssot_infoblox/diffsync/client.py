@@ -4,8 +4,8 @@ import logging
 import os
 import copy
 import re
-import requests
 import json
+import requests
 
 from nautobot.core.settings_funcs import is_truthy
 from requests.compat import urljoin
@@ -764,20 +764,6 @@ class InfobloxApi:  # pylint: disable=too-many-public-methods,  too-many-instanc
         response = self._request("GET", path=url_path, params=params)
         logger.info(response.json())
         return response.json()
-
-    def get_vlan_view_name(self, reference):
-        """Get the vlanview name by the reference resource string.
-
-        Args:
-            reference (str): Vlan view Reference resource.
-
-        Returns:
-            (str): Vlan view name.
-
-        Returns Response:
-            "Nautobot"
-        """
-        return reference.split("/")[1].split(":")[-1]
 
     def create_vlan_view(self, name, start_vid=1, end_vid=4094):
         """Create a vlan view.
