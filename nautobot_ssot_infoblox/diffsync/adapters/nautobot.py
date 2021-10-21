@@ -13,7 +13,7 @@ class NautobotAdapter(DiffSync):
     vlangroup = NautobotVlanGroup
     vlan = NautobotVlan
 
-    top_level = ["prefix", "ipaddress", "vlan"]
+    top_level = ["prefix", "ipaddress", "vlangroup", "vlan"]
 
     def __init__(self, *args, job=None, sync=None, **kwargs):
         """Initialize Nautobot.
@@ -44,7 +44,7 @@ class NautobotAdapter(DiffSync):
             prefix = _pf[len(_pf) - 1]
             _ip = self.ipaddress(
                 address=addr,
-                prefix=prefix,
+                prefix=str(prefix),
                 status=ipaddr.status.name,
                 description=ipaddr.description,
                 dns_name=ipaddr.dns_name,
