@@ -34,6 +34,9 @@ PLUGINS_CONFIG = {
     }
 }
 ```
+
+## Usage
+
 The data fields that can be syncronized are:
 
 | Infoblox  | Nautobot   |
@@ -43,12 +46,11 @@ The data fields that can be syncronized are:
 | vlan      | VLAN       |
 | vlanview  | VLANGroup  |
 
-
-## Usage
-
 ![Infoblox SSoT Status](./ssot-status.png)
 
 ![Infoblox SSoT Logs](./ssot-logs.png)
+
+Infoblox SSoT under the hood:
 
 ![Infoblox SSoT Under the Hood](./ssot-under-the-hood.gif)
 
