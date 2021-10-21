@@ -1,8 +1,8 @@
 """Nautobot Adapter for Infoblox integration with SSoT plugin."""
 import re
 from diffsync import DiffSync
-from nautobot.ipam.models import IPAddress, Prefix, VLAN
-from nautobot_ssot_infoblox.diffsync.models import NautobotNetwork, NautobotIPAddress, NautobotVlan
+from nautobot.ipam.models import IPAddress, Prefix, VLAN, VLANGroup
+from nautobot_ssot_infoblox.diffsync.models import NautobotNetwork, NautobotIPAddress, NautobotVlanGroup, NautobotVlan
 
 
 class NautobotAdapter(DiffSync):
@@ -10,6 +10,7 @@ class NautobotAdapter(DiffSync):
 
     prefix = NautobotNetwork
     ipaddress = NautobotIPAddress
+    vlangroup = NautobotVlanGroup
     vlan = NautobotVlan
 
     top_level = ["prefix", "ipaddress", "vlan"]
@@ -37,7 +38,7 @@ class NautobotAdapter(DiffSync):
     def load_ipaddresses(self):
         """Method to load IP Addresses from Nautobot."""
         for ipaddr in IPAddress.objects.all():
-            addr = re.sub(repl=ipaddr.address, pattern=r"/\d+", string="")
+            addr = re.sub(r"/\d+", "", str(ipaddr.address))
             _pf = Prefix.objects.net_contains(addr)
             # the last Prefix is the most specific and is assumed the one the IP address resides in
             prefix = _pf[len(_pf) - 1]
@@ -49,6 +50,15 @@ class NautobotAdapter(DiffSync):
                 dns_name=ipaddr.dns_name,
             )
             self.add(_ip)
+
+    def load_vlangroups(self):
+        """Method to load VLAN Groups from Nautobot."""
+        for grp in VLANGroup.objects.all():
+            _vg = self.vlangroup(
+                name=grp.name,
+                description=grp.description,
+            )
+            self.add(_vg)
 
     def load_vlans(self):
         """Method to load VLANs from Nautobot."""
