@@ -192,7 +192,7 @@ class InfobloxApi:  # pylint: disable=too-few-public-methods,  too-many-instance
                 response = self._request("GET", api_path, params=params)
         return results
 
-    def get_all_networks(self, prefix):
+    def get_all_networks(self, prefix=None):
         """Gets all IPv4 networks.
 
         Args:
@@ -215,7 +215,11 @@ class InfobloxApi:  # pylint: disable=too-few-public-methods,  too-many-instance
             }
         ]
         """
-        params = {"network": prefix, "_return_as_object": 1}
+        params = {"_return_as_object": 1}
+
+        if prefix:
+            params.update({"network": prefix})
+
         api_path = "network"
         response = self._request("GET", api_path, params=params)
         logger.info(response.json)
