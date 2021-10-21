@@ -50,6 +50,7 @@ class NautobotIPAddress(IPAddress):
             status=OrmStatus.objects.get(name="Active")
             if not attrs.get("status")
             else OrmStatus.objects.get(name=attrs["status"]),
+            description=attrs["description"] if attrs.get("description") else "",
         )
         _ip.validated_save()
         return super().create(ids=ids, diffsync=diffsync, attrs=attrs)
@@ -60,6 +61,8 @@ class NautobotIPAddress(IPAddress):
         _ipaddr = OrmIPAddress.objects.get(address=f"{self.address}/{_pf.prefix_length}")
         if attrs.get("status"):
             _ipaddr.status = OrmStatus.objects.get(name=attrs["status"])
+        if attrs.get("description"):
+            _ipaddr.description = attrs["description"]
         _ipaddr.validated_save()
         return super().update(attrs)
 
