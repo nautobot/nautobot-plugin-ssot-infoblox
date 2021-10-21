@@ -63,7 +63,20 @@ class InfobloxAdapter(DiffSync):
             )
             self.add(new_vv)
 
+    def load_vlans(self):
+        """Method to load InfoblocVlan DiffSync model."""
+        for _vlan in self.conn.get_vlans():
+            new_vlan = self.vlan(
+                name=_vlan["name"],
+                vid=_vlan["id"],
+                status=_vlan["status"],
+                description=_vlan["comment"],
+            )
+            self.add(new_vlan)
+
     def load(self):
         """Method for one stop shop loading of all models."""
         self.load_prefixes()
         self.load_ipaddresses()
+        self.load_vlanviews()
+        self.load_vlans()
