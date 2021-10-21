@@ -99,14 +99,15 @@ class NautobotVlan(Vlan):
         _vlan.validated_save()
         return super().create(ids=ids, diffsync=diffsync, attrs=attrs)
 
+    @staticmethod
     def get_vlan_status(status: str) -> str:
         """Method to return VLAN Status from mapping."""
-        STATUSES = {
+        statuses = {
             "ASSIGNED": "Active",
             "UNASSIGNED": "Deprecated",
             "RESERVED": "Reserved",
         }
-        return STATUSES[status]
+        return statuses[status]
 
     def update(self, attrs):
         """Update VLAN object in Nautobot."""
