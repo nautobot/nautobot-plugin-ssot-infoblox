@@ -1,8 +1,8 @@
 """Nautobot Adapter for Infoblox integration with SSoT plugin."""
+import re
 from diffsync import DiffSync
-from nautobot.ipam.models import Prefix
-from nautobot_ssot_infoblox.diffsync.models.base import IPAddress
-from nautobot_ssot_infoblox.diffsync.models import NautobotNetwork, NautobotIPAddress
+from nautobot.ipam.models import IPAddress, Prefix, VLAN
+from nautobot_ssot_infoblox.diffsync.models import NautobotNetwork, NautobotIPAddress, NautobotVlan
 
 
 class NautobotAdapter(DiffSync):
@@ -10,8 +10,9 @@ class NautobotAdapter(DiffSync):
 
     prefix = NautobotNetwork
     ipaddress = NautobotIPAddress
+    vlan = NautobotVlan
 
-    top_level = ["prefix", "ipaddress"]
+    top_level = ["prefix", "ipaddress", "vlan"]
 
     def __init__(self, *args, job=None, sync=None, **kwargs):
         """Initialize Nautobot.
@@ -25,17 +26,38 @@ class NautobotAdapter(DiffSync):
         self.sync = sync
 
     def load_prefixes(self):
-        """Method to load Prefixes from Infoblox."""
+        """Method to load Prefixes from Nautobot."""
         for prefix in Prefix.objects.all():
-            _prefix = self.prefix(network=str(prefix.prefix))
+            _prefix = self.prefix(
+                network=str(prefix.prefix),
+                description=prefix.description,
+            )
             self.add(_prefix)
 
     def load_ipaddresses(self):
-        """Method to load IP Addresses from Infoblox."""
-        for ipaddress in IPAddress.objects.all():
-            print(ipaddress)
-            print(self.ipaddress)
+        """Method to load IP Addresses from Nautobot."""
+        for ipaddr in IPAddress.objects.all():
+            addr = re.sub(repl=ipaddr.address, pattern=r"/\d+", string="")
+            _pf = Prefix.objects.net_contains(addr)
+            # the last Prefix is the most specific and is assumed the one the IP address resides in
+            prefix = _pf[len(_pf) - 1]
+            _ip = self.ipaddress(
+                address=addr,
+                prefix=prefix,
+                status=ipaddr.status.name,
+                description=ipaddr.description,
+                dns_name=ipaddr.dns_name,
+            )
+            self.add(_ip)
+
+    def load_vlans(self):
+        """Method to load VLANs from Nautobot."""
+        for vlan in VLAN.objects.all():
+            _vlan = self.vlan(vid=vlan.vid, name=vlan.name, description=vlan.description)
+            self.add(_vlan)
 
     def load(self):
-        """Method to load models with data from Infoblox."""
+        """Method to load models with data from Nautobot."""
         self.load_prefixes()
+        self.load_ipaddresses()
+        self.load_vlans()

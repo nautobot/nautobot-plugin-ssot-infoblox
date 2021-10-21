@@ -13,7 +13,7 @@ from dns import reversename
 logger = logging.getLogger("rq.worker")
 
 
-class InfobloxApi:  # pylint: disable=too-few-public-methods,  too-many-instance-attributes
+class InfobloxApi:  # pylint: disable=too-many-public-methods,  too-many-instance-attributes
     """Representation and methods for interacting with infoblox."""
 
     def __init__(
@@ -96,7 +96,7 @@ class InfobloxApi:  # pylint: disable=too-few-public-methods,  too-many-instance
         logger.info(response.text)
         return response.text
 
-    def _get_network_ref(self, prefix):
+    def _get_network_ref(self, prefix):  # pylint: disable=inconsistent-return-statements
         """Fetch the _ref of a prefix resource.
 
         Args:
@@ -170,11 +170,27 @@ class InfobloxApi:  # pylint: disable=too-few-public-methods,  too-many-instance
             }
         ]
         """
-        params = {"network": prefix, "_return_as_object": 1}
+        params = {
+            "network": prefix,
+            "status": "USED",
+            "_return_as_object": 1,
+            "_paging": 1,
+            "_max_results": 1000,
+            "_return_fields": "ip_address,mac_address,names,network,objects,status,types,usage,comment",
+        }
         api_path = "ipv4address"
         response = self._request("GET", api_path, params=params)
         logger.info(response.json)
-        return response.json().get("result")
+        results = []
+        while True:
+            if "next_page_id" in response.json():
+                results.extend(response.json().get("result"))
+                params["_page_id"] = response.json()["next_page_id"]
+                response = self._request("GET", api_path, params=params)
+            else:
+                results.extend(response.json().get("result"))
+                break
+        return results
 
     def get_all_networks(self, prefix=None):
         """Gets all IPv4 networks.
@@ -718,8 +734,6 @@ class InfobloxApi:  # pylint: disable=too-few-public-methods,  too-many-instance
     @staticmethod
     def get_ipaddr_status(ip_record: dict) -> str:
         """Method to determine the IPAddress status based upon types and usage keys."""
-        if "UNUSED" in ip_record["status"]:
-            return "Reserved"
         if "DHCP" in ip_record["usage"]:
             return "DHCP"
         return "Active"
@@ -735,11 +749,11 @@ class InfobloxApi:  # pylint: disable=too-few-public-methods,  too-many-instance
         """
         response = self._request("GET", resource, params=params)
         logger.info(response.json())
-        for resource in response.json():
-            return resource.get("_ref")
+        for _resource in response.json():
+            return _resource.get("_ref")
         return response.json()
 
-    def update_ipaddress(self, ip_address, **data):
+    def update_ipaddress(self, ip_address, **data):  # pylint: disable=inconsistent-return-statements
         """Update a Network object with a given prefix.
 
         Args:
