@@ -70,7 +70,7 @@ class InfobloxAdapter(DiffSync):
                 name=_vlan["name"],
                 vid=_vlan["id"],
                 status=_vlan["status"],
-                description=_vlan["comment"],
+                description=_vlan["comment"] if _vlan.get("comment") else "",
             )
             self.add(new_vlan)
 
