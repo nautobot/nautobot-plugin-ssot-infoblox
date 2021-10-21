@@ -29,6 +29,8 @@ class InfobloxDataSource(DataSource, Job):
         return (
             DataMapping("network", None, "Prefix", reverse("ipam:prefix_list")),
             DataMapping("ipaddress", None, "IP Address", reverse("ipam:ipaddress_list")),
+            DataMapping("vlan", None, "VLAN", reverse("ipam:vlan_list")),
+            DataMapping("vlanview", None, "VLANGroup", reverse("ipam:vlangroup_list")),
         )
 
     def sync_data(self):
@@ -74,6 +76,8 @@ class InfobloxDataTarget(DataTarget, Job):
         return (
             DataMapping("Prefix", reverse("ipam:prefix_list"), "network", None),
             DataMapping("IP Address", reverse("ipam:ipaddress_list"), "ipaddress", None),
+            DataMapping("VLAN", reverse("ipam:vlan_list"), "vlan", None),
+            DataMapping("VLANGroup", reverse("ipam:vlangroup_list"), "vlanview", None),
         )
 
     def sync_data(self):
