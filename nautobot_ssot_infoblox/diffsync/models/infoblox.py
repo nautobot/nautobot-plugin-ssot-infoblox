@@ -8,12 +8,16 @@ class InfobloxNetwork(Network):
     @classmethod
     def create(cls, diffsync, ids, attrs):
         """Create Network object in Infoblox."""
-        diffsync.conn.create_network(prefix=ids["prefix"], comment=attrs["description"] if attrs.get("description") else "")
+        diffsync.conn.create_network(
+            prefix=ids["prefix"], comment=attrs["description"] if attrs.get("description") else ""
+        )
         return super().create(ids=ids, diffsync=diffsync, attrs=attrs)
 
     def update(self, attrs):
         """Update Network object in Infoblox."""
-        self.diffsync.conn.update_network(prefix=self.get_identifiers["prefix"], comment=attrs["description"] if attrs.get("description") else "")
+        self.diffsync.conn.update_network(
+            prefix=self.get_identifiers["prefix"], comment=attrs["description"] if attrs.get("description") else ""
+        )
         return super().update(attrs)
 
     def delete(self):

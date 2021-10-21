@@ -47,17 +47,13 @@ class NautobotAdapter(DiffSync):
                 status=ipaddr.status.name,
                 description=ipaddr.description,
                 dns_name=ipaddr.dns_name,
-                )
+            )
             self.add(_ip)
 
     def load_vlans(self):
         """Method to load VLANs from Nautobot."""
         for vlan in VLAN.objects.all():
-            _vlan = self.vlan(
-                vid = vlan.vid,
-                name = vlan.name,
-                description = vlan.description
-            )
+            _vlan = self.vlan(vid=vlan.vid, name=vlan.name, description=vlan.description)
             self.add(_vlan)
 
     def load(self):
