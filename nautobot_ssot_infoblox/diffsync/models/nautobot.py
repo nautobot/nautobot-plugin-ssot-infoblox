@@ -17,9 +17,18 @@ class NautobotNetwork(Network):
         _prefix = OrmPrefix(
             prefix=ids["network"],
             status=OrmStatus.objects.get(name="Active"),
+            description=attrs["description"] if attrs.get("description") else "",
         )
         _prefix.validated_save()
         return super().create(ids=ids, diffsync=diffsync, attrs=attrs)
+
+    def update(self, attrs):
+        """Update Prefix object in Nautobot."""
+        _pf = OrmPrefix.objects.get(prefix=self.network)
+        if attrs.get("description"):
+            _pf.description = attrs["description"]
+        _pf.validated_save()
+        return super().update(attrs)
 
     def delete(self):
         """Delete Prefix object in Nautobot."""
