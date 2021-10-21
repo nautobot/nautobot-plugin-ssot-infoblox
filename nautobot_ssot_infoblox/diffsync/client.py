@@ -5,6 +5,7 @@ import os
 import copy
 import re
 import requests
+import json
 
 from nautobot.core.settings_funcs import is_truthy
 from requests.compat import urljoin
@@ -70,14 +71,18 @@ class InfobloxApi:  # pylint: disable=too-many-public-methods,  too-many-instanc
             resource (str): Resource to delete
 
         Returns:
-            (str): Resource String
+            (dict or str): Resource JSON/String
 
         Returns Response:
             "network/ZG5zLm5ldHdvcmskMTkyLjAuMi4wLzI0LzA:192.0.2.0/24/default"
         """
         response = self._request("DELETE", resource)
-        logger.info(response.text)
-        return response.text
+        try:
+            logger.info(response.json())
+            return response.json()
+        except json.decoder.JSONDecodeError:
+            logger.info(response.text)
+            return response.text
 
     def _update(self, resource, **params):
         """Delete a resource from Infoblox.
@@ -87,14 +92,18 @@ class InfobloxApi:  # pylint: disable=too-many-public-methods,  too-many-instanc
             params (dict): Parameters to update within a resource
 
         Returns:
-            (str): Resource String
+            (dict or str): Resource JSON / String
 
         Returns Response:
             "network/ZG5zLm5ldHdvcmskMTkyLjAuMi4wLzI0LzA:192.0.2.0/24/default"
         """
         response = self._request("PUT", path=resource, params=params)
-        logger.info(response.text)
-        return response.text
+        try:
+            logger.info(response.json())
+            return response.json()
+        except json.decoder.JSONDecodeError:
+            logger.info(response.text)
+            return response.text
 
     def _get_network_ref(self, prefix):  # pylint: disable=inconsistent-return-statements
         """Fetch the _ref of a prefix resource.
@@ -733,10 +742,10 @@ class InfobloxApi:  # pylint: disable=too-many-public-methods,  too-many-instanc
 
     def get_vlans(self):
         """Retrieve all VLANs from Infoblox.
-        
+
         Returns:
-            List: list of dictionaries  
-        
+            List: list of dictionaries
+
         Return Response:
         [
             {
@@ -765,18 +774,16 @@ class InfobloxApi:  # pylint: disable=too-many-public-methods,  too-many-instanc
             vlan_id (Int): VLAN ID (1-4094)
             vlan_name (Str): VLAN name
             parent_id (Str): The _ref ID of the parent VlanView in Infoblox
-        
+
         Returns:
-            Str: _ref to created vlan 
-        
+            Str: _ref to created vlan
+
         Return Response:
         "vlan/ZG5zLnZsYW4kLmNvbS5pbmZvYmxveC5kbnMudmxhbl92aWV3JFZMVmlldzEuMTAuMjAuMTE:VLView1/test11/11"
         """
         url_path = "vlan"
         params = {}
-        payload = {"parent": parent_id,
-                    "id": vlan_id,
-                    "name": vlan_name}
+        payload = {"parent": parent_id, "id": vlan_id, "name": vlan_name}
         response = self._request("POST", url_path, params=params, json=payload)
         logger.info(response.json)
         return response.json()
