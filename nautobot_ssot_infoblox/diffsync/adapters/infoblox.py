@@ -1,7 +1,12 @@
 """Infoblox Adapter for Infoblox integration with SSoT plugin."""
 from diffsync import DiffSync
 from nautobot_ssot_infoblox.diffsync.client import InfobloxApi
-from nautobot_ssot_infoblox.diffsync.models.infoblox import InfobloxIPAddress, InfobloxNetwork
+from nautobot_ssot_infoblox.diffsync.models.infoblox import (
+    InfobloxIPAddress,
+    InfobloxNetwork,
+    InfobloxVLANView,
+    InfobloxVLAN,
+)
 
 
 class InfobloxAdapter(DiffSync):
@@ -9,8 +14,10 @@ class InfobloxAdapter(DiffSync):
 
     prefix = InfobloxNetwork
     ipaddress = InfobloxIPAddress
+    vlangroup = InfobloxVLANView
+    vlan = InfobloxVLAN
 
-    top_level = ["prefix", "ipaddress"]
+    top_level = ["prefix", "ipaddress", "vlangroup", "vlan"]
 
     def __init__(self, *args, job=None, sync=None, **kwargs):
         """Initialize Infoblox.
@@ -26,7 +33,7 @@ class InfobloxAdapter(DiffSync):
         self.subnets = []
 
     def load_prefixes(self):
-        """Method to load NautobotNetwork DiffSync model."""
+        """Method to load InfobloxNetwork DiffSync model."""
         for _pf in self.conn.get_all_subnets():
             self.subnets.append(_pf["network"])
             new_pf = self.prefix(
@@ -36,7 +43,7 @@ class InfobloxAdapter(DiffSync):
             self.add(new_pf)
 
     def load_ipaddresses(self):
-        """Method to load NautobotIPAddress DiffSync model."""
+        """Method to load InfobloxIPAddress DiffSync model."""
         for _prefix in self.subnets:
             for _ip in self.conn.get_all_ipv4address_networks(prefix=_prefix):
                 new_ip = self.ipaddress(
@@ -46,6 +53,15 @@ class InfobloxAdapter(DiffSync):
                     description=_ip["comment"],
                 )
                 self.add(new_ip)
+
+    def load_vlanviews(self):
+        """Method to load InfobloxVLANView DiffSync model."""
+        for _vv in self.conn.get_vlanviews():
+            new_vv = self.vlangroup(
+                name=_vv["name"],
+                description=_vv["comment"] if _vv.get("comment") else "",
+            )
+            self.add(new_vv)
 
     def load(self):
         """Method for one stop shop loading of all models."""

@@ -1,5 +1,5 @@
 """Infoblox Models for Infoblox integration with SSoT plugin."""
-from nautobot_ssot_infoblox.diffsync.models.base import Network, IPAddress, Vlan
+from nautobot_ssot_infoblox.diffsync.models.base import Network, IPAddress, Vlan, VlanView
 
 
 class InfobloxNetwork(Network):
@@ -26,13 +26,22 @@ class InfobloxNetwork(Network):
         return super().delete()
 
 
+class InfobloxVLANView(VlanView):
+    """Infoblox implementation of the VLANView Model."""
+
+    @classmethod
+    def create(cls, diffsync, ids, attrs):
+        """Create VLANView object in Infoblox."""
+        return NotImplementedError
+
+
 class InfobloxVLAN(Vlan):
     """Infoblox implementation of the VLAN Model."""
 
     @classmethod
     def create(cls, diffsync, ids, attrs):
         """Create VLAN object in Infoblox."""
-        return super().create(ids=ids, diffsync=diffsync, attrs=attrs)
+        return NotImplementedError
 
 
 class InfobloxIPAddress(IPAddress):

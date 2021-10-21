@@ -14,6 +14,17 @@ class Network(DiffSyncModel):
     description: Optional[str]
 
 
+class VlanView(DiffSyncModel):
+    """VLANView model for DiffSync."""
+
+    _modelname = "vlangroup"
+    _identifiers = ("name",)
+    _attributes = ("description",)
+
+    name: str
+    description: Optional[str]
+
+
 class Vlan(DiffSyncModel):
     """VLAN model for DiffSync."""
 
