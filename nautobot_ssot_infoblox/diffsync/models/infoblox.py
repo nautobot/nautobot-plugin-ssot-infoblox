@@ -8,10 +8,18 @@ class InfobloxNetwork(Network):
     @classmethod
     def create(cls, diffsync, ids, attrs):
         """Create Network object in Infoblox."""
-        new_net = None
-        new_net.validated_save()
-        # TODO call Infoblox Network Create.
+        diffsync.conn.create_network(prefix=ids["prefix"], comment=attrs["description"] if attrs.get("description") else "")
         return super().create(ids=ids, diffsync=diffsync, attrs=attrs)
+
+    def update(self, attrs):
+        """Update Network object in Infoblox."""
+        self.diffsync.conn.update_network(prefix=self.get_identifiers["prefix"], comment=attrs["description"] if attrs.get("description") else "")
+        return super().update(attrs)
+
+    def delete(self):
+        """Delete Network object in Infoblox."""
+        self.diffsync.conn.delete_network(self.get_identifiers["prefix"])
+        return super().delete()
 
 
 class InfobloxVLAN(Vlan):
@@ -20,9 +28,6 @@ class InfobloxVLAN(Vlan):
     @classmethod
     def create(cls, diffsync, ids, attrs):
         """Create VLAN object in Infoblox."""
-        new_vlan = None
-        new_vlan.validated_save()
-        # TODO call Infoblox VLAN Create.
         return super().create(ids=ids, diffsync=diffsync, attrs=attrs)
 
 
@@ -31,8 +36,13 @@ class InfobloxIPAddress(IPAddress):
 
     @classmethod
     def create(cls, diffsync, ids, attrs):
-        """Create VLAN object in Infoblox."""
-        new_ip = None
-        new_ip.validated_save()
-        # TODO call Infoblox VLAN Create.
-        return super().create(ids=ids, diffsync=diffsync, attrs=attrs)
+        """NO-OP IPAddresses are automatically created in Infoblox."""
+        return super().create(ids, diffsync=diffsync, attrs=attrs)
+
+    def update(self, attrs):
+        """NO-OP Currently don't support updating Infoblox IPAddress."""
+        return super().update(attrs)
+
+    def delete(self):
+        """NO-OP IPAddresses cannot be deleted in Infoblox."""
+        return super().delete()
