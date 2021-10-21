@@ -122,7 +122,7 @@ class NautobotVlan(Vlan):
         """Update VLAN object in Nautobot."""
         _vlan = OrmVlan.objects.get(vid=self.vid)
         if attrs.get("status"):
-            _vlan.status = self.get_vlan_status(attrs["status"])
+            _vlan.status = OrmStatus.objects.get(name=self.get_vlan_status(attrs["status"]))
         if attrs.get("description"):
             _vlan.description = attrs["description"]
         _vlan.validated_save()
