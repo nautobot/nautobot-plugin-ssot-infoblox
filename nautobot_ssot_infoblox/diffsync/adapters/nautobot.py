@@ -3,6 +3,7 @@ import re
 from diffsync import DiffSync
 from nautobot.ipam.models import IPAddress, Prefix, VLAN, VLANGroup
 from nautobot_ssot_infoblox.diffsync.models import NautobotNetwork, NautobotIPAddress, NautobotVlanGroup, NautobotVlan
+from nautobot_ssot_infoblox.utils import nautobot_vlan_status
 
 
 class NautobotAdapter(DiffSync):
@@ -63,7 +64,12 @@ class NautobotAdapter(DiffSync):
     def load_vlans(self):
         """Method to load VLANs from Nautobot."""
         for vlan in VLAN.objects.all():
-            _vlan = self.vlan(vid=vlan.vid, name=vlan.name, description=vlan.description, status=vlan.status.name)
+            _vlan = self.vlan(
+                vid=vlan.vid,
+                name=vlan.name,
+                description=vlan.description,
+                status=nautobot_vlan_status(vlan.status.name),
+            )
             self.add(_vlan)
 
     def load(self):
