@@ -38,7 +38,7 @@ class NautobotAdapter(DiffSync):
     def load_ipaddresses(self):
         """Method to load IP Addresses from Nautobot."""
         for ipaddr in IPAddress.objects.all():
-            addr = re.sub(repl=str(ipaddr.address), pattern=r"/\d+", string="")
+            addr = re.sub(r"/\d+", "", str(ipaddr.address))
             _pf = Prefix.objects.net_contains(addr)
             # the last Prefix is the most specific and is assumed the one the IP address resides in
             prefix = _pf[len(_pf) - 1]
