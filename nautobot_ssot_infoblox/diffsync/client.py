@@ -1,15 +1,15 @@
 """All interactions with infoblox."""
 
+import copy
+import json
 import logging
 import os
-import copy
 import re
-import requests
-import json
 
+import requests
+from dns import reversename
 from nautobot.core.settings_funcs import is_truthy
 from requests.compat import urljoin
-from dns import reversename
 
 logger = logging.getLogger("rq.worker")
 
