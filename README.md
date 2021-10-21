@@ -25,13 +25,13 @@ Once installed, the plugin needs to be enabled in your `nautobot_config.py`
 PLUGINS = ["nautobot_ssot_infoblox"]
 
 PLUGINS_CONFIG = {
-  "nautobot_ssot_infoblox": {
-    "url": os.getenv("NAUTOBOT_INFOBLOX_URL"),
-    "username": os.getenv("NAUTOBOT_INFOBLOX_USERNAME"),
-    "password": os.getenv("NAUTOBOT_INFOBLOX_PASSWORD"),
-    "verify_ssl": os.getenv("NAUTOBOT_INFOBLOX_VERIFY_SSL", "true"),
-    "wapi_version": os.getenv("NAUTOBOT_INFOBLOX_WAPI_VERSION", "v2.11")
-  }
+    "nautobot_ssot_infoblox": {
+        "NAUTOBOT_INFOBLOX_URL": os.getenv("NAUTOBOT_INFOBLOX_URL", ""),
+        "NAUTOBOT_INFOBLOX_USERNAME": os.getenv("NAUTOBOT_INFOBLOX_USERNAME", ""),
+        "NAUTOBOT_INFOBLOX_PASSWORD": os.getenv("NAUTOBOT_INFOBLOX_PASSWORD", ""),
+        "NAUTOBOT_INFOBLOX_VERIFY_SSL": os.getenv("NAUTOBOT_INFOBLOX_VERIFY_SSL", "true"),
+        "NAUTOBOT_INFOBLOX_WAPI_VERSION": os.getenv("NAUTOBOT_INFOBLOX_WAPI_VERSION", "v2.12"),
+    }
 }
 ```
 The data fields that can be syncronized are:

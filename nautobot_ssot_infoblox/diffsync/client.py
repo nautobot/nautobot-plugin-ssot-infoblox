@@ -3,26 +3,26 @@
 import copy
 import json
 import logging
-import os
 import re
 import requests
 from dns import reversename
 from nautobot.core.settings_funcs import is_truthy
 from requests.compat import urljoin
+from nautobot_ssot_infoblox.constant import PLUGIN_CFG
 
 logger = logging.getLogger("rq.worker")
 
 
 class InfobloxApi:  # pylint: disable=too-many-public-methods,  too-many-instance-attributes
-    """Representation and methods for interacting with infoblox."""
+    """Representation and methods for interacting with Infoblox."""
 
     def __init__(
         self,
-        url=os.getenv("NAUTOBOT_INFOBLOX_URL", ""),
-        username=os.getenv("NAUTOBOT_INFOBLOX_USERNAME", ""),
-        password=os.getenv("NAUTOBOT_INFOBLOX_PASSWORD", ""),
-        verify_ssl=is_truthy(os.getenv("NAUTOBOT_INFOBLOX_VERIFY_SSL", "true")),
-        wapi_version=os.getenv("NAUTOBOT_INFOBLOX_WAPI_VERSION", "v2.11"),
+        url=PLUGIN_CFG.get("NAUTOBOT_INFOBLOX_URL"),
+        username=PLUGIN_CFG.get("NAUTOBOT_INFOBLOX_USERNAME"),
+        password=PLUGIN_CFG.get("NAUTOBOT_INFOBLOX_PASSWORD"),
+        verify_ssl=is_truthy(PLUGIN_CFG.get("NAUTOBOT_INFOBLOX_VERIFY_SSL")),
+        wapi_version=PLUGIN_CFG.get("NAUTOBOT_INFOBLOX_WAPI_VERSION"),
         cookie=None,
     ):  # pylint: disable=too-many-arguments
         """Initialization of infoblox class."""
