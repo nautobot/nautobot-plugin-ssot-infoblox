@@ -12,9 +12,9 @@ class TestUtils(unittest.TestCase):
         name = get_vlan_view_name(
             "vlan/ZG5zLnZsYW4kLmNvbS5pbmZvYmxveC5kbnMudmxhbl92aWV3JFZMVmlldzEuMTAuMjAuMTA:VLView1/VL10/10"
         )
-        assert name == "VLView1"
+        self.assertEqual(name, "VLView1")
 
     def nautobot_vlan_status(self):  # pylint: disable=no-self-use
         """Test nautobot_vlan_status."""
         status = nautobot_vlan_status("Active")
-        assert status == "ASSIGNED"
+        self.assertEqual(status, "ASSIGNED")
