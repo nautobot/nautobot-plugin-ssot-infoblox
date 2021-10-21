@@ -1,6 +1,6 @@
 """Nautobot Adapter for Infoblox integration with SSoT plugin."""
-from diffsync import DiffSync
 import re
+from diffsync import DiffSync
 from nautobot.ipam.models import IPAddress, Prefix, VLAN
 from nautobot_ssot_infoblox.diffsync.models import NautobotNetwork, NautobotIPAddress, NautobotVlan
 
@@ -60,4 +60,4 @@ class NautobotAdapter(DiffSync):
         """Method to load models with data from Nautobot."""
         self.load_prefixes()
         self.load_ipaddresses()
-        self.load_vlans
+        self.load_vlans()

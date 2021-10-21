@@ -16,13 +16,13 @@ class InfobloxNetwork(Network):
     def update(self, attrs):
         """Update Network object in Infoblox."""
         self.diffsync.conn.update_network(
-            prefix=self.get_identifiers["prefix"], comment=attrs["description"] if attrs.get("description") else ""
+            prefix=self.get_identifiers()["prefix"], comment=attrs["description"] if attrs.get("description") else ""
         )
         return super().update(attrs)
 
     def delete(self):
         """Delete Network object in Infoblox."""
-        self.diffsync.conn.delete_network(self.get_identifiers["prefix"])
+        self.diffsync.conn.delete_network(self.get_identifiers()["prefix"])
         return super().delete()
 
 
@@ -41,12 +41,12 @@ class InfobloxIPAddress(IPAddress):
     @classmethod
     def create(cls, diffsync, ids, attrs):
         """NO-OP IPAddresses are automatically created in Infoblox."""
-        return super().create(ids, diffsync=diffsync, attrs=attrs)
+        return NotImplementedError
 
     def update(self, attrs):
         """NO-OP Currently don't support updating Infoblox IPAddress."""
-        return super().update(attrs)
+        return NotImplementedError
 
     def delete(self):
         """NO-OP IPAddresses cannot be deleted in Infoblox."""
-        return super().delete()
+        return NotImplementedError
