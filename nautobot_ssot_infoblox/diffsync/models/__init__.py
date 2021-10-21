@@ -9,5 +9,5 @@ __all__ = [
     "NautobotVlan",
     "InfobloxNetwork",
     "InfobloxIPAddress",
-    "InfobloxVlan",
+    "InfobloxVLAN",
 ]
