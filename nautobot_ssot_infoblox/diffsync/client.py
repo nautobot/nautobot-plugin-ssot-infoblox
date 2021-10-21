@@ -733,3 +733,42 @@ class InfobloxApi:  # pylint: disable=too-few-public-methods,  too-many-instance
         if "DHCP" in ip_record["usage"]:
             return "DHCP"
         return "Active"
+
+    def _find_resource(self, resource, **params):
+        """Finds the resource for given parameters.
+
+        Returns:
+            str: _ref of an object
+
+        Return Response:
+            _ref: fixedaddress/ZG5zLmZpeGVkX2FkZHJlc3MkMTAuMjIwLjAuMy4wLi4:10.220.0.3/default
+        """
+        response = self._request("GET", resource, params=params)
+        logger.info(response.json())
+        for resource in response.json():
+            return resource.get("_ref")
+        return response.json()
+
+    def update_ipaddress(self, ip_address, **data):
+        """Update a Network object with a given prefix.
+
+        Args:
+            prefix (str): Valid IP prefix
+            data (dict): keyword args used to update the object e.g. comment="updateme"
+
+        Returns:
+            Dict: Dictionary of _ref and name
+
+        Return Response:
+        {
+            "_ref": "fixedaddress/ZG5zLmZpeGVkX2FkZHJlc3MkMTAuMjIwLjAuMy4wLi4:10.220.0.3/default",
+            "ipv4addr": "10.220.0.3"
+        }
+        """
+        resource = self._find_resource("search", address=ip_address)
+        if not resource:
+            return
+        params = {"_return_fields": "ipv4addr", "_return_as_object": 1}
+        response = self._request("PUT", path=resource, params=params, json=data)
+        logger.info("Infoblox IP Address updated: %s", response.json())
+        return response.json()
