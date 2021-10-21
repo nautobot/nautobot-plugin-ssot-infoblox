@@ -93,7 +93,7 @@ class NautobotVlan(Vlan):
         _vlan = OrmVlan(
             vid=ids["vid"],
             name=attrs["name"],
-            status=cls.get_vlan_status(attrs["status"]),
+            status=OrmStatus.objects.get(name=cls.get_vlan_status(attrs["status"])),
             description=attrs["description"],
         )
         _vlan.validated_save()
