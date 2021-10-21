@@ -740,6 +740,65 @@ class InfobloxApi:  # pylint: disable=too-many-public-methods,  too-many-instanc
         logger.info("Infoblox PTR record created: %s", response.json())
         return response.json().get("result")
 
+    def get_vlan_view(self, name="Nautobot"):
+        """Retrieve a specific vlanview.
+
+        Args:
+            name (str): Name of the vlan view
+
+        Returns:
+            (dict): Vlan view resource.
+
+        Returns Response:
+            [
+                {
+                    "_ref": "vlanview/ZG5zLnZsYW5fdmlldyROYXV0b2JvdC4xLjQwOTQ:Nautobot/1/4094",
+                    "end_vlan_id": 4094,
+                    "name": "Nautobot",
+                    "start_vlan_id": 1
+                }
+            ]
+        """
+        url_path = "vlanview"
+        params = {"name": name}
+        response = self._request("GET", path=url_path, params=params)
+        logger.info(response.json())
+        return response.json()
+
+    def get_vlan_view_name(self, reference):
+        """Get the vlanview name by the reference resource string.
+
+        Args:
+            reference (str): Vlan view Reference resource.
+
+        Returns:
+            (str): Vlan view name.
+
+        Returns Response:
+            "Nautobot"
+        """
+        return reference.split("/")[1].split(":")[-1]
+
+    def create_vlan_view(self, name, start_vid=1, end_vid=4094):
+        """Create a vlan view.
+
+        Args:
+            name (str): Name of the vlan view.
+            start_vid (int): Start vlan id
+            end_vid (int): End vlan id
+
+        Returns:
+            (dict): reference vlan view resource
+
+        Returns Response:
+            {"result": "vlanview/ZG5zLnZsYW5fdmlldyR0ZXN0LjEuNDA5NA:test/1/4094"}
+        """
+        url_path = "vlanview"
+        params = {"name": name, "start_vlan_id": start_vid, "end_vlan_id": end_vid}
+        response = self._request("POST", path=url_path, params=params)
+        logger.info(response.json())
+        return response.json()
+
     def get_vlans(self):
         """Retrieve all VLANs from Infoblox.
 
@@ -767,13 +826,13 @@ class InfobloxApi:  # pylint: disable=too-many-public-methods,  too-many-instanc
         logger.info(response.json)
         return response.json()
 
-    def create_vlan(self, vlan_id, vlan_name, parent_id):
+    def create_vlan(self, vlan_id, vlan_name, vlan_view):
         """Create a VLAN in Infoblox.
 
         Args:
             vlan_id (Int): VLAN ID (1-4094)
             vlan_name (Str): VLAN name
-            parent_id (Str): The _ref ID of the parent VlanView in Infoblox
+            vlan_view (Str): The vlan view name
 
         Returns:
             Str: _ref to created vlan
@@ -781,9 +840,16 @@ class InfobloxApi:  # pylint: disable=too-many-public-methods,  too-many-instanc
         Return Response:
         "vlan/ZG5zLnZsYW4kLmNvbS5pbmZvYmxveC5kbnMudmxhbl92aWV3JFZMVmlldzEuMTAuMjAuMTE:VLView1/test11/11"
         """
+        parent = self.get_vlan_view(name=vlan_view)
+
+        if len(parent) == 0:
+            parent = self.create_vlan_view(name=vlan_view).get("result")
+        else:
+            parent = parent[0].get("_ref")
+
         url_path = "vlan"
         params = {}
-        payload = {"parent": parent_id, "id": vlan_id, "name": vlan_name}
+        payload = {"parent": parent, "id": vlan_id, "name": vlan_name}
         response = self._request("POST", url_path, params=params, json=payload)
         logger.info(response.json)
         return response.json()
