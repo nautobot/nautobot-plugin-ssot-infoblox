@@ -30,12 +30,13 @@ class Vlan(DiffSyncModel):
 
     _modelname = "vlan"
     _identifiers = ("vid",)
-    _attributes = ("name", "description", "status")
+    _attributes = ("name", "description", "status", "vlangroup")
 
     vid: int
     name: str
     status: str
     description: Optional[str]
+    vlangroup: Optional[str]
 
 
 class IPAddress(DiffSyncModel):

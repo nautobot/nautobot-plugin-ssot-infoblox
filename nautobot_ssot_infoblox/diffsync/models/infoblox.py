@@ -32,6 +32,11 @@ class InfobloxVLANView(VlanView):
     @classmethod
     def create(cls, diffsync, ids, attrs):
         """Create VLANView object in Infoblox."""
+        diffsync.conn.create_vlan(
+            vlan_id=ids["vid"],
+            vlan_name=attrs["vlan_name"],
+            vlan_view=attrs["vlangroup"] if attrs.get("vlangroup") else "nautobot",
+        )
         return NotImplementedError
 
 
@@ -41,21 +46,16 @@ class InfobloxVLAN(Vlan):
     @classmethod
     def create(cls, diffsync, ids, attrs):
         """Create VLAN object in Infoblox."""
-        return NotImplementedError
+        diffsync.conn.create_vlan_view(name=ids.name)
+        return super().create(ids=ids, diffsync=diffsync, attrs=attrs)
 
 
 class InfobloxIPAddress(IPAddress):
     """Infoblox implementation of the VLAN Model."""
 
-    @classmethod
-    def create(cls, diffsync, ids, attrs):
-        """NO-OP IPAddresses are automatically created in Infoblox."""
-        return NotImplementedError
-
     def update(self, attrs):
-        """NO-OP Currently don't support updating Infoblox IPAddress."""
-        return NotImplementedError
-
-    def delete(self):
-        """NO-OP IPAddresses cannot be deleted in Infoblox."""
-        return NotImplementedError
+        """Updates IPAddress object in Infoblox."""
+        if attrs.get("description"):
+            json = {"comment": attrs["description"]}
+            self.diffsync.conn.update_ipaddress(address=self.get_identifiers()["address"], data=json)
+        return super().update(attrs)

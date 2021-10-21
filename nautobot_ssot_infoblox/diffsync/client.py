@@ -5,7 +5,6 @@ import json
 import logging
 import os
 import re
-import json
 import requests
 from dns import reversename
 from nautobot.core.settings_funcs import is_truthy
