@@ -784,7 +784,7 @@ class InfobloxApi:  # pylint: disable=too-many-public-methods,  too-many-instanc
         response = self._request("POST", path=url_path, params=params)
         logger.info(response.json())
         return response.json()
-        
+
     def get_vlanviews(self):
         """Retrieve all VLANViews from Infoblox.
 
