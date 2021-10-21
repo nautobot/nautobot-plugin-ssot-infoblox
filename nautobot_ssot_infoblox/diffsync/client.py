@@ -172,6 +172,7 @@ class InfobloxApi:  # pylint: disable=too-few-public-methods,  too-many-instance
         """
         params = {
             "network": prefix,
+            "status": "USED",
             "_return_as_object": 1,
             "_paging": 1,
             "_max_results": 1000,
@@ -729,8 +730,6 @@ class InfobloxApi:  # pylint: disable=too-few-public-methods,  too-many-instance
     @staticmethod
     def get_ipaddr_status(ip_record: dict) -> str:
         """Method to determine the IPAddress status based upon types and usage keys."""
-        if "UNUSED" in ip_record["status"]:
-            return "Reserved"
         if "DHCP" in ip_record["usage"]:
             return "DHCP"
         return "Active"
