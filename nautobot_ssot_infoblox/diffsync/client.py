@@ -70,7 +70,7 @@ class InfobloxApi:  # pylint: disable=too-many-public-methods,  too-many-instanc
             resource (str): Resource to delete
 
         Returns:
-            (str): Resource String
+            (dict or str): Resource JSON/String
 
         Returns Response:
             "network/ZG5zLm5ldHdvcmskMTkyLjAuMi4wLzI0LzA:192.0.2.0/24/default"
@@ -91,7 +91,7 @@ class InfobloxApi:  # pylint: disable=too-many-public-methods,  too-many-instanc
             params (dict): Parameters to update within a resource
 
         Returns:
-            (str): Resource String
+            (dict or str): Resource JSON / String
 
         Returns Response:
             "network/ZG5zLm5ldHdvcmskMTkyLjAuMi4wLzI0LzA:192.0.2.0/24/default"
