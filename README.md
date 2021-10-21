@@ -48,7 +48,9 @@ The data fields that can be syncronized are:
 
 ![Infoblox SSoT Status](./ssot-status.png)
 
-![Infoblox SSot Logs](./ssot-logs.png)
+![Infoblox SSoT Logs](./ssot-logs.png)
+
+![Infoblox SSoT Under the Hood](./ssot-under-the-hood.gif)
 
 ### API
 
