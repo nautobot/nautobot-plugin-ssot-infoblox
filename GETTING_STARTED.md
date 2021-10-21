@@ -331,7 +331,7 @@ This is the same as running:
 
 ### Tests
 
-To run tests against your code, you can run all of the tests that TravisCI runs against any new PR with:
+To run tests against your code, you can run all of the tests that GitHub Actions runs against any new PR with:
 
 ```bash
 ➜ invoke tests
