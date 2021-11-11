@@ -8,6 +8,7 @@ from nautobot_ssot.jobs.base import DataMapping, DataSource, DataTarget
 from diffsync import DiffSyncFlags
 from diffsync.exceptions import ObjectNotCreated
 from nautobot_ssot_infoblox.diffsync.adapters import infoblox, nautobot
+from nautobot_ssot_infoblox.constant import PLUGIN_CFG
 
 
 class InfobloxDataSource(DataSource, Job):
@@ -104,4 +105,7 @@ class InfobloxDataTarget(DataTarget, Job):
             self.log_success(message="Sync complete.")
 
 
-jobs = [InfobloxDataSource, InfobloxDataTarget]
+jobs = [InfobloxDataSource]
+
+if PLUGIN_CFG["enable_sync_to_infoblox"]:
+    jobs.append(InfobloxDataTarget)
