@@ -37,6 +37,7 @@ pydocstyle = "*"
 pylint = "*"
 pylint-django = "*"
 pytest = "*"
+requests-mock = "^1.9.3"
 yamllint = "*"
 
 [tool.poetry.extras]

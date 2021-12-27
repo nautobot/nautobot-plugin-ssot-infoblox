@@ -370,5 +370,3 @@ if DJANGO_TOOLBAR_ENABLED and "debug_toolbar" not in EXTRA_INSTALLED_APPS:
     EXTRA_INSTALLED_APPS.append("debug_toolbar")
 if DJANGO_TOOLBAR_ENABLED and "debug_toolbar.middleware.DebugToolbarMiddleware" not in MIDDLEWARE:  # noqa F405
     MIDDLEWARE.insert(0, "debug_toolbar.middleware.DebugToolbarMiddleware")  # noqa F405
-if DJANGO_EXTENSIONS_ENABLED and "django_extensions" not in EXTRA_INSTALLED_APPS:
-    EXTRA_INSTALLED_APPS.append("django_extensions")
