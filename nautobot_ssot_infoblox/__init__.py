@@ -23,7 +23,9 @@ class NautobotSSoTInfobloxConfig(PluginConfig):
     required_settings = []
     min_version = "1.1.0"
     max_version = "1.9999"
-    default_settings = {}
+    default_settings = {
+        "enable_sync_to_infoblox": False,
+    }
     caching_config = {}
 
 
