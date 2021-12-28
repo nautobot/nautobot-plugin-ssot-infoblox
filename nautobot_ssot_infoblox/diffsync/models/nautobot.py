@@ -1,6 +1,7 @@
 """Nautobot Models for Infoblox integration with SSoT plugin."""
 from django.utils.text import slugify
 from nautobot.extras.models import Status as OrmStatus
+from nautobot.extras.models import Tag
 from nautobot.ipam.models import IPAddress as OrmIPAddress
 from nautobot.ipam.models import Prefix as OrmPrefix
 from nautobot.ipam.models import VLAN as OrmVlan
@@ -19,6 +20,7 @@ class NautobotNetwork(Network):
             status=OrmStatus.objects.get(name="Active"),
             description=attrs["description"] if attrs.get("description") else "",
         )
+        _prefix.tags.add(Tag.objects.get(slug="created-by-infoblox"))
         _prefix.validated_save()
         return super().create(ids=ids, diffsync=diffsync, attrs=attrs)
 
@@ -52,6 +54,7 @@ class NautobotIPAddress(IPAddress):
             else OrmStatus.objects.get(name=attrs["status"]),
             description=attrs["description"] if attrs.get("description") else "",
         )
+        _ip.tags.add(Tag.objects.get(slug="created-by-infoblox"))
         _ip.validated_save()
         return super().create(ids=ids, diffsync=diffsync, attrs=attrs)
 
@@ -108,6 +111,7 @@ class NautobotVlan(Vlan):
             status=OrmStatus.objects.get(name=cls.get_vlan_status(attrs["status"])),
             description=attrs["description"],
         )
+        _vlan.tags.add(Tag.objects.get(slug="created-by-infoblox"))
         _vlan.validated_save()
         return super().create(ids=ids, diffsync=diffsync, attrs=attrs)
 

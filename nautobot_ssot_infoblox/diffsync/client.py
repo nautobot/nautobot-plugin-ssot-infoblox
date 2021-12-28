@@ -615,6 +615,52 @@ class InfobloxApi:  # pylint: disable=too-many-public-methods,  too-many-instanc
         logger.info(response.json)
         return response.json().get("result")
 
+    def get_authoritative_zone(self):
+        """Get authoritative zone to check if fqdn exists.
+
+        Returns:
+            (list) of zone dicts
+
+        Return Response:
+        [
+            {
+                "_ref": "zone_auth/ZG5zLnpvbmUkLl9kZWZhdWx0LnRlc3Qtc2l0ZS1pbm5hdXRvYm90:test-site-innautobot/default",
+                "fqdn": "test-site-innautobot",
+                "view": "default"
+            },
+            {
+                "_ref": "zone_auth/ZG5zLnpvbmUkLl9kZWZhdWx0LnRlc3Qtc2l0ZQ:test-site/default",
+                "fqdn": "test-site",
+                "view": "default"
+            },
+            {
+                "_ref": "zone_auth/ZG5zLnpvbmUkLl9kZWZhdWx0LmNvbS5uZXR3b3JrdG9jb2Rl:networktocode.com/default",
+                "fqdn": "networktocode.com",
+                "view": "default"
+            },
+            {
+                "_ref": "zone_auth/ZG5zLnpvbmUkLl9kZWZhdWx0LmNvbS5uZXR3b3JrdG9jb2RlLm5ldHdvcms:network.networktocode.com/default",
+                "fqdn": "network.networktocode.com",
+                "view": "default"
+            },
+            {
+                "_ref": "zone_auth/ZG5zLnpvbmUkLl9kZWZhdWx0LmNvbS5uZXR3b3JrdG9jb2RlLm5ldHdvcmsudGVzdC1zaXRl:test-site.network.networktocode.com/default",
+                "fqdn": "test-site.network.networktocode.com",
+                "view": "default"
+            },
+            {
+                "_ref": "zone_auth/ZG5zLnpvbmUkLl9kZWZhdWx0LmFycGEuaW4tYWRkci4xMA:10.0.0.0%2F8/default",
+                "fqdn": "10.0.0.0/8",
+                "view": "default"
+            }
+        ]
+        """
+        url_path = "zone_auth"
+        params = {"_return_as_object": 1}
+        response = self._request("GET", url_path, params=params)
+        logger.info(response.json)
+        return response.json().get("result")
+
     def _find_network_reference(self, network):
         """Finds the reference for the given network.
 
@@ -739,6 +785,40 @@ class InfobloxApi:  # pylint: disable=too-many-public-methods,  too-many-instanc
         logger.info("Infoblox PTR record created: %s", response.json())
         return response.json().get("result")
 
+    def search_ipv4_address(self, ipaddress):
+        """Find if IP address is in IPAM. Returns empty list if address does not exist.
+
+        Returns:
+            (list) of record dicts
+
+        Return Response:
+        [
+            {
+                "_ref": "record:host/ZG5zLmhvc3QkLl9kZWZhdWx0LnRlc3Qtc2l0ZS1pbm5hdXRvYm90LnRlc3QtZGV2aWNl:test-device.test-site-innautobot/default",
+                "ipv4addrs": [
+                    {
+                        "_ref": "record:host_ipv4addr/ZG5zLmhvc3RfYWRkcmVzcyQuX2RlZmF1bHQudGVzdC1zaXRlLWlubmF1dG9ib3QudGVzdC1kZXZpY2UuMTAuMjIzLjAuNDIu:10.223.0.42/test-device.test-site-innautobot/default",
+                        "configure_for_dhcp": false,
+                        "host": "test-device.test-site-innautobot",
+                        "ipv4addr": "10.223.0.42"
+                    }
+                ],
+                "name": "test-device.test-site-innautobot",
+                "view": "default"
+            },
+            {
+                "_ref": "networkcontainer/ZG5zLm5ldHdvcmtfY29udGFpbmVyJDEwLjIyMy4wLjAvMTYvMA:10.223.0.0/16/default",
+                "network": "10.223.0.0/16",
+                "network_view": "default"
+            }
+        ]
+        """
+        url_path = "search"
+        params = {"address": ipaddress, "_return_as_object": 1}
+        response = self._request("GET", url_path, params=params)
+        logger.info(response.json)
+        return response.json().get("result")
+
     def get_vlan_view(self, name="Nautobot"):
         """Retrieve a specific vlanview.
 
@@ -797,12 +877,6 @@ class InfobloxApi:  # pylint: disable=too-many-public-methods,  too-many-instanc
                 "end_vlan_id": 20,
                 "name": "VLView1",
                 "start_vlan_id": 10
-            },
-            {
-                "_ref": "vlanview/ZG5zLnZsYW5fdmlldyRWTFZpZXcyLjEwMC4yMDA:VLView2/100/200",
-                "end_vlan_id": 200,
-                "name": "VLView2",
-                "start_vlan_id": 100
             },
             {
                 "_ref": "vlanview/ZG5zLnZsYW5fdmlldyROYXV0b2JvdC4xLjQwOTQ:Nautobot/1/4094",

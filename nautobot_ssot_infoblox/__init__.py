@@ -8,7 +8,10 @@ except ImportError:
 
 __version__ = metadata.version(__name__)
 
+from nautobot.core.signals import nautobot_database_ready
 from nautobot.extras.plugins import PluginConfig
+
+from nautobot_ssot_infoblox.signals import infoblox_create_tag
 
 
 class NautobotSSoTInfobloxConfig(PluginConfig):
@@ -21,12 +24,17 @@ class NautobotSSoTInfobloxConfig(PluginConfig):
     description = "Nautobot SSoT Infoblox."
     base_url = "ssot-infoblox"
     required_settings = []
-    min_version = "1.1.0"
+    min_version = "1.2.0"
     max_version = "1.9999"
     default_settings = {
         "enable_sync_to_infoblox": False,
     }
     caching_config = {}
+
+    def ready(self):
+        super().ready()
+
+        nautobot_database_ready.connect(infoblox_create_tag, sender=self)
 
 
 config = NautobotSSoTInfobloxConfig  # pylint:disable=invalid-name

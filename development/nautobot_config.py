@@ -304,12 +304,12 @@ PLUGINS_CONFIG = {
         "NAUTOBOT_INFOBLOX_USERNAME": os.getenv("NAUTOBOT_INFOBLOX_USERNAME", ""),
         "NAUTOBOT_INFOBLOX_PASSWORD": os.getenv("NAUTOBOT_INFOBLOX_PASSWORD", ""),
         "NAUTOBOT_INFOBLOX_VERIFY_SSL": os.getenv("NAUTOBOT_INFOBLOX_VERIFY_SSL", "true"),
-        "NAUTOBOT_INFOBLOX_WAPI_VERSION": os.getenv("NAUTOBOT_INFOBLOX_WAPI_VERSION", "v2.11"),
+        "NAUTOBOT_INFOBLOX_WAPI_VERSION": os.getenv("NAUTOBOT_INFOBLOX_WAPI_VERSION", "v2.12"),
         "enable_sync_to_infoblox": False,
     },
     "nautobot_ssot": {
         "hide_example_jobs": True,
-    }
+    },
 }
 
 # When determining the primary IP address for a device, IPv6 is preferred over IPv4 by default. Set this to True to
@@ -370,5 +370,3 @@ if DJANGO_TOOLBAR_ENABLED and "debug_toolbar" not in EXTRA_INSTALLED_APPS:
     EXTRA_INSTALLED_APPS.append("debug_toolbar")
 if DJANGO_TOOLBAR_ENABLED and "debug_toolbar.middleware.DebugToolbarMiddleware" not in MIDDLEWARE:  # noqa F405
     MIDDLEWARE.insert(0, "debug_toolbar.middleware.DebugToolbarMiddleware")  # noqa F405
-if DJANGO_EXTENSIONS_ENABLED and "django_extensions" not in EXTRA_INSTALLED_APPS:
-    EXTRA_INSTALLED_APPS.append("django_extensions")
