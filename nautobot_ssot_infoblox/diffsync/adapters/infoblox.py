@@ -1,7 +1,10 @@
 """Infoblox Adapter for Infoblox integration with SSoT plugin."""
+import ipaddress
+
 from diffsync import DiffSync
 from nautobot_ssot_infoblox.diffsync.client import InfobloxApi
 from nautobot_ssot_infoblox.diffsync.models.infoblox import (
+    InfobloxAggregate,
     InfobloxIPAddress,
     InfobloxNetwork,
     InfobloxVLANView,
@@ -80,3 +83,34 @@ class InfobloxAdapter(DiffSync):
         self.load_ipaddresses()
         self.load_vlanviews()
         self.load_vlans()
+
+
+class InfobloxAggregateAdapter(DiffSync):
+    """DiffSync adapter using requests to communicate to Infoblox server."""
+
+    aggregate = InfobloxAggregate
+
+    top_level = ["aggregate"]
+
+    def __init__(self, *args, job=None, sync=None, **kwargs):
+        """Initialize Infoblox.
+
+        Args:
+            job (object, optional): Infoblox job. Defaults to None.
+            sync (object, optional): Infoblox DiffSync. Defaults to None.
+        """
+        super().__init__(*args, **kwargs)
+        self.job = job
+        self.sync = sync
+        self.conn = InfobloxApi()
+
+    def load(self):
+        """Method for loading aggregate models."""
+        for container in self.conn.get_network_containers():
+            network = ipaddress.ip_network(container["network"])
+            if network.is_private:
+                new_aggregate = self.aggregate(
+                    network=container["network"],
+                    description=container["comment"] if container.get("comment") else "",
+                )
+                self.add(new_aggregate)

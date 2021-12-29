@@ -2,11 +2,13 @@
 from django.utils.text import slugify
 from nautobot.extras.models import Status as OrmStatus
 from nautobot.extras.models import Tag
+from nautobot.ipam.models import RIR
+from nautobot.ipam.models import Aggregate as OrmAggregate
 from nautobot.ipam.models import IPAddress as OrmIPAddress
 from nautobot.ipam.models import Prefix as OrmPrefix
 from nautobot.ipam.models import VLAN as OrmVlan
 from nautobot.ipam.models import VLANGroup as OrmVlanGroup
-from nautobot_ssot_infoblox.diffsync.models.base import Network, IPAddress, Vlan, VlanView
+from nautobot_ssot_infoblox.diffsync.models.base import Aggregate, Network, IPAddress, Vlan, VlanView
 
 
 class NautobotNetwork(Network):
@@ -140,4 +142,36 @@ class NautobotVlan(Vlan):
         self.diffsync.job.log_warning(f"VLAN {self.vid} will be deleted.")
         _vlan = OrmVlan.objects.get(vid=self.get_identifiers()["vid"])
         _vlan.delete()
+        return super().delete()
+
+
+class NautobotAggregate(Aggregate):
+    """Nautobot implementation of the Aggregate Model."""
+
+    @classmethod
+    def create(cls, diffsync, ids, attrs):
+        """Create Aggregate object in Nautobot."""
+        rir, _ = RIR.objects.get_or_create(name="RFC1918", slug="rfc1918", is_private=True)
+        _aggregate = OrmAggregate(
+            prefix=ids["network"],
+            rir=rir,
+            description=attrs["description"] if attrs.get("description") else "",
+        )
+        _aggregate.tags.add(Tag.objects.get(slug="created-by-infoblox"))
+        _aggregate.validated_save()
+        return super().create(ids=ids, diffsync=diffsync, attrs=attrs)
+
+    def update(self, attrs):
+        """Update Aggregate object in Nautobot."""
+        _aggregate = OrmAggregate.objects.get(prefix=self.network)
+        if attrs.get("description"):
+            _aggregate.description = attrs["description"]
+        _aggregate.validated_save()
+        return super().update(attrs)
+
+    def delete(self):
+        """Delete Aggregate object in Nautobot."""
+        self.diffsync.job.log_warning(f"Aggregate {self.network} will be deleted.")
+        _aggregate = OrmAggregate.objects.get(prefix=self.get_identifiers()["network"])
+        _aggregate.delete()
         return super().delete()

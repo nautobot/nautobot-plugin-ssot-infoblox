@@ -1,5 +1,5 @@
 """Infoblox Models for Infoblox integration with SSoT plugin."""
-from nautobot_ssot_infoblox.diffsync.models.base import Network, IPAddress, Vlan, VlanView
+from nautobot_ssot_infoblox.diffsync.models.base import Aggregate, Network, IPAddress, Vlan, VlanView
 
 
 class InfobloxNetwork(Network):
@@ -59,3 +59,27 @@ class InfobloxIPAddress(IPAddress):
             json = {"comment": attrs["description"]}
             self.diffsync.conn.update_ipaddress(address=self.get_identifiers()["address"], data=json)
         return super().update(attrs)
+
+
+class InfobloxAggregate(Aggregate):
+    """Infoblox implementation of the Aggregate Model."""
+
+    @classmethod
+    def create(cls, diffsync, ids, attrs):
+        """Create Network Container object in Infoblox."""
+        diffsync.conn.create_network_container(
+            prefix=ids["network"], comment=attrs["description"] if attrs.get("description") else ""
+        )
+        return super().create(ids=ids, diffsync=diffsync, attrs=attrs)
+
+    def update(self, attrs):
+        """Update Network Container object in Infoblox."""
+        self.diffsync.conn.update_network_container(
+            prefix=self.get_identifiers()["network"], comment=attrs["description"] if attrs.get("description") else ""
+        )
+        return super().update(attrs)
+
+    def delete(self):
+        """Delete Network Container object in Infoblox."""
+        self.diffsync.conn.delete_network_container(self.get_identifiers()["network"])
+        return super().delete()

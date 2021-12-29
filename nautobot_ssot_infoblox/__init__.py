@@ -28,6 +28,7 @@ class NautobotSSoTInfobloxConfig(PluginConfig):
     max_version = "1.9999"
     default_settings = {
         "enable_sync_to_infoblox": False,
+        "enable_rfc1918_network_containers": False,
     }
     caching_config = {}
 
