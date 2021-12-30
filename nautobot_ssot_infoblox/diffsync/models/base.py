@@ -51,3 +51,14 @@ class IPAddress(DiffSyncModel):
     prefix: str
     status: str
     description: Optional[str]
+
+
+class Aggregate(DiffSyncModel):
+    """Aggregate model for DiffSync."""
+
+    _modelname = "aggregate"
+    _identifiers = ("network",)
+    _attributes = ("description",)
+
+    network: str
+    description: Optional[str]

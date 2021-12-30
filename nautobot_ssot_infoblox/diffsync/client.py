@@ -1,4 +1,4 @@
-"""All interactions with infoblox."""
+"""All interactions with infoblox."""  # pylint: disable=too-many-lines
 
 import copy
 import json
@@ -120,6 +120,22 @@ class InfobloxApi:  # pylint: disable=too-many-public-methods,  too-many-instanc
             if item["network"] == prefix:
                 return item["_ref"]
 
+    def _get_network_container_ref(self, prefix):  # pylint: disable=inconsistent-return-statements
+        """Fetch the _ref of a networkcontainer resource.
+
+        Args:
+            prefix (str): IPv4 Prefix to fetch the _ref for.
+
+        Returns:
+            (str) networkcontainer _ref or None
+
+        Returns Response:
+            "networkcontainer/ZG5zLm5ldHdvcmtfY29udGFpbmVyJDE5Mi4xNjguMi4wLzI0LzA:192.168.2.0/24/default"
+        """
+        for item in self.get_network_containers():
+            if item["network"] == prefix:
+                return item["_ref"]
+
     def get_all_ipv4address_networks(self, prefix):
         """Gets all used / unused IPv4 addresses within the supplied network.
 
@@ -233,7 +249,7 @@ class InfobloxApi:  # pylint: disable=too-many-public-methods,  too-many-instanc
         logger.info(response.json)
         return response.json().get("result")
 
-    def create_network(self, prefix):
+    def create_network(self, prefix, comment=None):
         """Create a network.
 
         Args:
@@ -245,7 +261,7 @@ class InfobloxApi:  # pylint: disable=too-many-public-methods,  too-many-instanc
         Return Response:
             "network/ZG5zLm5ldHdvcmskMTkyLjE2OC4wLjAvMjMvMA:192.168.0.0/23/default"
         """
-        params = {"network": prefix}
+        params = {"network": prefix, "comment": comment}
         api_path = "network"
         response = self._request("POST", api_path, params=params)
         logger.info(response.text)
@@ -288,6 +304,71 @@ class InfobloxApi:  # pylint: disable=too-many-public-methods,  too-many-instanc
             {"updated": "network/ZG5zLm5ldHdvcmskMTkyLjE2OC4wLjAvMjMvMA:192.168.0.0/23/default"}
         """
         resource = self._get_network_ref(prefix)
+
+        if resource:
+            params = {"network": prefix, "comment": comment}
+            self._update(resource, **params)
+            response = {"updated": resource}
+        else:
+            response = {"error": f"error updating {prefix}"}
+        logger.info(response)
+        return response
+
+    def create_network_container(self, prefix, comment=None):
+        """Create a network container.
+
+        Args:
+            prefix (str): IP network to create.
+
+        Returns:
+            (str) of reference network
+
+        Return Response:
+            "networkcontainer/ZG5zLm5ldHdvcmskMTkyLjE2OC4wLjAvMjMvMA:192.168.0.0/23/default"
+        """
+        params = {"network": prefix, "comment": comment}
+        api_path = "networkcontainer"
+        response = self._request("POST", api_path, params=params)
+        logger.info(response.text)
+        return response.text
+
+    def delete_network_container(self, prefix):
+        """Delete a network container.
+
+        Args:
+            prefix (str): IPv4 prefix to delete.
+
+        Returns:
+            (dict) deleted prefix.
+
+        Returns Response:
+            {"deleted": "networkcontainer/ZG5zLm5ldHdvcmskMTkyLjAuMi4wLzI0LzA:192.0.2.0/24/default"}
+        """
+        resource = self._get_network_container_ref(prefix)
+
+        if resource:
+            self._delete(resource)
+            response = {"deleted": resource}
+        else:
+            response = {"error": f"{prefix} not found."}
+
+        logger.info(response)
+        return response
+
+    def update_network_container(self, prefix, comment=None):
+        """Update a network container.
+
+        Args:
+            (str): IPv4 prefix to update.
+            comment (str): IPv4 prefix update comment.
+
+        Returns:
+            (dict) updated prefix.
+
+        Return Response:
+            {"updated": "networkcontainer/ZG5zLm5ldHdvcmskMTkyLjE2OC4wLjAvMjMvMA:192.168.0.0/23/default"}
+        """
+        resource = self._get_network_container_ref(prefix)
 
         if resource:
             params = {"network": prefix, "comment": comment}
@@ -633,26 +714,6 @@ class InfobloxApi:  # pylint: disable=too-many-public-methods,  too-many-instanc
                 "fqdn": "test-site",
                 "view": "default"
             },
-            {
-                "_ref": "zone_auth/ZG5zLnpvbmUkLl9kZWZhdWx0LmNvbS5uZXR3b3JrdG9jb2Rl:networktocode.com/default",
-                "fqdn": "networktocode.com",
-                "view": "default"
-            },
-            {
-                "_ref": "zone_auth/ZG5zLnpvbmUkLl9kZWZhdWx0LmNvbS5uZXR3b3JrdG9jb2RlLm5ldHdvcms:network.networktocode.com/default",
-                "fqdn": "network.networktocode.com",
-                "view": "default"
-            },
-            {
-                "_ref": "zone_auth/ZG5zLnpvbmUkLl9kZWZhdWx0LmNvbS5uZXR3b3JrdG9jb2RlLm5ldHdvcmsudGVzdC1zaXRl:test-site.network.networktocode.com/default",
-                "fqdn": "test-site.network.networktocode.com",
-                "view": "default"
-            },
-            {
-                "_ref": "zone_auth/ZG5zLnpvbmUkLl9kZWZhdWx0LmFycGEuaW4tYWRkci4xMA:10.0.0.0%2F8/default",
-                "fqdn": "10.0.0.0/8",
-                "view": "default"
-            }
         ]
         """
         url_path = "zone_auth"
@@ -992,3 +1053,24 @@ class InfobloxApi:  # pylint: disable=too-many-public-methods,  too-many-instanc
         response = self._request("PUT", path=resource, params=params, json=data)
         logger.info("Infoblox IP Address updated: %s", response.json())
         return response.json()
+
+    def get_network_containers(self):
+        """Get all Network Containers.
+
+        Returns:
+            (list) of record dicts
+
+        Return Response:
+        [
+            {
+                "_ref": "networkcontainer/ZG5zLm5ldHdvcmtfY29udGFpbmVyJDE5Mi4xNjguMi4wLzI0LzA:192.168.2.0/24/default",
+                "network": "192.168.2.0/24",
+                "network_view": "default"
+            }
+        ]
+        """
+        url_path = "networkcontainer"
+        params = {"_return_as_object": 1, "_return_fields": "network,comment,network_view"}
+        response = self._request("GET", url_path, params=params)
+        logger.info(response.json)
+        return response.json().get("result")

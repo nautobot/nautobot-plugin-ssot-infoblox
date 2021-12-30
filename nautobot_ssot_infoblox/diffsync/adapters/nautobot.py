@@ -1,8 +1,14 @@
 """Nautobot Adapter for Infoblox integration with SSoT plugin."""
 import re
 from diffsync import DiffSync
-from nautobot.ipam.models import IPAddress, Prefix, VLAN, VLANGroup
-from nautobot_ssot_infoblox.diffsync.models import NautobotNetwork, NautobotIPAddress, NautobotVlanGroup, NautobotVlan
+from nautobot.ipam.models import Aggregate, IPAddress, Prefix, VLAN, VLANGroup
+from nautobot_ssot_infoblox.diffsync.models import (
+    NautobotAggregate,
+    NautobotNetwork,
+    NautobotIPAddress,
+    NautobotVlanGroup,
+    NautobotVlan,
+)
 from nautobot_ssot_infoblox.utils import nautobot_vlan_status
 
 
@@ -77,3 +83,31 @@ class NautobotAdapter(DiffSync):
         self.load_ipaddresses()
         self.load_vlangroups()
         self.load_vlans()
+
+
+class NautobotAggregateAdapter(DiffSync):
+    """DiffSync adapter using ORM to communicate to Nautobot Aggregrates."""
+
+    aggregate = NautobotAggregate
+
+    top_level = ["aggregate"]
+
+    def __init__(self, *args, job=None, sync=None, **kwargs):
+        """Initialize Nautobot.
+
+        Args:
+            job (object, optional): Nautobot job. Defaults to None.
+            sync (object, optional): Nautobot DiffSync. Defaults to None.
+        """
+        super().__init__(*args, **kwargs)
+        self.job = job
+        self.sync = sync
+
+    def load(self):
+        """Method to load aggregate models from Nautobot."""
+        for aggregate in Aggregate.objects.all():
+            _aggregate = self.aggregate(
+                network=str(aggregate.prefix),
+                description=aggregate.description,
+            )
+            self.add(_aggregate)
