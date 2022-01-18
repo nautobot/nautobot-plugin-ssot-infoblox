@@ -53,12 +53,27 @@ class InfobloxVLAN(Vlan):
 class InfobloxIPAddress(IPAddress):
     """Infoblox implementation of the VLAN Model."""
 
+    @classmethod
+    def create(cls, diffsync, ids, attrs):
+        """Will create either a host record or fixed address (Not implemented).
+
+        This requires the IP Address to either have a DNS name
+        """
+        if attrs["dns_name"]:
+            diffsync.conn.create_host_record(attrs["dns_name"], ids["address"])
+        return super().create(ids=ids, diffsync=diffsync, attrs=attrs)
+
     def update(self, attrs):
-        """Updates IPAddress object in Infoblox."""
+        """Updates IP Address object in Infoblox."""
         if attrs.get("description"):
             json = {"comment": attrs["description"]}
             self.diffsync.conn.update_ipaddress(address=self.get_identifiers()["address"], data=json)
         return super().update(attrs)
+
+    def delete(self):
+        """Delete an IP Address from Infoblox."""
+        self.diffsync.conn.delete_host_record(self.get_identifiers()["address"])
+        return super().delete()
 
 
 class InfobloxAggregate(Aggregate):

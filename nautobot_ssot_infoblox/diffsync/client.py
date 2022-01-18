@@ -795,6 +795,22 @@ class InfobloxApi:  # pylint: disable=too-many-public-methods,  too-many-instanc
             return response.json().get("result").get("ipv4addr")
         return False
 
+    def create_fixed_address(self, ip_address, mac_address):
+        """Creates a fixed ip address within Infoblox.
+
+        Returns:
+            Str: The IP Address that was reserved
+
+        Return Response:
+            "10.220.0.1"
+        """
+        url_path = "fixedaddress"
+        params = {"_return_fields": "ipv4addr", "_return_as_object": 1}
+        payload = {"ipv4addr": ip_address, "mac": mac_address}
+        response = self._request("POST", url_path, params=params, json=payload)
+        logger.info(response.json())
+        return response.json().get("result").get("ipv4addr")
+
     def create_host_record(self, fqdn, ip_address):
         """Create an host record for a given FQDN.
 
@@ -817,6 +833,18 @@ class InfobloxApi:  # pylint: disable=too-many-public-methods,  too-many-instanc
         response = self._request("POST", url_path, params=params, json=payload)
         logger.info("Infoblox host record created: %s", response.json())
         return response.json().get("result")
+
+    def delete_host_record(self, ip_address):
+        """Delete provided IP Address from Infoblox."""
+        resource = self.get_host_record_by_ip(ip_address)
+        if resource:
+            ref = resource[0]["_ref"]
+            self._delete(ref)
+            response = {"deleted": ip_address}
+        else:
+            response = {"error": f"Did not find {ip_address}"}
+        logger.info(response)
+        return response
 
     def create_ptr_record(self, fqdn, ip_address):
         """Create an PTR record for a given FQDN.
