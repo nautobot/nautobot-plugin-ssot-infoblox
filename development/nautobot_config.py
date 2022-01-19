@@ -305,7 +305,7 @@ PLUGINS_CONFIG = {
         "NAUTOBOT_INFOBLOX_PASSWORD": os.getenv("NAUTOBOT_INFOBLOX_PASSWORD", ""),
         "NAUTOBOT_INFOBLOX_VERIFY_SSL": os.getenv("NAUTOBOT_INFOBLOX_VERIFY_SSL", "true"),
         "NAUTOBOT_INFOBLOX_WAPI_VERSION": os.getenv("NAUTOBOT_INFOBLOX_WAPI_VERSION", "v2.12"),
-        "enable_sync_to_infoblox": True,
+        "enable_sync_to_infoblox": False,
         "enable_rfc1918_network_containers": True,
     },
     "nautobot_ssot": {

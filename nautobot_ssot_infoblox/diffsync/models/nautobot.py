@@ -114,7 +114,7 @@ class NautobotVlan(Vlan):
             vid=ids["vid"],
             name=attrs["name"],
             status=OrmStatus.objects.get(name=cls.get_vlan_status(attrs["status"])),
-            group=OrmVlanGroup.objects.get(name=attrs["vlangroup"] if attrs["vlangroup"] else None),
+            group=OrmVlanGroup.objects.get(name=attrs["vlangroup"]) if attrs["vlangroup"] else None,
             description=attrs["description"],
         )
         _vlan.tags.add(Tag.objects.get(slug="created-by-infoblox"))
