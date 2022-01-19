@@ -1,5 +1,4 @@
 """Nautobot Adapter for Infoblox integration with SSoT plugin."""
-import re
 from diffsync import DiffSync
 from nautobot.ipam.models import Aggregate, IPAddress, Prefix, VLAN, VLANGroup
 from nautobot_ssot_infoblox.diffsync.models import (
