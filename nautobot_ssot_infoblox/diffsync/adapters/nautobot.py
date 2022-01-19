@@ -1,5 +1,4 @@
 """Nautobot Adapter for Infoblox integration with SSoT plugin."""
-import re
 from diffsync import DiffSync
 from nautobot.ipam.models import Aggregate, IPAddress, Prefix, VLAN, VLANGroup
 from nautobot_ssot_infoblox.diffsync.models import (
@@ -45,14 +44,17 @@ class NautobotAdapter(DiffSync):
     def load_ipaddresses(self):
         """Method to load IP Addresses from Nautobot."""
         for ipaddr in IPAddress.objects.all():
-            addr = re.sub(r"/\d+", "", str(ipaddr.address))
-            _pf = Prefix.objects.net_contains(addr)
+            addr = ipaddr.host
+            # _pf = Prefix.objects.net_contains(addr)
+            prefix = Prefix.objects.net_contains(addr).last()
             # the last Prefix is the most specific and is assumed the one the IP address resides in
-            prefix = _pf[len(_pf) - 1]
+            # prefix = _pf[len(_pf) - 1]
             _ip = self.ipaddress(
                 address=addr,
                 prefix=str(prefix),
                 status=ipaddr.status.name,
+                prefix_length=ipaddr.prefix_length,
+                dns_name=ipaddr.dns_name,
                 description=ipaddr.description,
             )
             self.add(_ip)
@@ -73,6 +75,7 @@ class NautobotAdapter(DiffSync):
                 vid=vlan.vid,
                 name=vlan.name,
                 description=vlan.description,
+                vlangroup=vlan.group.name if vlan.group else "",
                 status=nautobot_vlan_status(vlan.status.name),
             )
             self.add(_vlan)

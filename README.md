@@ -1,16 +1,16 @@
 # Nautobot SSoT Infoblox
 
-Using the [Nautobot SSoT](https://github.com/nautobot/nautobot-plugin-ssot) framework, the SSoT plugin for Infoblox allows for syncronizing source of IP network and VLAN data between [Infoblox](https://infoblox.com/) and [Nautobot](https://github.com/nautobot/nautobot).
+Using the [Nautobot SSoT](https://github.com/nautobot/nautobot-plugin-ssot) framework, the SSoT plugin for Infoblox allows for synchronizing source of IP network and VLAN data between [Infoblox](https://infoblox.com/) and [Nautobot](https://github.com/nautobot/nautobot).
 
 ## Installation
 
-The plugin is available as a Python package in pypi and can be installed with pip
+The plugin is available as a Python package in PyPi and can be installed with pip.
 
 ```shell
 pip install nautobot-ssot-infoblox
 ```
 
-> The plugin is compatible with Nautobot 1.1.0 and higher
+> The plugin is compatible with Nautobot 1.2.0 and higher
 
 To ensure Nautobot SSoT Infoblox is automatically re-installed during future upgrades, create a file named `local_requirements.txt` (if not already existing) in the Nautobot root directory (alongside `requirements.txt`) and list the `nautobot-ssot-infoblox` package:
 
@@ -37,16 +37,17 @@ PLUGINS_CONFIG = {
 }
 ```
 
-## Usage
+## DiffSync Models
 
-The data fields that can be syncronized are:
+Below are the data mappings between objects within Infoblox and the corresponding objects within Nautobot:
 
-| Infoblox  | Nautobot   |
-------------|-------------
-| network   | Prefix     |
-| ipaddress | IP Address |
-| vlan      | VLAN       |
-| vlanview  | VLANGroup  |
+| Infoblox          | Nautobot   |
+| ----------------- | ---------- |
+| Network           | Prefix     |
+| IP Address        | IP Address |
+| Vlan              | VLAN       |
+| Vlan view         | VLAN Group |
+| Network container | Aggregate  |
 
 ### API
 

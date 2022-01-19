@@ -1,5 +1,6 @@
 """Infoblox Adapter for Infoblox integration with SSoT plugin."""
 import ipaddress
+import re
 
 from diffsync import DiffSync
 from nautobot_ssot_infoblox.diffsync.client import InfobloxApi
@@ -49,9 +50,12 @@ class InfobloxAdapter(DiffSync):
         """Method to load InfobloxIPAddress DiffSync model."""
         for _prefix in self.subnets:
             for _ip in self.conn.get_all_ipv4address_networks(prefix=_prefix):
+                _, prefix_length = _ip["network"].split("/")
                 new_ip = self.ipaddress(
                     address=_ip["ip_address"],
                     prefix=_ip["network"],
+                    prefix_length=prefix_length,
+                    dns_name=_ip["names"][0] if _ip["names"] else "",
                     status=self.conn.get_ipaddr_status(_ip),
                     description=_ip["comment"],
                 )
@@ -69,10 +73,12 @@ class InfobloxAdapter(DiffSync):
     def load_vlans(self):
         """Method to load InfoblocVlan DiffSync model."""
         for _vlan in self.conn.get_vlans():
+            vlan_group = re.search(r"(?:.+\:)(\S+)(?:\/\S+\/.+)", _vlan["_ref"])
             new_vlan = self.vlan(
                 name=_vlan["name"],
                 vid=_vlan["id"],
                 status=_vlan["status"],
+                vlangroup=vlan_group.group(1) if vlan_group else "",
                 description=_vlan["comment"] if _vlan.get("comment") else "",
             )
             self.add(new_vlan)

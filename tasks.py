@@ -38,9 +38,9 @@ namespace = Collection("nautobot_ssot_infoblox")
 namespace.configure(
     {
         "nautobot_ssot_infoblox": {
-            "nautobot_ver": "1.2.0",
+            "nautobot_ver": "1.2.3",
             "project_name": "nautobot_ssot_infoblox",
-            "python_ver": "3.6",
+            "python_ver": "3.7",
             "local": False,
             "compose_dir": os.path.join(os.path.dirname(__file__), "development"),
             "compose_files": [
