@@ -51,7 +51,7 @@ class IPAddress(DiffSyncModel):
     dns_name: str
     prefix: str
     prefix_length: int
-    status: str
+    status: Optional[str]
     description: Optional[str]
 
 

@@ -1,4 +1,5 @@
 """Infoblox Models for Infoblox integration with SSoT plugin."""
+from requests.exceptions import HTTPError
 from nautobot_ssot_infoblox.diffsync.models.base import Aggregate, Network, IPAddress, Vlan, VlanView
 
 
@@ -8,9 +9,12 @@ class InfobloxNetwork(Network):
     @classmethod
     def create(cls, diffsync, ids, attrs):
         """Create Network object in Infoblox."""
-        diffsync.conn.create_network(
-            prefix=ids["network"], comment=attrs["description"] if attrs.get("description") else ""
-        )
+        try:
+            diffsync.conn.create_network(
+                prefix=ids["network"], comment=attrs["description"] if attrs.get("description") else ""
+            )
+        except HTTPError as err:
+            diffsync.job.log_failure(f"Failed to create {ids['network']} due to {err.response.text}")
         return super().create(ids=ids, diffsync=diffsync, attrs=attrs)
 
     def update(self, attrs):
@@ -20,34 +24,35 @@ class InfobloxNetwork(Network):
         )
         return super().update(attrs)
 
-    def delete(self):
-        """Delete Network object in Infoblox."""
-        self.diffsync.conn.delete_network(self.get_identifiers()["network"])
-        return super().delete()
+    # def delete(self):
+    #     """Delete Network object in Infoblox."""
+    #     self.diffsync.conn.delete_network(self.get_identifiers()["network"])
+    #     return super().delete()
 
 
 class InfobloxVLANView(VlanView):
     """Infoblox implementation of the VLANView Model."""
 
-    @classmethod
-    def create(cls, diffsync, ids, attrs):
-        """Create VLANView object in Infoblox."""
-        diffsync.conn.create_vlan(
-            vlan_id=ids["vid"],
-            vlan_name=attrs["vlan_name"],
-            vlan_view=attrs["vlangroup"] if attrs.get("vlangroup") else "nautobot",
-        )
-        return super().create(ids=ids, diffsync=diffsync, attrs=attrs)
+    # @classmethod
+    # def create(cls, diffsync, ids, attrs):
+    #     """Create VLANView object in Infoblox."""
+    #     diffsync.conn.create_vlan(
+    #         vlan_id=ids["vid"],
+    #         vlan_name=attrs["vlan_name"],
+    #         vlan_view=attrs["vlangroup"] if attrs.get("vlangroup") else "nautobot",
+    #     )
+    #     return super().create(ids=ids, diffsync=diffsync, attrs=attrs)
 
 
 class InfobloxVLAN(Vlan):
     """Infoblox implementation of the VLAN Model."""
 
-    @classmethod
-    def create(cls, diffsync, ids, attrs):
-        """Create VLAN object in Infoblox."""
-        diffsync.conn.create_vlan_view(name=ids.name)
-        return super().create(ids=ids, diffsync=diffsync, attrs=attrs)
+
+#     @classmethod
+#     def create(cls, diffsync, ids, attrs):
+#         """Create VLAN object in Infoblox."""
+#         diffsync.conn.create_vlan_view(name=ids.name)
+#         return super().create(ids=ids, diffsync=diffsync, attrs=attrs)
 
 
 class InfobloxIPAddress(IPAddress):

@@ -30,8 +30,8 @@ class InfobloxDataSource(DataSource, Job):
         return (
             DataMapping("network", None, "Prefix", reverse("ipam:prefix_list")),
             DataMapping("ipaddress", None, "IP Address", reverse("ipam:ipaddress_list")),
-            DataMapping("vlan", None, "VLAN", reverse("ipam:vlan_list")),
-            DataMapping("vlanview", None, "VLANGroup", reverse("ipam:vlangroup_list")),
+            # DataMapping("vlan", None, "VLAN", reverse("ipam:vlan_list")),
+            # DataMapping("vlanview", None, "VLANGroup", reverse("ipam:vlangroup_list")),
         )
 
     def sync_data(self):
@@ -45,14 +45,15 @@ class InfobloxDataSource(DataSource, Job):
         self.log_info(message="Loading data from Nautobot...")
         nb_adapter.load()
         self.log_info(message="Performing diff of data between Infoblox and Nautobot.")
-        diff = nb_adapter.diff_from(infoblox_adapter, flags=DiffSyncFlags.CONTINUE_ON_FAILURE)
+        flags = DiffSyncFlags.CONTINUE_ON_FAILURE | DiffSyncFlags.SKIP_UNMATCHED_DST
+        diff = nb_adapter.diff_from(infoblox_adapter, flags=flags)
         self.sync.diff = diff.dict()
         self.sync.save()
         self.log_info(message=diff.summary())
         if not self.kwargs["dry_run"]:
             self.log_info(message="Performing data synchronization from Infoblox to Nautobot.")
             try:
-                nb_adapter.sync_from(infoblox_adapter, flags=DiffSyncFlags.CONTINUE_ON_FAILURE)
+                nb_adapter.sync_from(infoblox_adapter, flags=flags)
             except ObjectNotCreated as err:
                 self.log_debug(f"Unable to create object. {err}")
             self.log_success(message="Sync complete.")
