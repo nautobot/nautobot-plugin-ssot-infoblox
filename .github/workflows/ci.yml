@@ -208,7 +208,7 @@ jobs:
       SLACK_WEBHOOK_URL: "${{ secrets.SLACK_WEBHOOK_URL }}"
       SLACK_MESSAGE: >-
         *NOTIFICATION: NEW-RELEASE-PUBLISHED*\n
-        Repository: <${{ github.server_url }}}/${{ github.repository }}|${{ github.repository }}>\n
+        Repository: <${{ github.server_url }}/${{ github.repository }}|${{ github.repository }}>\n
         Release: <${{ github.server_url }}/${{ github.repository }}/releases/tag/${{ github.ref_name }}|${{ github.ref_name }}>\n
         Published by: <${{ github.server_url }}/${{ github.actor }}|${{ github.actor }}>
     steps:
