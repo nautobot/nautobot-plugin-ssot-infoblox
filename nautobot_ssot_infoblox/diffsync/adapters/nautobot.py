@@ -59,10 +59,7 @@ class NautobotAdapter(DiffSync):
                     prefix=str(prefix),
                     status=ipaddr.status.name if ipaddr.status else None,
                     prefix_length=prefix.prefix_length if prefix else ipaddr.prefix_length,
-                    # TODO (Mikhail): Fix logic to validate DNS name more and reject adding if invalid domain name
-                    dns_name=ipaddr.dns_name
-                    if not ipaddr.dns_name.endswith(".")
-                    else ipaddr.dns_name + "nautobot.test",
+                    dns_name=ipaddr.dns_name,
                     description=ipaddr.description,
                 )
                 self.add(_ip)

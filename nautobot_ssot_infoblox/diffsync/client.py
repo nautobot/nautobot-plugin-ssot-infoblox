@@ -838,9 +838,6 @@ class InfobloxApi:  # pylint: disable=too-many-public-methods,  too-many-instanc
         """
         url_path = "record:host"
         params = {"_return_fields": "name", "_return_as_object": 1}
-        # TODO (Mikhail): Prevent this from being synced or remove to prevent 400 error after fixed in loading invalid DNS name
-        if fqdn.endswith("."):
-            fqdn += "nautobot.test"
         payload = {"name": fqdn, "ipv4addrs": [{"ipv4addr": ip_address}]}
         try:
             response = self._request("POST", url_path, params=params, json=payload)
