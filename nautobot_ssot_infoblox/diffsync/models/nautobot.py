@@ -62,8 +62,7 @@ class NautobotIPAddress(IPAddress):
 
     def update(self, attrs):
         """Update IPAddress object in Nautobot."""
-        _pf = OrmPrefix.objects.get(prefix=self.prefix)
-        _ipaddr = OrmIPAddress.objects.get(address=f"{self.address}/{_pf.prefix_length}")
+        _ipaddr = OrmIPAddress.objects.get(address=f"{self.address}/{self.prefix_length}")
         if attrs.get("status"):
             _ipaddr.status = OrmStatus.objects.get(name=attrs["status"])
         if attrs.get("description"):
