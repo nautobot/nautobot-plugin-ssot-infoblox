@@ -1,5 +1,7 @@
 """Nautobot Adapter for Infoblox integration with SSoT plugin."""
+from itertools import chain
 from diffsync import DiffSync
+from diffsync.exceptions import ObjectAlreadyExists
 from nautobot.ipam.models import Aggregate, IPAddress, Prefix, VLAN, VLANGroup
 from nautobot_ssot_infoblox.diffsync.models import (
     NautobotAggregate,
@@ -34,30 +36,33 @@ class NautobotAdapter(DiffSync):
 
     def load_prefixes(self):
         """Method to load Prefixes from Nautobot."""
-        for prefix in Prefix.objects.all():
+        all_prefixes = list(chain(Prefix.objects.all(), Aggregate.objects.all()))
+        for prefix in all_prefixes:
             _prefix = self.prefix(
                 network=str(prefix.prefix),
                 description=prefix.description,
             )
-            self.add(_prefix)
+            try:
+                self.add(_prefix)
+            except ObjectAlreadyExists:
+                pass
 
     def load_ipaddresses(self):
         """Method to load IP Addresses from Nautobot."""
         for ipaddr in IPAddress.objects.all():
             addr = ipaddr.host
-            # _pf = Prefix.objects.net_contains(addr)
-            prefix = Prefix.objects.net_contains(addr).last()
             # the last Prefix is the most specific and is assumed the one the IP address resides in
-            # prefix = _pf[len(_pf) - 1]
-            _ip = self.ipaddress(
-                address=addr,
-                prefix=str(prefix),
-                status=ipaddr.status.name,
-                prefix_length=ipaddr.prefix_length,
-                dns_name=ipaddr.dns_name,
-                description=ipaddr.description,
-            )
-            self.add(_ip)
+            prefix = Prefix.objects.net_contains(addr).last()
+            if ipaddr.dns_name:
+                _ip = self.ipaddress(
+                    address=addr,
+                    prefix=str(prefix),
+                    status=ipaddr.status.name if ipaddr.status else None,
+                    prefix_length=prefix.prefix_length if prefix else ipaddr.prefix_length,
+                    dns_name=ipaddr.dns_name,
+                    description=ipaddr.description,
+                )
+                self.add(_ip)
 
     def load_vlangroups(self):
         """Method to load VLAN Groups from Nautobot."""
@@ -84,8 +89,8 @@ class NautobotAdapter(DiffSync):
         """Method to load models with data from Nautobot."""
         self.load_prefixes()
         self.load_ipaddresses()
-        self.load_vlangroups()
-        self.load_vlans()
+        # self.load_vlangroups()
+        # self.load_vlans()
 
 
 class NautobotAggregateAdapter(DiffSync):

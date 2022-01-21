@@ -38,8 +38,13 @@ class InfobloxAdapter(DiffSync):
 
     def load_prefixes(self):
         """Method to load InfobloxNetwork DiffSync model."""
-        for _pf in self.conn.get_all_subnets():
-            self.subnets.append(_pf["network"])
+        # Need to load containers here to prevent duplicates when syncing back to Infoblox
+        containers = self.conn.get_network_containers()
+        subnets = self.conn.get_all_subnets()
+        self.subnets = [x["network"] for x in subnets]
+        all_networks = containers + subnets
+        for _pf in all_networks:
+            # self.subnets.append(_pf["network"])
             new_pf = self.prefix(
                 network=_pf["network"],
                 description=_pf["comment"] if _pf.get("comment") else "",
@@ -87,8 +92,8 @@ class InfobloxAdapter(DiffSync):
         """Method for one stop shop loading of all models."""
         self.load_prefixes()
         self.load_ipaddresses()
-        self.load_vlanviews()
-        self.load_vlans()
+        # self.load_vlanviews()
+        # self.load_vlans()
 
 
 class InfobloxAggregateAdapter(DiffSync):
@@ -114,7 +119,7 @@ class InfobloxAggregateAdapter(DiffSync):
         """Method for loading aggregate models."""
         for container in self.conn.get_network_containers():
             network = ipaddress.ip_network(container["network"])
-            if network.is_private:
+            if network.is_private and container["network"] in ["10.0.0.0/8", "172.16.0.0/12", "192.168.0.0/16"]:
                 new_aggregate = self.aggregate(
                     network=container["network"],
                     description=container["comment"] if container.get("comment") else "",

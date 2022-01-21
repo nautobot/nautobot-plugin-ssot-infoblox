@@ -11,6 +11,9 @@ from nautobot_ssot_infoblox.diffsync.adapters import infoblox, nautobot
 from nautobot_ssot_infoblox.constant import PLUGIN_CFG
 
 
+name = "SSoT - Infoblox DDI"  # pylint: disable=invalid-name
+
+
 class InfobloxDataSource(DataSource, Job):
     """Infoblox SSoT Data Source."""
 
@@ -19,7 +22,7 @@ class InfobloxDataSource(DataSource, Job):
     class Meta:  # pylint: disable=too-few-public-methods
         """Information about the Job."""
 
-        name = "Infoblox"
+        name = "Infoblox ⟹ Nautobot"
         data_source = "Infoblox"
         data_source_icon = static("nautobot_ssot_infoblox/infoblox_logo.png")
         description = "Sync infomation from Infoblox to Nautobot"
@@ -30,8 +33,8 @@ class InfobloxDataSource(DataSource, Job):
         return (
             DataMapping("network", None, "Prefix", reverse("ipam:prefix_list")),
             DataMapping("ipaddress", None, "IP Address", reverse("ipam:ipaddress_list")),
-            DataMapping("vlan", None, "VLAN", reverse("ipam:vlan_list")),
-            DataMapping("vlanview", None, "VLANGroup", reverse("ipam:vlangroup_list")),
+            # DataMapping("vlan", None, "VLAN", reverse("ipam:vlan_list")),
+            # DataMapping("vlanview", None, "VLANGroup", reverse("ipam:vlangroup_list")),
         )
 
     def sync_data(self):
@@ -45,14 +48,15 @@ class InfobloxDataSource(DataSource, Job):
         self.log_info(message="Loading data from Nautobot...")
         nb_adapter.load()
         self.log_info(message="Performing diff of data between Infoblox and Nautobot.")
-        diff = nb_adapter.diff_from(infoblox_adapter, flags=DiffSyncFlags.CONTINUE_ON_FAILURE)
+        flags = DiffSyncFlags.CONTINUE_ON_FAILURE | DiffSyncFlags.SKIP_UNMATCHED_DST
+        diff = nb_adapter.diff_from(infoblox_adapter, flags=flags)
         self.sync.diff = diff.dict()
         self.sync.save()
         self.log_info(message=diff.summary())
         if not self.kwargs["dry_run"]:
             self.log_info(message="Performing data synchronization from Infoblox to Nautobot.")
             try:
-                nb_adapter.sync_from(infoblox_adapter, flags=DiffSyncFlags.CONTINUE_ON_FAILURE)
+                nb_adapter.sync_from(infoblox_adapter, flags=flags)
             except ObjectNotCreated as err:
                 self.log_debug(f"Unable to create object. {err}")
             self.log_success(message="Sync complete.")
@@ -66,7 +70,7 @@ class InfobloxDataTarget(DataTarget, Job):
     class Meta:  # pylint: disable=too-few-public-methods
         """Information about the Job."""
 
-        name = "Infoblox"
+        name = "Nautobot ⟹ Infoblox"
         data_target = "Infoblox"
         data_target_icon = static("nautobot_ssot_infoblox/infoblox_logo.png")
         description = "Sync infomation from Nautobot to Infoblox"
@@ -77,8 +81,8 @@ class InfobloxDataTarget(DataTarget, Job):
         return (
             DataMapping("Prefix", reverse("ipam:prefix_list"), "network", None),
             DataMapping("IP Address", reverse("ipam:ipaddress_list"), "ipaddress", None),
-            DataMapping("VLAN", reverse("ipam:vlan_list"), "vlan", None),
-            DataMapping("VLANGroup", reverse("ipam:vlangroup_list"), "vlanview", None),
+            # DataMapping("VLAN", reverse("ipam:vlan_list"), "vlan", None),
+            # DataMapping("VLANGroup", reverse("ipam:vlangroup_list"), "vlanview", None),
         )
 
     def sync_data(self):
@@ -92,14 +96,15 @@ class InfobloxDataTarget(DataTarget, Job):
         self.log_info(message="Loading data from Nautobot...")
         nb_adapter.load()
         self.log_info(message="Performing diff of data between Infoblox and Nautobot.")
-        diff = infoblox_adapter.diff_from(nb_adapter, flags=DiffSyncFlags.CONTINUE_ON_FAILURE)
+        flags = DiffSyncFlags.CONTINUE_ON_FAILURE | DiffSyncFlags.SKIP_UNMATCHED_DST
+        diff = infoblox_adapter.diff_from(nb_adapter, flags=flags)
         self.sync.diff = diff.dict()
         self.sync.save()
         self.log_info(message=diff.summary())
         if not self.kwargs["dry_run"]:
             self.log_info(message="Performing data synchronization to Infoblox from Nautobot.")
             try:
-                infoblox_adapter.sync_from(nb_adapter, flags=DiffSyncFlags.CONTINUE_ON_FAILURE)
+                infoblox_adapter.sync_from(nb_adapter, flags=flags)
             except ObjectNotCreated as err:
                 self.log_debug(f"Unable to create object. {err}")
             self.log_success(message="Sync complete.")
@@ -113,7 +118,7 @@ class InfobloxNetworkContainerSource(DataSource, Job):
     class Meta:  # pylint: disable=too-few-public-methods
         """Information about the Job."""
 
-        name = "Infoblox Network Containers"
+        name = "Infoblox ⟹ Nautobot -  Network Containers"
         data_source = "InfobloxNetworkContainers"
         data_source_icon = static("nautobot_ssot_infoblox/infoblox_logo.png")
         description = "Sync Network Container (Aggregate) infomation from Infoblox to Nautobot"
