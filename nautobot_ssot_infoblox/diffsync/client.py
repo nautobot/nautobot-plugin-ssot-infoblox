@@ -5,9 +5,10 @@ import json
 import logging
 import re
 import requests
+from requests.exceptions import HTTPError
+from requests.compat import urljoin
 from dns import reversename
 from nautobot.core.settings_funcs import is_truthy
-from requests.compat import urljoin
 from nautobot_ssot_infoblox.constant import PLUGIN_CFG
 
 logger = logging.getLogger("rq.worker")
@@ -199,13 +200,17 @@ class InfobloxApi:  # pylint: disable=too-many-public-methods,  too-many-instanc
             "status": "USED",
             "_return_as_object": 1,
             "_paging": 1,
-            "_max_results": 1000,
+            "_max_results": 10000,
             "_return_fields": "ip_address,mac_address,names,network,objects,status,types,usage,comment",
         }
         api_path = "ipv4address"
-        response = self._request("GET", api_path, params=params)
-        logger.info(response.json)
         results = []
+        try:
+            response = self._request("GET", api_path, params=params)
+        except HTTPError as err:
+            logger.info(err.response.text)
+            return results
+        logger.info(response.json())
         while True:
             if "next_page_id" in response.json():
                 results.extend(response.json().get("result"))
@@ -691,9 +696,13 @@ class InfobloxApi:  # pylint: disable=too-many-public-methods,  too-many-instanc
         ]
         """
         url_path = "network"
-        params = {"_return_as_object": 1, "_return_fields": "network,comment"}
-        response = self._request("GET", url_path, params=params)
-        logger.info(response.json)
+        params = {"_return_as_object": 1, "_return_fields": "network,comment", "_max_results": 10000}
+        try:
+            response = self._request("GET", url_path, params=params)
+        except HTTPError as err:
+            logger.info(err.response.text)
+            return []
+        logger.info(response.json())
         return response.json().get("result")
 
     def get_authoritative_zone(self):
@@ -719,7 +728,7 @@ class InfobloxApi:  # pylint: disable=too-many-public-methods,  too-many-instanc
         url_path = "zone_auth"
         params = {"_return_as_object": 1}
         response = self._request("GET", url_path, params=params)
-        logger.info(response.json)
+        logger.info(response.json())
         return response.json().get("result")
 
     def _find_network_reference(self, network):
@@ -829,8 +838,15 @@ class InfobloxApi:  # pylint: disable=too-many-public-methods,  too-many-instanc
         """
         url_path = "record:host"
         params = {"_return_fields": "name", "_return_as_object": 1}
+        # TODO (Mikhail): Prevent this from being synced or remove to prevent 400 error after fixed in loading invalid DNS name
+        if fqdn.endswith("."):
+            fqdn += "nautobot.test"
         payload = {"name": fqdn, "ipv4addrs": [{"ipv4addr": ip_address}]}
-        response = self._request("POST", url_path, params=params, json=payload)
+        try:
+            response = self._request("POST", url_path, params=params, json=payload)
+        except HTTPError as err:
+            logger.info("Host record error: %s", err.response.text)
+            return []
         logger.info("Infoblox host record created: %s", response.json())
         return response.json().get("result")
 
@@ -905,7 +921,7 @@ class InfobloxApi:  # pylint: disable=too-many-public-methods,  too-many-instanc
         url_path = "search"
         params = {"address": ipaddress, "_return_as_object": 1}
         response = self._request("GET", url_path, params=params)
-        logger.info(response.json)
+        logger.info(response.json())
         return response.json().get("result")
 
     def get_vlan_view(self, name="Nautobot"):
@@ -978,7 +994,7 @@ class InfobloxApi:  # pylint: disable=too-many-public-methods,  too-many-instanc
         url_path = "vlanview"
         params = {"_return_fields": "name,comment,start_vlan_id,end_vlan_id"}
         response = self._request("GET", url_path, params=params)
-        logger.info(response.json)
+        logger.info(response.json())
         return response.json()
 
     def get_vlans(self):
@@ -1005,7 +1021,7 @@ class InfobloxApi:  # pylint: disable=too-many-public-methods,  too-many-instanc
         url_path = "vlan"
         params = {"_return_fields": "assigned_to,id,name,comment,contact,department,description,parent,reserved,status"}
         response = self._request("GET", url_path, params=params)
-        logger.info(response.json)
+        logger.info(response.json())
         return response.json()
 
     def create_vlan(self, vlan_id, vlan_name, vlan_view):
@@ -1033,7 +1049,7 @@ class InfobloxApi:  # pylint: disable=too-many-public-methods,  too-many-instanc
         params = {}
         payload = {"parent": parent, "id": vlan_id, "name": vlan_name}
         response = self._request("POST", url_path, params=params, json=payload)
-        logger.info(response.json)
+        logger.info(response.json())
         return response.json()
 
     @staticmethod
@@ -1098,7 +1114,7 @@ class InfobloxApi:  # pylint: disable=too-many-public-methods,  too-many-instanc
         ]
         """
         url_path = "networkcontainer"
-        params = {"_return_as_object": 1, "_return_fields": "network,comment,network_view"}
+        params = {"_return_as_object": 1, "_return_fields": "network,comment,network_view", "_max_results": 100000}
         response = self._request("GET", url_path, params=params)
-        logger.info(response.json)
+        logger.info(response.json())
         return response.json().get("result")

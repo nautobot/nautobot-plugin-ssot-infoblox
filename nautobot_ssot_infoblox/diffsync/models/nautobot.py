@@ -34,12 +34,12 @@ class NautobotNetwork(Network):
         _pf.validated_save()
         return super().update(attrs)
 
-    def delete(self):
-        """Delete Prefix object in Nautobot."""
-        self.diffsync.job.log_warning(f"Prefix {self.network} will be deleted.")
-        _prefix = OrmPrefix.objects.get(prefix=self.get_identifiers()["network"])
-        _prefix.delete()
-        return super().delete()
+    # def delete(self):
+    #     """Delete Prefix object in Nautobot."""
+    #     self.diffsync.job.log_warning(f"Prefix {self.network} will be deleted.")
+    #     _prefix = OrmPrefix.objects.get(prefix=self.get_identifiers()["network"])
+    #     _prefix.delete()
+    #     return super().delete()
 
 
 class NautobotIPAddress(IPAddress):
@@ -62,8 +62,7 @@ class NautobotIPAddress(IPAddress):
 
     def update(self, attrs):
         """Update IPAddress object in Nautobot."""
-        _pf = OrmPrefix.objects.get(prefix=self.prefix)
-        _ipaddr = OrmIPAddress.objects.get(address=f"{self.address}/{_pf.prefix_length}")
+        _ipaddr = OrmIPAddress.objects.get(address=f"{self.address}/{self.prefix_length}")
         if attrs.get("status"):
             _ipaddr.status = OrmStatus.objects.get(name=attrs["status"])
         if attrs.get("description"):
@@ -73,13 +72,13 @@ class NautobotIPAddress(IPAddress):
         _ipaddr.validated_save()
         return super().update(attrs)
 
-    def delete(self):
-        """Delete IPAddress object in Nautobot."""
-        self.diffsync.job.log_warning(self, message=f"IP Address {self.address} will be deleted.")
-        ip_ids = self.get_identifiers()
-        _ipaddr = OrmIPAddress.objects.get(address=f"{ip_ids['address']}/{ip_ids['prefix_length']}")
-        _ipaddr.delete()
-        return super().delete()
+    # def delete(self):
+    #     """Delete IPAddress object in Nautobot."""
+    #     self.diffsync.job.log_warning(self, message=f"IP Address {self.address} will be deleted.")
+    #     ip_ids = self.get_identifiers()
+    #     _ipaddr = OrmIPAddress.objects.get(address=f"{ip_ids['address']}/{ip_ids['prefix_length']}")
+    #     _ipaddr.delete()
+    #     return super().delete()
 
 
 class NautobotVlanGroup(VlanView):

@@ -99,10 +99,9 @@ class TestInfobloxTest(unittest.TestCase):
 
         with requests_mock.Mocker() as req:
             req.get(f"{LOCALHOST}/{mock_uri}", json=mock_response, status_code=404)
-            with pytest.raises(HTTPError) as err:
-                self.infoblox_client.get_all_ipv4address_networks(mock_prefix)
+            response = self.infoblox_client.get_all_ipv4address_networks(mock_prefix)
 
-            self.assertEqual(err.value.response.status_code, 404)
+            self.assertEqual(response, [])
 
     def test_get_host_record_by_name_success(self):
         """Test get_host_by_record success."""
@@ -295,10 +294,9 @@ class TestInfobloxTest(unittest.TestCase):
 
         with requests_mock.Mocker() as req:
             req.get(f"{LOCALHOST}/{mock_uri}", json=mock_response, status_code=404)
-            with pytest.raises(HTTPError) as err:
-                self.infoblox_client.get_all_subnets()
+            response = self.infoblox_client.get_all_subnets()
 
-        self.assertEqual(err.value.response.status_code, 404)
+        self.assertEqual(response, [])
 
     def test_get_authoritative_zone_success(self):
         """Test get_authoritative_zone success."""
@@ -399,11 +397,9 @@ class TestInfobloxTest(unittest.TestCase):
 
         with requests_mock.Mocker() as req:
             req.post(f"{LOCALHOST}/{mock_uri}", json="", status_code=404)
+            response = self.infoblox_client.create_host_record(mock_fqdn, mock_ip_address)
 
-            with pytest.raises(HTTPError) as err:
-                self.infoblox_client.create_host_record(mock_fqdn, mock_ip_address)
-
-        self.assertEqual(err.value.response.status_code, 404)
+        self.assertEqual(response, [])
 
     @patch("nautobot_ssot_infoblox.diffsync.client.InfobloxApi._find_network_reference")
     def test_find_next_available_ip_success(self, mock_find_network_reference):
