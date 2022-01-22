@@ -44,10 +44,10 @@ class InfobloxAdapter(DiffSync):
         self.subnets = [x["network"] for x in subnets]
         all_networks = containers + subnets
         for _pf in all_networks:
-            # self.subnets.append(_pf["network"])
             new_pf = self.prefix(
                 network=_pf["network"],
-                description=_pf["comment"] if _pf.get("comment") else "",
+                description=_pf.get("comment", ""),
+                status=_pf.get("status", "active"),
             )
             self.add(new_pf)
 
@@ -56,15 +56,16 @@ class InfobloxAdapter(DiffSync):
         for _prefix in self.subnets:
             for _ip in self.conn.get_all_ipv4address_networks(prefix=_prefix):
                 _, prefix_length = _ip["network"].split("/")
-                new_ip = self.ipaddress(
-                    address=_ip["ip_address"],
-                    prefix=_ip["network"],
-                    prefix_length=prefix_length,
-                    dns_name=_ip["names"][0] if _ip["names"] else "",
-                    status=self.conn.get_ipaddr_status(_ip),
-                    description=_ip["comment"],
-                )
-                self.add(new_ip)
+                if _ip["names"]:
+                    new_ip = self.ipaddress(
+                        address=_ip["ip_address"],
+                        prefix=_ip["network"],
+                        prefix_length=prefix_length,
+                        dns_name=_ip["names"][0],
+                        status=self.conn.get_ipaddr_status(_ip),
+                        description=_ip["comment"],
+                    )
+                    self.add(new_ip)
 
     def load_vlanviews(self):
         """Method to load InfobloxVLANView DiffSync model."""

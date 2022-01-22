@@ -17,10 +17,15 @@ class NautobotNetwork(Network):
     @classmethod
     def create(cls, diffsync, ids, attrs):
         """Create Prefix object in Nautobot."""
+        try:
+            status = OrmStatus.objects.get(slug=attrs.get("status", "active"))
+        except OrmStatus.DoesNotExist:
+            status = OrmStatus.objects.get(slug="active")
+
         _prefix = OrmPrefix(
             prefix=ids["network"],
-            status=OrmStatus.objects.get(name="Active"),
-            description=attrs["description"] if attrs.get("description") else "",
+            status=status,
+            description=attrs.get("description", ""),
         )
         _prefix.tags.add(Tag.objects.get(slug="created-by-infoblox"))
         _prefix.validated_save()
@@ -34,12 +39,12 @@ class NautobotNetwork(Network):
         _pf.validated_save()
         return super().update(attrs)
 
-    def delete(self):
-        """Delete Prefix object in Nautobot."""
-        self.diffsync.job.log_warning(f"Prefix {self.network} will be deleted.")
-        _prefix = OrmPrefix.objects.get(prefix=self.get_identifiers()["network"])
-        _prefix.delete()
-        return super().delete()
+    # def delete(self):
+    #     """Delete Prefix object in Nautobot."""
+    #     self.diffsync.job.log_warning(f"Prefix {self.network} will be deleted.")
+    #     _prefix = OrmPrefix.objects.get(prefix=self.get_identifiers()["network"])
+    #     _prefix.delete()
+    #     return super().delete()
 
 
 class NautobotIPAddress(IPAddress):
@@ -54,7 +59,8 @@ class NautobotIPAddress(IPAddress):
             status=OrmStatus.objects.get(name="Active")
             if not attrs.get("status")
             else OrmStatus.objects.get(name=attrs["status"]),
-            description=attrs["description"] if attrs.get("description") else "",
+            description=attrs.get("description", ""),
+            dns_name=attrs.get("dns_name", ""),
         )
         _ip.tags.add(Tag.objects.get(slug="created-by-infoblox"))
         _ip.validated_save()
@@ -72,13 +78,13 @@ class NautobotIPAddress(IPAddress):
         _ipaddr.validated_save()
         return super().update(attrs)
 
-    def delete(self):
-        """Delete IPAddress object in Nautobot."""
-        self.diffsync.job.log_warning(self, message=f"IP Address {self.address} will be deleted.")
-        ip_ids = self.get_identifiers()
-        _ipaddr = OrmIPAddress.objects.get(address=f"{ip_ids['address']}/{ip_ids['prefix_length']}")
-        _ipaddr.delete()
-        return super().delete()
+    # def delete(self):
+    #     """Delete IPAddress object in Nautobot."""
+    #     self.diffsync.job.log_warning(self, message=f"IP Address {self.address} will be deleted.")
+    #     ip_ids = self.get_identifiers()
+    #     _ipaddr = OrmIPAddress.objects.get(address=f"{ip_ids['address']}/{ip_ids['prefix_length']}")
+    #     _ipaddr.delete()
+    #     return super().delete()
 
 
 class NautobotVlanGroup(VlanView):

@@ -41,11 +41,12 @@ class NautobotAdapter(DiffSync):
             _prefix = self.prefix(
                 network=str(prefix.prefix),
                 description=prefix.description,
+                status=prefix.status.slug if hasattr(prefix, "status") else "container",
             )
             try:
                 self.add(_prefix)
             except ObjectAlreadyExists:
-                self.job.log_warning(f"Found duplicate prefix: {prefix.prefix}.")
+                self.job.log_warning(_prefix, message=f"Found duplicate prefix: {prefix.prefix}.")
 
     def load_ipaddresses(self):
         """Method to load IP Addresses from Nautobot."""

@@ -9,10 +9,12 @@ class InfobloxNetwork(Network):
     @classmethod
     def create(cls, diffsync, ids, attrs):
         """Create Network object in Infoblox."""
+        status = attrs.get("status")
         try:
-            diffsync.conn.create_network(
-                prefix=ids["network"], comment=attrs["description"] if attrs.get("description") else ""
-            )
+            if status != "container":
+                diffsync.conn.create_network(prefix=ids["network"], comment=attrs.get("description", ""))
+            else:
+                diffsync.conn.create_network_container(prefix=ids["network"], comment=attrs.get("description", ""))
         except HTTPError as err:
             diffsync.job.log_warning(f"Failed to create {ids['network']} due to {err.response.text}")
         return super().create(ids=ids, diffsync=diffsync, attrs=attrs)
@@ -20,7 +22,7 @@ class InfobloxNetwork(Network):
     def update(self, attrs):
         """Update Network object in Infoblox."""
         self.diffsync.conn.update_network(
-            prefix=self.get_identifiers()["network"], comment=attrs["description"] if attrs.get("description") else ""
+            prefix=self.get_identifiers()["network"], comment=attrs.get("description", "")
         )
         return super().update(attrs)
 

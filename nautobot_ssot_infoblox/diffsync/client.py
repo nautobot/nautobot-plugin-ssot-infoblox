@@ -1119,7 +1119,12 @@ class InfobloxApi:  # pylint: disable=too-many-public-methods,  too-many-instanc
         ]
         """
         url_path = "networkcontainer"
-        params = {"_return_as_object": 1, "_return_fields": "network,comment,network_view", "_max_results": 100000}
+        # params = {"_return_as_object": 1, "_return_fields": "network,comment,network_view", "_max_results": 100000}
+        params = {"_return_as_object": 1, "_max_results": 100000}
         response = self._request("GET", url_path, params=params)
-        logger.info(response.json())
-        return response.json().get("result")
+        response = response.json()
+        logger.info(response)
+        results = response.get("result", [])
+        for res in results:
+            res.update({"status": "container"})
+        return results
