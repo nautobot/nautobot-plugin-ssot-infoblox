@@ -14,7 +14,7 @@ class InfobloxNetwork(Network):
                 prefix=ids["network"], comment=attrs["description"] if attrs.get("description") else ""
             )
         except HTTPError as err:
-            diffsync.job.log_failure(f"Failed to create {ids['network']} due to {err.response.text}")
+            diffsync.job.log_warning(f"Failed to create {ids['network']} due to {err.response.text}")
         return super().create(ids=ids, diffsync=diffsync, attrs=attrs)
 
     def update(self, attrs):
@@ -79,10 +79,10 @@ class InfobloxIPAddress(IPAddress):
             self.diffsync.conn.update_ipaddress(ip_address=self.get_identifiers()["address"], data=json)
         return super().update(attrs)
 
-    def delete(self):
-        """Delete an IP Address from Infoblox."""
-        self.diffsync.conn.delete_host_record(self.get_identifiers()["address"])
-        return super().delete()
+    # def delete(self):
+    #     """Delete an IP Address from Infoblox."""
+    #     self.diffsync.conn.delete_host_record(self.get_identifiers()["address"])
+    #     return super().delete()
 
 
 class InfobloxAggregate(Aggregate):
