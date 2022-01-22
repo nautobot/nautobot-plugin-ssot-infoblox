@@ -45,7 +45,7 @@ class NautobotAdapter(DiffSync):
             try:
                 self.add(_prefix)
             except ObjectAlreadyExists:
-                pass
+                self.job.log_warning(f"Found duplicate prefix: {prefix.prefix}.")
 
     def load_ipaddresses(self):
         """Method to load IP Addresses from Nautobot."""
@@ -53,16 +53,21 @@ class NautobotAdapter(DiffSync):
             addr = ipaddr.host
             # the last Prefix is the most specific and is assumed the one the IP address resides in
             prefix = Prefix.objects.net_contains(addr).last()
-            if ipaddr.dns_name:
-                _ip = self.ipaddress(
-                    address=addr,
-                    prefix=str(prefix),
-                    status=ipaddr.status.name if ipaddr.status else None,
-                    prefix_length=prefix.prefix_length if prefix else ipaddr.prefix_length,
-                    dns_name=ipaddr.dns_name,
-                    description=ipaddr.description,
-                )
+            _ip = self.ipaddress(
+                address=addr,
+                prefix=str(prefix),
+                status=ipaddr.status.name if ipaddr.status else None,
+                prefix_length=prefix.prefix_length if prefix else ipaddr.prefix_length,
+                dns_name=ipaddr.dns_name,
+                description=ipaddr.description,
+            )
+            try:
                 self.add(_ip)
+            except ObjectAlreadyExists:
+                self.remove(_ip)
+                self.job.log_warning(
+                    f"Duplicate IP Address detected: {addr}, removing existing IP Address from adapter."
+                )
 
     def load_vlangroups(self):
         """Method to load VLAN Groups from Nautobot."""
