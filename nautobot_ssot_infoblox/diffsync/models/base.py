@@ -12,6 +12,7 @@ class Network(DiffSyncModel):
 
     network: str
     description: Optional[str]
+    status: Optional[str]
 
 
 class VlanView(DiffSyncModel):
