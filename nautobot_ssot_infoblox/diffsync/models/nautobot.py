@@ -17,10 +17,15 @@ class NautobotNetwork(Network):
     @classmethod
     def create(cls, diffsync, ids, attrs):
         """Create Prefix object in Nautobot."""
+        try:
+            status = OrmStatus.objects.get(slug=attrs.get("status", "active"))
+        except OrmStatus.DoesNotExist:
+            status = OrmStatus.objects.get(slug="active")
+
         _prefix = OrmPrefix(
             prefix=ids["network"],
-            status=OrmStatus.objects.get(name="Active"),
-            description=attrs["description"] if attrs.get("description") else "",
+            status=status,
+            description=attrs.get("description", ""),
         )
         _prefix.tags.add(Tag.objects.get(slug="created-by-infoblox"))
         _prefix.validated_save()
@@ -54,7 +59,8 @@ class NautobotIPAddress(IPAddress):
             status=OrmStatus.objects.get(name="Active")
             if not attrs.get("status")
             else OrmStatus.objects.get(name=attrs["status"]),
-            description=attrs["description"] if attrs.get("description") else "",
+            description=attrs.get("description", ""),
+            dns_name=attrs.get("dns_name", ""),
         )
         _ip.tags.add(Tag.objects.get(slug="created-by-infoblox"))
         _ip.validated_save()
