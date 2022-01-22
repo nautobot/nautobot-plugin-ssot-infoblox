@@ -70,9 +70,13 @@ class InfobloxIPAddress(IPAddress):
 
     def update(self, attrs):
         """Updates IP Address object in Infoblox."""
+        json = {"configure_for_dns": False}
         if attrs.get("description"):
-            json = {"comment": attrs["description"]}
-            self.diffsync.conn.update_ipaddress(address=self.get_identifiers()["address"], data=json)
+            json.update({"comment": attrs["description"]})
+        if attrs.get("dns_name"):
+            json.update({"name": attrs["dns_name"]})
+        if json:
+            self.diffsync.conn.update_ipaddress(ip_address=self.get_identifiers()["address"], data=json)
         return super().update(attrs)
 
     def delete(self):

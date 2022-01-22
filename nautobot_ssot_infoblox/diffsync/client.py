@@ -838,7 +838,7 @@ class InfobloxApi:  # pylint: disable=too-many-public-methods,  too-many-instanc
         """
         url_path = "record:host"
         params = {"_return_fields": "name", "_return_as_object": 1}
-        payload = {"name": fqdn, "ipv4addrs": [{"ipv4addr": ip_address}]}
+        payload = {"name": fqdn, "configure_for_dns": False, "ipv4addrs": [{"ipv4addr": ip_address}]}
         try:
             response = self._request("POST", url_path, params=params, json=payload)
         except HTTPError as err:
@@ -1071,6 +1071,7 @@ class InfobloxApi:  # pylint: disable=too-many-public-methods,  too-many-instanc
             return _resource.get("_ref")
         return response.json()
 
+    # TODO: See if we should accept params dictionary and extended to both host record and fixed address
     def update_ipaddress(self, ip_address, **data):  # pylint: disable=inconsistent-return-statements
         """Update a Network object with a given prefix.
 
@@ -1090,8 +1091,15 @@ class InfobloxApi:  # pylint: disable=too-many-public-methods,  too-many-instanc
         resource = self._find_resource("search", address=ip_address)
         if not resource:
             return
-        params = {"_return_fields": "ipv4addr", "_return_as_object": 1}
-        response = self._request("PUT", path=resource, params=params, json=data)
+        # params = {"_return_fields": "ipv4addr", "_return_as_object": 1}
+        params = {}
+        try:
+            logger.info(data)
+            response = self._request("PUT", path=resource, params=params, json=data["data"])
+        except HTTPError as err:
+            logger.info("Resource: %s", resource)
+            logger.info("Could not update IP address: %s", err.response.text)
+            return
         logger.info("Infoblox IP Address updated: %s", response.json())
         return response.json()
 
