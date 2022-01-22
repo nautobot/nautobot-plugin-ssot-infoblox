@@ -46,7 +46,6 @@ class NautobotAdapter(DiffSync):
                 self.add(_prefix)
             except ObjectAlreadyExists:
                 self.job.log_warning(f"Found duplicate prefix: {prefix.prefix}.")
-                pass
 
     def load_ipaddresses(self):
         """Method to load IP Addresses from Nautobot."""
@@ -69,7 +68,6 @@ class NautobotAdapter(DiffSync):
                 self.job.log_warning(
                     f"Duplicate IP Address detected: {addr}, removing existing IP Address from adapter."
                 )
-                pass
 
     def load_vlangroups(self):
         """Method to load VLAN Groups from Nautobot."""
