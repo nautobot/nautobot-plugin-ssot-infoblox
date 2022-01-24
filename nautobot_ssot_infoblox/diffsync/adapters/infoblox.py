@@ -3,6 +3,7 @@ import ipaddress
 import re
 
 from diffsync import DiffSync
+from diffsync.enum import DiffSyncFlags
 from nautobot_ssot_infoblox.diffsync.client import InfobloxApi
 from nautobot_ssot_infoblox.diffsync.models.infoblox import (
     InfobloxAggregate,
@@ -95,6 +96,10 @@ class InfobloxAdapter(DiffSync):
         self.load_ipaddresses()
         # self.load_vlanviews()
         # self.load_vlans()
+
+    def sync_complete(self, source, diff, flags=DiffSyncFlags.NONE, logger=None):
+        """Add tags and custom fields to synced objects."""
+        source.tag_involved_objects(target=self)
 
 
 class InfobloxAggregateAdapter(DiffSync):
