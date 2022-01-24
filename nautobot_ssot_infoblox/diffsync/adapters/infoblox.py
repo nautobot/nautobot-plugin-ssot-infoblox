@@ -14,15 +14,7 @@ from nautobot_ssot_infoblox.diffsync.models.infoblox import (
 )
 
 
-class InfobloxMixin:
-    """Methods that can be used across Infoblox Adapters."""
-
-    def sync_complete(self, source, diff, flags=DiffSyncFlags.NONE, logger=None):
-        """Add tags and custom fields to synced objects."""
-        source.tag_involved_objects(target=self)
-
-
-class InfobloxAdapter(InfobloxMixin, DiffSync):
+class InfobloxAdapter(DiffSync):
     """DiffSync adapter using requests to communicate to Infoblox server."""
 
     prefix = InfobloxNetwork
@@ -105,8 +97,12 @@ class InfobloxAdapter(InfobloxMixin, DiffSync):
         # self.load_vlanviews()
         # self.load_vlans()
 
+    def sync_complete(self, source, diff, flags=DiffSyncFlags.NONE, logger=None):
+        """Add tags and custom fields to synced objects."""
+        source.tag_involved_objects(target=self)
 
-class InfobloxAggregateAdapter(InfobloxMixin, DiffSync):
+
+class InfobloxAggregateAdapter(DiffSync):
     """DiffSync adapter using requests to communicate to Infoblox server."""
 
     aggregate = InfobloxAggregate

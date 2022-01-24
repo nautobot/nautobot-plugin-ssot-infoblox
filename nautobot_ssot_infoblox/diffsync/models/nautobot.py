@@ -98,7 +98,6 @@ class NautobotVlanGroup(VlanView):
             slug=slugify(ids["name"]),
             description=attrs["description"],
         )
-        _vg.tags.add(Tag.objects.get(slug="ssot-synced-from-infoblox"))
         _vg.validated_save()
         return super().create(ids=ids, diffsync=diffsync, attrs=attrs)
 

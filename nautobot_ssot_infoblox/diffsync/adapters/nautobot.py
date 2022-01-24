@@ -1,7 +1,7 @@
 """Nautobot Adapter for Infoblox integration with SSoT plugin."""
 import datetime
 from itertools import chain
-from diffsync import DiffSync, DiffSyncFlags
+from diffsync import DiffSync
 from diffsync.exceptions import ObjectAlreadyExists, ObjectNotFound
 from django.contrib.contenttypes.models import ContentType
 from nautobot.extras.choices import CustomFieldTypeChoices
@@ -44,7 +44,7 @@ class NautobotMixin:
         for model in [Aggregate, IPAddress, Prefix]:
             custom_field.content_types.add(ContentType.objects.get_for_model(model))
 
-        for modelname in ["aggregate", "ipaddress", "prefix"]:
+        for modelname in ["ipaddress", "prefix"]:
             for local_instance in self.get_all(modelname):
                 unique_id = local_instance.get_unique_id()
                 # Verify that the object now has a counterpart in the target DiffSync
