@@ -11,7 +11,7 @@ __version__ = metadata.version(__name__)
 from nautobot.core.signals import nautobot_database_ready
 from nautobot.extras.plugins import PluginConfig
 
-from nautobot_ssot_infoblox.signals import infoblox_create_tag
+from nautobot_ssot_infoblox.signals import nautobot_database_ready_callback
 
 
 class NautobotSSoTInfobloxConfig(PluginConfig):
@@ -35,7 +35,7 @@ class NautobotSSoTInfobloxConfig(PluginConfig):
     def ready(self):
         super().ready()
 
-        nautobot_database_ready.connect(infoblox_create_tag, sender=self)
+        nautobot_database_ready.connect(nautobot_database_ready_callback, sender=self)
 
 
 config = NautobotSSoTInfobloxConfig  # pylint:disable=invalid-name
