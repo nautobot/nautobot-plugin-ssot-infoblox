@@ -3,6 +3,7 @@ import ipaddress
 import re
 
 from diffsync import DiffSync
+from diffsync.enum import DiffSyncFlags
 from nautobot_ssot_infoblox.diffsync.client import InfobloxApi
 from nautobot_ssot_infoblox.diffsync.models.infoblox import (
     InfobloxAggregate,
@@ -13,7 +14,15 @@ from nautobot_ssot_infoblox.diffsync.models.infoblox import (
 )
 
 
-class InfobloxAdapter(DiffSync):
+class InfobloxMixin:
+    """Methods that can be used across Infoblox Adapters."""
+
+    def sync_complete(self, source, diff, flags=DiffSyncFlags.NONE, logger=None):
+        """Add tags and custom fields to synced objects."""
+        source.tag_involved_objects(target=self)
+
+
+class InfobloxAdapter(InfobloxMixin, DiffSync):
     """DiffSync adapter using requests to communicate to Infoblox server."""
 
     prefix = InfobloxNetwork
@@ -97,7 +106,7 @@ class InfobloxAdapter(DiffSync):
         # self.load_vlans()
 
 
-class InfobloxAggregateAdapter(DiffSync):
+class InfobloxAggregateAdapter(InfobloxMixin, DiffSync):
     """DiffSync adapter using requests to communicate to Infoblox server."""
 
     aggregate = InfobloxAggregate

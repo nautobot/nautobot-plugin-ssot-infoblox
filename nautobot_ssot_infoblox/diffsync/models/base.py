@@ -1,4 +1,5 @@
 """Base Shared Models for Infoblox integration with SSoT plugin."""
+import uuid
 from typing import Optional
 from diffsync import DiffSyncModel
 
@@ -13,6 +14,7 @@ class Network(DiffSyncModel):
     network: str
     description: Optional[str]
     status: Optional[str]
+    pk: Optional[uuid.UUID] = None
 
 
 class VlanView(DiffSyncModel):
@@ -24,6 +26,7 @@ class VlanView(DiffSyncModel):
 
     name: str
     description: Optional[str]
+    pk: Optional[uuid.UUID] = None
 
 
 class Vlan(DiffSyncModel):
@@ -38,6 +41,7 @@ class Vlan(DiffSyncModel):
     status: str
     description: Optional[str]
     vlangroup: Optional[str]
+    pk: Optional[uuid.UUID] = None
 
 
 class IPAddress(DiffSyncModel):
@@ -54,6 +58,7 @@ class IPAddress(DiffSyncModel):
     prefix_length: int
     status: Optional[str]
     description: Optional[str]
+    pk: Optional[uuid.UUID] = None
 
 
 class Aggregate(DiffSyncModel):
@@ -65,3 +70,4 @@ class Aggregate(DiffSyncModel):
 
     network: str
     description: Optional[str]
+    pk: Optional[uuid.UUID] = None

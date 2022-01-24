@@ -27,7 +27,7 @@ class NautobotNetwork(Network):
             status=status,
             description=attrs.get("description", ""),
         )
-        _prefix.tags.add(Tag.objects.get(slug="created-by-infoblox"))
+        _prefix.tags.add(Tag.objects.get(slug="ssot-synced-from-infoblox"))
         _prefix.validated_save()
         return super().create(ids=ids, diffsync=diffsync, attrs=attrs)
 
@@ -62,7 +62,7 @@ class NautobotIPAddress(IPAddress):
             description=attrs.get("description", ""),
             dns_name=attrs.get("dns_name", ""),
         )
-        _ip.tags.add(Tag.objects.get(slug="created-by-infoblox"))
+        _ip.tags.add(Tag.objects.get(slug="ssot-synced-from-infoblox"))
         _ip.validated_save()
         return super().create(ids=ids, diffsync=diffsync, attrs=attrs)
 
@@ -98,6 +98,7 @@ class NautobotVlanGroup(VlanView):
             slug=slugify(ids["name"]),
             description=attrs["description"],
         )
+        _vg.tags.add(Tag.objects.get(slug="ssot-synced-from-infoblox"))
         _vg.validated_save()
         return super().create(ids=ids, diffsync=diffsync, attrs=attrs)
 
@@ -122,7 +123,7 @@ class NautobotVlan(Vlan):
             group=OrmVlanGroup.objects.get(name=attrs["vlangroup"]) if attrs["vlangroup"] else None,
             description=attrs["description"],
         )
-        _vlan.tags.add(Tag.objects.get(slug="created-by-infoblox"))
+        _vlan.tags.add(Tag.objects.get(slug="ssot-synced-from-infoblox"))
         _vlan.validated_save()
         return super().create(ids=ids, diffsync=diffsync, attrs=attrs)
 
@@ -168,7 +169,7 @@ class NautobotAggregate(Aggregate):
             rir=rir,
             description=attrs["description"] if attrs.get("description") else "",
         )
-        _aggregate.tags.add(Tag.objects.get(slug="created-by-infoblox"))
+        _aggregate.tags.add(Tag.objects.get(slug="ssot-synced-from-infoblox"))
         _aggregate.validated_save()
         return super().create(ids=ids, diffsync=diffsync, attrs=attrs)
 
@@ -180,9 +181,9 @@ class NautobotAggregate(Aggregate):
         _aggregate.validated_save()
         return super().update(attrs)
 
-    def delete(self):
-        """Delete Aggregate object in Nautobot."""
-        self.diffsync.job.log_warning(message=f"Aggregate {self.network} will be deleted.")
-        _aggregate = OrmAggregate.objects.get(prefix=self.get_identifiers()["network"])
-        _aggregate.delete()
-        return super().delete()
+    # def delete(self):
+    #     """Delete Aggregate object in Nautobot."""
+    #     self.diffsync.job.log_warning(message=f"Aggregate {self.network} will be deleted.")
+    #     _aggregate = OrmAggregate.objects.get(prefix=self.get_identifiers()["network"])
+    #     _aggregate.delete()
+    #     return super().delete()

@@ -1,6 +1,6 @@
 # Nautobot SSoT Infoblox
 
-Using the [Nautobot SSoT](https://github.com/nautobot/nautobot-plugin-ssot) framework, the SSoT plugin for Infoblox allows for synchronizing source of IP network and VLAN data between [Infoblox](https://infoblox.com/) and [Nautobot](https://github.com/nautobot/nautobot).
+Using the [Nautobot SSoT](https://github.com/nautobot/nautobot-plugin-ssot) framework, the SSoT plugin for Infoblox allows for synchronizing of IP network and VLAN data between [Infoblox](https://infoblox.com/) and [Nautobot](https://github.com/nautobot/nautobot).
 
 ## Installation
 
@@ -23,7 +23,25 @@ Once installed, the plugin needs to be enabled in your `nautobot_config.py`
 ```python
 # In your nautobot_config.py
 PLUGINS = ["nautobot_ssot_infoblox"]
+```
 
+See the section below for configuration settings.
+
+## Configuration
+
+| Setting                           | Default | Description                                                            |
+| --------------------------------- | ------- | ---------------------------------------------------------------------- |
+| NAUTOBOT_INFOBLOX_URL             | N/A     | URL of the Infoblox instance to sync with.                             |
+| NAUTOBOT_INFOBLOX_USERNAME        | N/A     | The username to authenticate against Infoblox with.                    |
+| NAUTOBOT_INFOBLOX_PASSWORD        | N/A     | The password to authenticate against Infblox with.                     |
+| NAUTOBOT_INFOBLOX_VERIFY_SSL      | True    | Toggle SSL verification when syncing data with Infoblox.               |
+| NAUTOBOT_INFOBLOX_WAPI_VERSION    | v2.12   | The version of the Infoblox API.                                       |
+| enable_sync_to_infoblox           | False   | Add job to sync data from Nautobot into Infoblox.                      |
+| enable_rfc1918_network_containers | False   | Add job to sync network containers to Nautobot (top level aggregates). |
+
+### Configuration Example
+
+```python
 PLUGINS_CONFIG = {
     "nautobot_ssot_infoblox": {
         "NAUTOBOT_INFOBLOX_URL": os.getenv("NAUTOBOT_INFOBLOX_URL", ""),
@@ -41,17 +59,27 @@ PLUGINS_CONFIG = {
 
 Below are the data mappings between objects within Infoblox and the corresponding objects within Nautobot:
 
-| Infoblox          | Nautobot   |
-| ----------------- | ---------- |
-| Network           | Prefix     |
-| IP Address        | IP Address |
-| Vlan              | VLAN       |
-| Vlan view         | VLAN Group |
-| Network container | Aggregate  |
+| Infoblox          | Nautobot       |
+| ----------------- | -------------- |
+| Network           | Prefix         |
+| IP Address        | IP Address     |
+| ~~Vlan~~          | ~~VLAN~~       |
+| ~~Vlan view~~     | ~~VLAN Group~~ |
+| Network container | Aggregate      |
 
-### API
+> **_NOTE_**: VLAN and VLAN Group will be turned on within the next available releases.
 
-TODO
+### DiffSyncModel - Network
+
+![Diffsync Model - Network](./diffsyncmodel-network.png)
+
+### DiffSyncModel - IPAddress
+
+![Diffsync Model - IPAddress](./diffsyncmodel-ipaddress.png)
+
+### DiffSyncModel - Aggregate
+
+![Diffsync Model - Aggregate](./diffsyncmodel-aggregate.png)
 
 ## Contributing
 
@@ -195,7 +223,3 @@ Sign up [here](http://slack.networktocode.com/)
 ![Infoblox SSoT Status](./ssot-status.png)
 
 ![Infoblox SSoT Logs](./ssot-logs.png)
-
-Infoblox SSoT under the hood:
-
-![Infoblox SSoT Under the Hood](./ssot-under-the-hood.gif)
