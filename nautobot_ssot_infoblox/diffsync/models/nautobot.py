@@ -1,7 +1,6 @@
 """Nautobot Models for Infoblox integration with SSoT plugin."""
 from django.utils.text import slugify
 from nautobot.extras.models import Status as OrmStatus
-from nautobot.extras.models import Tag
 from nautobot.ipam.models import RIR
 from nautobot.ipam.models import Aggregate as OrmAggregate
 from nautobot.ipam.models import IPAddress as OrmIPAddress
@@ -9,6 +8,7 @@ from nautobot.ipam.models import Prefix as OrmPrefix
 from nautobot.ipam.models import VLAN as OrmVlan
 from nautobot.ipam.models import VLANGroup as OrmVlanGroup
 from nautobot_ssot_infoblox.diffsync.models.base import Aggregate, Network, IPAddress, Vlan, VlanView
+from nautobot_ssot_infoblox.diffsync.utilities import create_tag_sync_from_infoblox
 
 
 class NautobotNetwork(Network):
@@ -27,7 +27,7 @@ class NautobotNetwork(Network):
             status=status,
             description=attrs.get("description", ""),
         )
-        _prefix.tags.add(Tag.objects.get(slug="ssot-synced-from-infoblox"))
+        _prefix.tags.add(create_tag_sync_from_infoblox())
         _prefix.validated_save()
         return super().create(ids=ids, diffsync=diffsync, attrs=attrs)
 
@@ -62,7 +62,7 @@ class NautobotIPAddress(IPAddress):
             description=attrs.get("description", ""),
             dns_name=attrs.get("dns_name", ""),
         )
-        _ip.tags.add(Tag.objects.get(slug="ssot-synced-from-infoblox"))
+        _ip.tags.add(create_tag_sync_from_infoblox())
         _ip.validated_save()
         return super().create(ids=ids, diffsync=diffsync, attrs=attrs)
 
@@ -122,7 +122,7 @@ class NautobotVlan(Vlan):
             group=OrmVlanGroup.objects.get(name=attrs["vlangroup"]) if attrs["vlangroup"] else None,
             description=attrs["description"],
         )
-        _vlan.tags.add(Tag.objects.get(slug="ssot-synced-from-infoblox"))
+        _vlan.tags.add(create_tag_sync_from_infoblox)
         _vlan.validated_save()
         return super().create(ids=ids, diffsync=diffsync, attrs=attrs)
 
@@ -168,7 +168,7 @@ class NautobotAggregate(Aggregate):
             rir=rir,
             description=attrs["description"] if attrs.get("description") else "",
         )
-        _aggregate.tags.add(Tag.objects.get(slug="ssot-synced-from-infoblox"))
+        _aggregate.tags.add(create_tag_sync_from_infoblox())
         _aggregate.validated_save()
         return super().create(ids=ids, diffsync=diffsync, attrs=attrs)
 
