@@ -147,7 +147,7 @@ class NautobotAdapter(NautobotMixin, DiffSync):
                 try:
                     self.add(_ip)
                 except ObjectAlreadyExists:
-                    self.job.log_warning(f"Duplicate IP Address detected: {addr}.")
+                    self.job.log_warning(ipaddr, message=f"Duplicate IP Address detected: {addr}.")
 
     def load_vlangroups(self):
         """Method to load VLAN Groups from Nautobot."""
