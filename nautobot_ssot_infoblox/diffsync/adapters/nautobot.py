@@ -127,7 +127,7 @@ class NautobotAdapter(NautobotMixin, DiffSync):
             # This means the IP cannot be associated with an IPv4 Network within Infoblox
             if prefix.status.slug == "container":
                 self.job.log_warning(
-                    f"IP Address {addr}'s arent prefix is a container. The parent prefix must not be a container."
+                    f"IP Address {addr}'s parent prefix is a container. The parent prefix status must not be 'container'."
                 )
                 continue
 
