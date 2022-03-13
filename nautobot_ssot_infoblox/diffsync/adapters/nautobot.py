@@ -119,9 +119,19 @@ class NautobotAdapter(NautobotMixin, DiffSync):
             # the last Prefix is the most specific and is assumed the one the IP address resides in
             prefix = Prefix.objects.net_contains(addr).last()
 
+            # The IP address must have a parent prefix
+            if not prefix:
+                self.job.log_warning(
+                    ipaddr, message=f"IP Address {addr} does not have a parent prefix and will not be synced."
+                )
+                continue
             # IP address must be part of a prefix that is not a container
             # This means the IP cannot be associated with an IPv4 Network within Infoblox
             if prefix.status.slug == "container":
+                self.job.log_warning(
+                    ipaddr,
+                    message=f"IP Address {addr}'s parent prefix is a container. The parent prefix status must not be 'container'.",
+                )
                 continue
 
             if ipaddr.dns_name:
@@ -137,7 +147,7 @@ class NautobotAdapter(NautobotMixin, DiffSync):
                 try:
                     self.add(_ip)
                 except ObjectAlreadyExists:
-                    self.job.log_warning(f"Duplicate IP Address detected: {addr}.")
+                    self.job.log_warning(ipaddr, message=f"Duplicate IP Address detected: {addr}.")
 
     def load_vlangroups(self):
         """Method to load VLAN Groups from Nautobot."""
