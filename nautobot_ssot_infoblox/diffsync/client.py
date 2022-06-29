@@ -735,7 +735,7 @@ class InfobloxApi:  # pylint: disable=too-many-public-methods,  too-many-instanc
         return response.json().get("result")
 
     def _find_network_reference(self, network):
-        """Finds the reference for the given network.
+        """Find the reference for the given network.
 
         Returns:
             Dict: Dictionary of _ref and name

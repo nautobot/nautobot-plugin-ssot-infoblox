@@ -57,7 +57,7 @@ def task(function=None, *args, **kwargs):
     """Task decorator to override the default Invoke task decorator and add each task to the invoke namespace."""
 
     def task_wrapper(function=None):
-        """Adds task to the invoke.task namespace."""
+        """Add task to the invoke.task namespace."""
         if args or kwargs:
             task_func = invoke_task(*args, **kwargs)(function)
         else:
@@ -73,7 +73,7 @@ def task(function=None, *args, **kwargs):
 
 
 def docker_compose(context, command, **kwargs):
-    """Helper function for running a specific docker-compose command with all appropriate parameters and environment.
+    """Run a specific docker-compose command with all appropriate parameters and environment.
 
     Args:
         context (obj): Used to run specific commands
