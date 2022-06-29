@@ -39,7 +39,7 @@ class InfobloxAdapter(DiffSync):
         self.subnets = []
 
     def load_prefixes(self):
-        """Method to load InfobloxNetwork DiffSync model."""
+        """Load InfobloxNetwork DiffSync model."""
         # Need to load containers here to prevent duplicates when syncing back to Infoblox
         containers = self.conn.get_network_containers()
         subnets = self.conn.get_all_subnets()
@@ -54,7 +54,7 @@ class InfobloxAdapter(DiffSync):
             self.add(new_pf)
 
     def load_ipaddresses(self):
-        """Method to load InfobloxIPAddress DiffSync model."""
+        """Load InfobloxIPAddress DiffSync model."""
         for _prefix in self.subnets:
             for _ip in self.conn.get_all_ipv4address_networks(prefix=_prefix):
                 _, prefix_length = _ip["network"].split("/")
@@ -70,7 +70,7 @@ class InfobloxAdapter(DiffSync):
                     self.add(new_ip)
 
     def load_vlanviews(self):
-        """Method to load InfobloxVLANView DiffSync model."""
+        """Load InfobloxVLANView DiffSync model."""
         for _vv in self.conn.get_vlanviews():
             new_vv = self.vlangroup(
                 name=_vv["name"],
@@ -79,7 +79,7 @@ class InfobloxAdapter(DiffSync):
             self.add(new_vv)
 
     def load_vlans(self):
-        """Method to load InfoblocVlan DiffSync model."""
+        """Load InfobloxVlan DiffSync model."""
         for _vlan in self.conn.get_vlans():
             vlan_group = re.search(r"(?:.+\:)(\S+)(?:\/\S+\/.+)", _vlan["_ref"])
             new_vlan = self.vlan(
@@ -92,7 +92,7 @@ class InfobloxAdapter(DiffSync):
             self.add(new_vlan)
 
     def load(self):
-        """Method for one stop shop loading of all models."""
+        """Load all models by calling other methods."""
         self.load_prefixes()
         self.load_ipaddresses()
         self.load_vlanviews()
@@ -123,7 +123,7 @@ class InfobloxAggregateAdapter(DiffSync):
         self.conn = InfobloxApi()
 
     def load(self):
-        """Method for loading aggregate models."""
+        """Load aggregate models."""
         for container in self.conn.get_network_containers():
             network = ipaddress.ip_network(container["network"])
             if network.is_private and container["network"] in ["10.0.0.0/8", "172.16.0.0/12", "192.168.0.0/16"]:

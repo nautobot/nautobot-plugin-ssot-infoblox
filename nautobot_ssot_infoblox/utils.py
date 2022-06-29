@@ -17,7 +17,7 @@ def get_vlan_view_name(reference):
 
 
 def nautobot_vlan_status(status: str) -> str:
-    """Method to return VLAN Status from mapping."""
+    """Return VLAN Status from mapping."""
     statuses = {
         "Active": "ASSIGNED",
         "Deprecated": "UNASSIGNED",

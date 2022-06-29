@@ -30,7 +30,7 @@ class InfobloxDataSource(DataSource, Job):
 
     @classmethod
     def data_mappings(cls):
-        """Shows mapping of models between Infoblox and Nautobot."""
+        """Show mapping of models between Infoblox and Nautobot."""
         return (
             DataMapping("network", None, "Prefix", reverse("ipam:prefix_list")),
             DataMapping("ipaddress", None, "IP Address", reverse("ipam:ipaddress_list")),
@@ -39,7 +39,7 @@ class InfobloxDataSource(DataSource, Job):
         )
 
     def sync_data(self):
-        """Method to handle synchronization of data to Nautobot."""
+        """Synchronize data to Nautobot from Infoblox."""
         self.log_info(message="Connecting to Infoblox")
         client = InfobloxApi()
         infoblox_adapter = infoblox.InfobloxAdapter(job=self, sync=self.sync, conn=client)
@@ -79,7 +79,7 @@ class InfobloxDataTarget(DataTarget, Job):
 
     @classmethod
     def data_mappings(cls):
-        """Shows mapping of models between Nautobot and Infoblox."""
+        """Show mapping of models between Nautobot and Infoblox."""
         return (
             DataMapping("Prefix", reverse("ipam:prefix_list"), "network", None),
             DataMapping("IP Address", reverse("ipam:ipaddress_list"), "ipaddress", None),
@@ -88,7 +88,7 @@ class InfobloxDataTarget(DataTarget, Job):
         )
 
     def sync_data(self):
-        """Method to handle synchronization of data to Infoblox."""
+        """Synchronize data from Nautobot to Infoblox."""
         self.log_info(message="Connecting to Infoblox")
         infoblox_adapter = infoblox.InfobloxAdapter(job=self, sync=self.sync)
         self.log_info(message="Loading data from Infoblox...")
@@ -127,11 +127,11 @@ class InfobloxNetworkContainerSource(DataSource, Job):
 
     @classmethod
     def data_mappings(cls):
-        """Shows mapping of models between Infoblox and Nautobot."""
+        """Show mapping of models between Infoblox and Nautobot."""
         return (DataMapping("networkcontainer", None, "Aggregate", reverse("ipam:aggregate_list")),)
 
     def sync_data(self):
-        """Method to handle synchronization of data to Nautobot."""
+        """Synchronize network containers to Nautobot from Infoblox."""
         self.log_info(message="Connecting to Infoblox")
         infoblox_adapter = infoblox.InfobloxAggregateAdapter(job=self, sync=self.sync)
         self.log_info(message="Loading data from Infoblox...")

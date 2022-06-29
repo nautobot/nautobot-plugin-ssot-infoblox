@@ -128,7 +128,7 @@ class NautobotVlan(Vlan):
 
     @staticmethod
     def get_vlan_status(status: str) -> str:
-        """Method to return VLAN Status from mapping."""
+        """Return VLAN Status from mapping."""
         statuses = {
             "ASSIGNED": "Active",
             "UNASSIGNED": "Deprecated",

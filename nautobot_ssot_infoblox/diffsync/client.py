@@ -26,7 +26,7 @@ class InfobloxApi:  # pylint: disable=too-many-public-methods,  too-many-instanc
         wapi_version=PLUGIN_CFG.get("NAUTOBOT_INFOBLOX_WAPI_VERSION"),
         cookie=None,
     ):  # pylint: disable=too-many-arguments
-        """Initialization of infoblox class."""
+        """Initialize Infoblox class."""
         if not url.startswith("https://"):
             self.url = f"https://{url.strip()}"
         else:
@@ -141,7 +141,7 @@ class InfobloxApi:  # pylint: disable=too-many-public-methods,  too-many-instanc
                 return item["_ref"]
 
     def get_all_ipv4address_networks(self, prefix):
-        """Gets all used / unused IPv4 addresses within the supplied network.
+        """Get all used / unused IPv4 addresses within the supplied network.
 
         Args:
             prefix (str): Network prefix - '10.220.0.0/22'
@@ -225,7 +225,7 @@ class InfobloxApi:  # pylint: disable=too-many-public-methods,  too-many-instanc
         return results
 
     def get_all_networks(self, prefix=None):
-        """Gets all IPv4 networks.
+        """Get all IPv4 networks.
 
         Args:
             prefix (str): Network prefix - '10.220.0.0/22'
@@ -388,7 +388,7 @@ class InfobloxApi:  # pylint: disable=too-many-public-methods,  too-many-instanc
         return response
 
     def get_host_record_by_name(self, fqdn):
-        """Gets the host record by using FQDN.
+        """Get the host record by using FQDN.
 
         Args:
             fqdn (str): IPv4 Address to look up
@@ -421,7 +421,7 @@ class InfobloxApi:  # pylint: disable=too-many-public-methods,  too-many-instanc
         return response.json().get("result")
 
     def get_host_record_by_ip(self, ip_address):
-        """Gets the host record by using IP Address.
+        """Get the host record by using IP Address.
 
         Args:
             ip_address (str): IPv4 Address to look up
@@ -454,7 +454,7 @@ class InfobloxApi:  # pylint: disable=too-many-public-methods,  too-many-instanc
         return response.json().get("result")
 
     def get_a_record_by_name(self, fqdn):
-        """Gets the A record for a FQDN.
+        """Get the A record for a FQDN.
 
         Args:
             fqdn (str): "testdevice1.test"
@@ -479,7 +479,7 @@ class InfobloxApi:  # pylint: disable=too-many-public-methods,  too-many-instanc
         return response.json().get("result")
 
     def get_a_record_by_ip(self, ip_address):
-        """Gets the A record for a IP Address.
+        """Get the A record for a IP Address.
 
         Args:
             ip_address (str): "10.220.0.101"
@@ -504,7 +504,7 @@ class InfobloxApi:  # pylint: disable=too-many-public-methods,  too-many-instanc
         return response.json().get("result")
 
     def get_ptr_record_by_name(self, fqdn):
-        """Gets the PTR record by FQDN.
+        """Get the PTR record by FQDN.
 
         Args:
             fqdn (str): "testdevice1.test"
@@ -528,7 +528,7 @@ class InfobloxApi:  # pylint: disable=too-many-public-methods,  too-many-instanc
         return response.json().get("result")
 
     def get_all_dns_views(self):
-        """Gets all dns views.
+        """Get all dns views.
 
         Returns:
             (list) of record dicts
@@ -575,8 +575,8 @@ class InfobloxApi:  # pylint: disable=too-many-public-methods,  too-many-instanc
         logger.info(response.json)
         return response.json().get("result")
 
-    def get_dhcp_lease(self, lease_to_check):  # pylint: disable=no-self-use
-        """Gets a DHCP lease for the IP/hostname passed in.
+    def get_dhcp_lease(self, lease_to_check):
+        """Get a DHCP lease for the IP/hostname passed in.
 
         Args:
             lease_to_check (str): "192.168.0.1" or "testdevice1.test"
@@ -621,7 +621,7 @@ class InfobloxApi:  # pylint: disable=too-many-public-methods,  too-many-instanc
         return data
 
     def get_dhcp_lease_from_ipv4(self, ip_address):
-        """Gets a DHCP lease for the IP address passed in.
+        """Get a DHCP lease for the IP address passed in.
 
         Args:
             ip_address (str): "192.168.0.1"
@@ -650,7 +650,7 @@ class InfobloxApi:  # pylint: disable=too-many-public-methods,  too-many-instanc
         return response.json()
 
     def get_dhcp_lease_from_hostname(self, hostname):
-        """Gets a DHCP lease for the hostname passed in.
+        """Get a DHCP lease for the hostname passed in.
 
         Args:
             hostnames (str): "testdevice1.test"
@@ -756,7 +756,7 @@ class InfobloxApi:  # pylint: disable=too-many-public-methods,  too-many-instanc
         return response.json()
 
     def find_next_available_ip(self, network):
-        """Finds the next available ip address for a given network.
+        """Find the next available ip address for a given network.
 
         Returns:
             Dict:
@@ -788,7 +788,7 @@ class InfobloxApi:  # pylint: disable=too-many-public-methods,  too-many-instanc
         return next_ip_avail
 
     def reserve_fixed_address(self, network, mac_address):
-        """Reserves the next available ip address for a given network range.
+        """Reserve the next available ip address for a given network range.
 
         Returns:
             Str: The IP Address that was reserved
@@ -808,7 +808,7 @@ class InfobloxApi:  # pylint: disable=too-many-public-methods,  too-many-instanc
         return False
 
     def create_fixed_address(self, ip_address, mac_address):
-        """Creates a fixed ip address within Infoblox.
+        """Create a fixed ip address within Infoblox.
 
         Returns:
             Str: The IP Address that was reserved
@@ -824,7 +824,7 @@ class InfobloxApi:  # pylint: disable=too-many-public-methods,  too-many-instanc
         return response.json().get("result").get("ipv4addr")
 
     def create_host_record(self, fqdn, ip_address):
-        """Create an host record for a given FQDN.
+        """Create a host record for a given FQDN.
 
         Please note:  This API call with work only for host records that do not have an associated a record.
         If an a record already exists, this will return a 400 error.
@@ -1054,13 +1054,13 @@ class InfobloxApi:  # pylint: disable=too-many-public-methods,  too-many-instanc
 
     @staticmethod
     def get_ipaddr_status(ip_record: dict) -> str:
-        """Method to determine the IPAddress status based upon types and usage keys."""
+        """Determine the IPAddress status based upon types and usage keys."""
         if "DHCP" in ip_record["usage"]:
             return "DHCP"
         return "Active"
 
     def _find_resource(self, resource, **params):
-        """Finds the resource for given parameters.
+        """Find the resource for given parameters.
 
         Returns:
             str: _ref of an object
