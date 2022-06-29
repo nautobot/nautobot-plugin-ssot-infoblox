@@ -17,11 +17,11 @@ packages = [
 ]
 
 [tool.poetry.dependencies]
-# Used for local development
-nautobot = { version = "*", optional = true }
-python = "^3.6"
-nautobot-ssot = "^1.0.1"
+python = "^3.7"
+nautobot = "*"
 dnspython = "^2.1.0"
+nautobot-ssot = "^1.1.0"
+Markdown = "^3.3.6"
 
 [tool.poetry.dev-dependencies]
 bandit = "*"
@@ -39,9 +39,6 @@ pylint-django = "*"
 pytest = "*"
 requests-mock = "^1.9.3"
 yamllint = "*"
-
-[tool.poetry.extras]
-nautobot = ["nautobot"]
 
 [tool.black]
 line-length = 120
