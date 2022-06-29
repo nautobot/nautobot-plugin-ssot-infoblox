@@ -95,8 +95,8 @@ class InfobloxAdapter(DiffSync):
         """Method for one stop shop loading of all models."""
         self.load_prefixes()
         self.load_ipaddresses()
-        # self.load_vlanviews()
-        # self.load_vlans()
+        self.load_vlanviews()
+        self.load_vlans()
 
     def sync_complete(self, source, diff, flags=DiffSyncFlags.NONE, logger=None):
         """Add tags and custom fields to synced objects."""

@@ -172,8 +172,8 @@ class NautobotAdapter(NautobotMixin, DiffSync):
         """Method to load models with data from Nautobot."""
         self.load_prefixes()
         self.load_ipaddresses()
-        # self.load_vlangroups()
-        # self.load_vlans()
+        self.load_vlangroups()
+        self.load_vlans()
 
 
 class NautobotAggregateAdapter(NautobotMixin, DiffSync):
