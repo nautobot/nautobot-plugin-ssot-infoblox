@@ -27,7 +27,10 @@ class InfobloxApi:  # pylint: disable=too-many-public-methods,  too-many-instanc
         cookie=None,
     ):  # pylint: disable=too-many-arguments
         """Initialization of infoblox class."""
-        self.url = url.rstrip()
+        if not url.startswith("https://"):
+            self.url = f"https://{url.strip()}"
+        else:
+            self.url = url.strip()
         self.username = username
         self.password = password
         self.verify_ssl = verify_ssl
