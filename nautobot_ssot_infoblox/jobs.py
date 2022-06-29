@@ -8,6 +8,7 @@ from nautobot_ssot.jobs.base import DataMapping, DataSource, DataTarget
 from diffsync import DiffSyncFlags
 from diffsync.exceptions import ObjectNotCreated
 from nautobot_ssot_infoblox.diffsync.adapters import infoblox, nautobot
+from nautobot_ssot_infoblox.diffsync.client import InfobloxApi
 from nautobot_ssot_infoblox.constant import PLUGIN_CFG
 
 
@@ -40,7 +41,8 @@ class InfobloxDataSource(DataSource, Job):
     def sync_data(self):
         """Method to handle synchronization of data to Nautobot."""
         self.log_info(message="Connecting to Infoblox")
-        infoblox_adapter = infoblox.InfobloxAdapter(job=self, sync=self.sync)
+        client = InfobloxApi()
+        infoblox_adapter = infoblox.InfobloxAdapter(job=self, sync=self.sync, conn=client)
         self.log_info(message="Loading data from Infoblox...")
         infoblox_adapter.load()
         self.log_info(message="Connecting to Nautobot...")

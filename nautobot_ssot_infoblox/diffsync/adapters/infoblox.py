@@ -24,17 +24,18 @@ class InfobloxAdapter(DiffSync):
 
     top_level = ["prefix", "ipaddress", "vlangroup", "vlan"]
 
-    def __init__(self, *args, job=None, sync=None, **kwargs):
+    def __init__(self, *args, job=None, sync=None, conn=None, **kwargs):
         """Initialize Infoblox.
 
         Args:
             job (object, optional): Infoblox job. Defaults to None.
             sync (object, optional): Infoblox DiffSync. Defaults to None.
+            conn (object, optional): InfobloxAPI connection. Defaults to None.
         """
         super().__init__(*args, **kwargs)
         self.job = job
         self.sync = sync
-        self.conn = InfobloxApi()
+        self.conn = conn
         self.subnets = []
 
     def load_prefixes(self):
