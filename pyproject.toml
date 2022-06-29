@@ -17,7 +17,7 @@ packages = [
 ]
 
 [tool.poetry.dependencies]
-python = "^3.7"
+python = "^3.8"
 nautobot = "*"
 dnspython = "^2.1.0"
 nautobot-ssot = "^1.1.0"
