@@ -11,7 +11,7 @@ from dns import reversename
 from nautobot.core.settings_funcs import is_truthy
 from nautobot_ssot_infoblox.constant import PLUGIN_CFG
 
-logger = logging.getLogger("rq.worker")
+logger = logging.getLogger(__name__)
 
 
 class InfobloxApi:  # pylint: disable=too-many-public-methods,  too-many-instance-attributes
