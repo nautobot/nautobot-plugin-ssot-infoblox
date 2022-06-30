@@ -1019,10 +1019,15 @@ class InfobloxApi:  # pylint: disable=too-many-public-methods,  too-many-instanc
         ]
         """
         url_path = "vlan"
-        params = {"_return_as_object": 1, "_paging": 1, "_max_results": 100000000, "_return_fields": "assigned_to,id,name,comment,contact,department,description,parent,reserved,status"}
+        params = {
+            "_return_as_object": 1,
+            "_paging": 1,
+            "_max_results": 100000000,
+            "_return_fields": "assigned_to,id,name,comment,contact,department,description,parent,reserved,status",
+        }
         response = self._request("GET", url_path, params=params)
         logger.info(response.json())
-        return response.json()
+        return response.json()["result"]
 
     def create_vlan(self, vlan_id, vlan_name, vlan_view):
         """Create a VLAN in Infoblox.
