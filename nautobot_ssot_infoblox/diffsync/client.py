@@ -140,12 +140,11 @@ class InfobloxApi:  # pylint: disable=too-many-public-methods,  too-many-instanc
             if item["network"] == prefix:
                 return item["_ref"]
 
-    def get_all_ipv4address_networks(self, prefix, network_view):
+    def get_all_ipv4address_networks(self, prefixes):
         """Get all used / unused IPv4 addresses within the supplied network.
 
         Args:
-            prefix (str): Network prefix - '10.220.0.0/22'
-            network_view (str): Network view - 'default'
+            prefixes (List[tuple]): List of Network prefixes and associated network view - ('10.220.0.0/22', 'default')
 
         Returns:
             (list): IPv4 dict objects
@@ -200,20 +199,21 @@ class InfobloxApi:  # pylint: disable=too-many-public-methods,  too-many-instanc
         ]
         """
         url_path = "request"
-        payload = json.dumps(
-            [
+        payload = []
+        for pf in prefixes:
+            payload.append(
                 {
                     "method": "GET",
                     "object": "ipv4address",
-                    "data": {"network_view": network_view, "network": prefix},
+                    "data": {"network_view": pf[1], "network": pf[0], "status": "USED"},
                     "args": {
                         "_return_fields": "ip_address,mac_address,names,network,objects,status,types,usage,comment"
                     },
-        }
-            ]
-        )
+                }
+            )
+        data = json.dumps(payload)
         try:
-            response = self._request(method="POST", path=url_path, data=payload)
+            response = self._request(method="POST", path=url_path, data=data)
         except HTTPError as err:
             logger.info(err.response.text)
             return []
@@ -695,7 +695,7 @@ class InfobloxApi:  # pylint: disable=too-many-public-methods,  too-many-instanc
         ]
         """
         url_path = "network"
-        params = {"_return_as_object": 1, "_return_fields": "network,comment", "_max_results": 10000}
+        params = {"_return_as_object": 1, "_return_fields": "network,network_view,comment", "_max_results": 10000}
         try:
             response = self._request("GET", url_path, params=params)
         except HTTPError as err:

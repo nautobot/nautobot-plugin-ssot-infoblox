@@ -43,7 +43,7 @@ class InfobloxAdapter(DiffSync):
         # Need to load containers here to prevent duplicates when syncing back to Infoblox
         containers = self.conn.get_network_containers()
         subnets = self.conn.get_all_subnets()
-        self.subnets = [x["network"] for x in subnets]
+        self.subnets = [(x["network"], x["network_view"]) for x in subnets]
         all_networks = containers + subnets
         for _pf in all_networks:
             new_pf = self.prefix(
@@ -55,8 +55,7 @@ class InfobloxAdapter(DiffSync):
 
     def load_ipaddresses(self):
         """Load InfobloxIPAddress DiffSync model."""
-        for _prefix in self.subnets:
-            for _ip in self.conn.get_all_ipv4address_networks(prefix=_prefix):
+        for _ip in self.conn.get_all_ipv4address_networks(prefixes=self.subnets):
                 _, prefix_length = _ip["network"].split("/")
                 if _ip["names"]:
                     new_ip = self.ipaddress(
