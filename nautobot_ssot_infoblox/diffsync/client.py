@@ -140,11 +140,12 @@ class InfobloxApi:  # pylint: disable=too-many-public-methods,  too-many-instanc
             if item["network"] == prefix:
                 return item["_ref"]
 
-    def get_all_ipv4address_networks(self, prefix):
+    def get_all_ipv4address_networks(self, prefix, network_view):
         """Get all used / unused IPv4 addresses within the supplied network.
 
         Args:
             prefix (str): Network prefix - '10.220.0.0/22'
+            network_view (str): Network view - 'default'
 
         Returns:
             (list): IPv4 dict objects
@@ -198,31 +199,26 @@ class InfobloxApi:  # pylint: disable=too-many-public-methods,  too-many-instanc
             }
         ]
         """
-        params = {
-            "network": prefix,
-            "status": "USED",
-            "_return_as_object": 1,
-            "_paging": 1,
-            "_max_results": 10000,
-            "_return_fields": "ip_address,mac_address,names,network,objects,status,types,usage,comment",
+        url_path = "request"
+        payload = json.dumps(
+            [
+                {
+                    "method": "GET",
+                    "object": "ipv4address",
+                    "data": {"network_view": network_view, "network": prefix},
+                    "args": {
+                        "_return_fields": "ip_address,mac_address,names,network,objects,status,types,usage,comment"
+                    },
         }
-        api_path = "ipv4address"
-        results = []
+            ]
+        )
         try:
-            response = self._request("GET", api_path, params=params)
+            response = self._request(method="POST", path=url_path, data=payload)
         except HTTPError as err:
             logger.info(err.response.text)
-            return results
-        logger.info(response.json())
-        while True:
-            if "next_page_id" in response.json():
-                results.extend(response.json().get("result"))
-                params["_page_id"] = response.json()["next_page_id"]
-                response = self._request("GET", api_path, params=params)
-            else:
-                results.extend(response.json().get("result"))
-                break
-        return results
+            return []
+        logger.info(response.json()[0])
+        return response.json()[0]
 
     def get_all_networks(self, prefix=None):
         """Get all IPv4 networks.
