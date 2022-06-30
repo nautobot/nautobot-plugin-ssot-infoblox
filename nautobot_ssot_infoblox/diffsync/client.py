@@ -1002,23 +1002,43 @@ class InfobloxApi:  # pylint: disable=too-many-public-methods,  too-many-instanc
         Return Response:
         [
             {
-                "_ref": "vlan/ZG5zLnZsYW4kLmNvbS5pbmZvYmxveC5kbnMudmxhbl92aWV3JFZMVmlldzEuMTAuMjAuMTA:VLView1/VL10/10",
-                "description": "Test VL10",
-                "id": 10,
-                "name": "VL10"
+                "_ref": "vlan/ZG5zLnZsYW4kLmNvbS5pbmZvYmxveC5kbnMudmxhbl92aWV3JGRlZmF1bHQuMS40MDk0LjIw:default/DATA_VLAN/20",
+                "assigned_to": [
+                    "network/ZG5zLm5ldHdvcmskMTkyLjE2OC4xLjAvMjQvMA:192.168.1.0/24/default"
+                ],
+                "description": "PC Users",
+                "id": 20,
+                "name": "DATA_VLAN",
+                "reserved": false,
+                "status": "ASSIGNED"
             },
             {
-                "_ref": "vlan/ZG5zLnZsYW4kLmNvbS5pbmZvYmxveC5kbnMudmxhbl92aWV3JFZMVmlldzEuMTAuMjAuMTE:VLView1/test11/11",
-                "id": 11,
-                "name": "test11"
+                "_ref": "vlan/ZG5zLnZsYW4kLmNvbS5pbmZvYmxveC5kbnMudmxhbl92aWV3JGRlZmF1bHQuMS40MDk0Ljk5:default/VOICE_VLAN/99",
+                "comment": "Only Cisco IP Phones",
+                "id": 99,
+                "name": "VOICE_VLAN",
+                "reserved": false,
+                "status": "UNASSIGNED"
             }
         ]
         """
-        url_path = "vlan"
-        params = {"_return_fields": "assigned_to,id,name,comment,contact,department,description,parent,reserved,status"}
-        response = self._request("GET", url_path, params=params)
-        logger.info(response.json())
-        return response.json()
+        url_path = "request"
+        payload = json.dumps(
+            [
+                {
+                    "method": "GET",
+                    "object": "vlan",
+                    "data": {},
+                    "args": {
+                        "_max_results": 100000000,
+                        "_return_fields": "assigned_to,id,name,comment,contact,department,description,reserved,status",
+                    },
+                }
+            ]
+        )
+        response = self._request("POST", url_path, data=payload)
+        logger.info(response.json()[0])
+        return response.json()[0]
 
     def create_vlan(self, vlan_id, vlan_name, vlan_view):
         """Create a VLAN in Infoblox.
