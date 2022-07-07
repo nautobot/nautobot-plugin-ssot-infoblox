@@ -4,6 +4,7 @@ import copy
 import json
 import logging
 import re
+from urllib.parse import urlparse
 import requests
 from requests.exceptions import HTTPError
 from requests.compat import urljoin
@@ -27,10 +28,8 @@ class InfobloxApi:  # pylint: disable=too-many-public-methods,  too-many-instanc
         cookie=None,
     ):  # pylint: disable=too-many-arguments
         """Initialize Infoblox class."""
-        if not url.startswith("https://"):
-            self.url = f"https://{url.strip()}"
-        else:
-            self.url = url.strip()
+        parsed_url = urlparse(url.strip())
+        self.url = parsed_url._replace(scheme="https").geturl() if not parsed_url.scheme else parsed_url.geturl()
         self.username = username
         self.password = password
         self.verify_ssl = verify_ssl
