@@ -9,7 +9,7 @@ from nautobot_ssot_infoblox.diffsync import client
 
 FIXTURES = os.environ.get("FIXTURE_DIR", "nautobot_ssot_infoblox/tests/fixtures")
 
-LOCALHOST = os.environ.get("TEST_LOCALHOST_URL", "https://localhost:4440/")
+LOCALHOST = os.environ.get("TEST_LOCALHOST_URL", "http://localhost:4440/wapi/v2.12")
 
 
 def _json_read_fixture(name):
