@@ -199,12 +199,12 @@ class InfobloxApi:  # pylint: disable=too-many-public-methods,  too-many-instanc
         """
         url_path = "request"
         payload = []
-        for pf in prefixes:
+        for prefix in prefixes:
             payload.append(
                 {
                     "method": "GET",
                     "object": "ipv4address",
-                    "data": {"network_view": pf[1], "network": pf[0], "status": "USED"},
+                    "data": {"network_view": prefix[1], "network": prefix[0], "status": "USED"},
                     "args": {
                         "_return_fields": "ip_address,mac_address,names,network,objects,status,types,usage,comment"
                     },
