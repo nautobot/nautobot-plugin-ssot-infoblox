@@ -1,5 +1,5 @@
-{
-	"result": [
+[
+	[
 		{
 			"_ref": "ipv4address/Li5pcHY0X2FkZHJlc3MkMTAuMjIwLjAuMTAwLzA:10.220.0.100",
 			"ip_address": "10.220.0.100",
@@ -46,4 +46,4 @@
 			]
 		}
 	]
-}
+]
