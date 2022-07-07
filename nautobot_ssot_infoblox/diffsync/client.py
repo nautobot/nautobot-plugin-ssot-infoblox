@@ -4,7 +4,7 @@ import copy
 import json
 import logging
 import re
-from urllib.parse import urlparse
+import urllib.parse
 import requests
 from requests.exceptions import HTTPError
 from requests.compat import urljoin
@@ -13,6 +13,20 @@ from nautobot.core.settings_funcs import is_truthy
 from nautobot_ssot_infoblox.constant import PLUGIN_CFG
 
 logger = logging.getLogger(__name__)
+
+
+def urlparse(address):
+    """Handle outside case where protocol isn't included in URL address.
+
+    Args:
+        address (str): URL set by end user for Infoblox instance.
+
+    Returns:
+        ParseResult: The parsed results from urllib.
+    """
+    if not re.search(r"^[A-Za-z0-9+.\-]+://", address):
+        address = f"https://{address}"
+    return urllib.parse.urlparse(address)
 
 
 class InfobloxApi:  # pylint: disable=too-many-public-methods,  too-many-instance-attributes
@@ -29,7 +43,11 @@ class InfobloxApi:  # pylint: disable=too-many-public-methods,  too-many-instanc
     ):  # pylint: disable=too-many-arguments
         """Initialize Infoblox class."""
         parsed_url = urlparse(url.strip())
-        self.url = parsed_url._replace(scheme="https").geturl() if not parsed_url.scheme else parsed_url.geturl()
+        self.url = (
+            parsed_url._replace(scheme="https").geturl()
+            if parsed_url.scheme or not parsed_url.scheme
+            else parsed_url.geturl()
+        )
         self.username = username
         self.password = password
         self.verify_ssl = verify_ssl
