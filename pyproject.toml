@@ -17,11 +17,10 @@ packages = [
 ]
 
 [tool.poetry.dependencies]
-python = "^3.8"
+python = "^3.7"
 nautobot = "*"
 dnspython = "^2.1.0"
 nautobot-ssot = "^1.1.0"
-Markdown = "^3.3.6"
 
 [tool.poetry.dev-dependencies]
 bandit = "*"
