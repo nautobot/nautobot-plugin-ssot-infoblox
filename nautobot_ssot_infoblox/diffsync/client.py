@@ -610,32 +610,9 @@ class InfobloxApi:  # pylint: disable=too-many-public-methods,  too-many-instanc
                 lease_to_check,
             )
         )
-        data = []
         if ips > 0:
-            # Data used for demo
-            data = [
-                {
-                    "_ref": "lease/ZG5zLmxlYXNlJDQvMTcyLjE2LjIwMC4xMDEvMC8:172.26.1.250/default1",
-                    "binding_state": "ACTIVE",
-                    "fingerprint": "Cisco/Linksys SPA series IP Phone",
-                    "hardware": "16:55:a4:1b:98:c9",
-                }
-            ]
-            # Delete lines above!!
-            # return self.get_dhcp_lease_from_ipv4(lease_to_check)
-        else:
-            # Data used for demo
-            data = [
-                {
-                    "_ref": "lease/ZG5zLmxlYXNlJC8xOTIuMTY4LjQuMy8wLzE3:192.168.4.3/Company%201",
-                    "binding_state": "STATIC",
-                    "client_hostname": "test",
-                    "hardware": "12:34:56:78:91:23",
-                }
-            ]
-            # Delete lines above!!
-            # return self.get_dhcp_lease_from_hostname(lease_to_check)
-        return data
+            return self.get_dhcp_lease_from_ipv4(lease_to_check)
+        return self.get_dhcp_lease_from_hostname(lease_to_check)
 
     def get_dhcp_lease_from_ipv4(self, ip_address):
         """Get a DHCP lease for the IP address passed in.
