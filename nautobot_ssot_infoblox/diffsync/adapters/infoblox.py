@@ -4,6 +4,7 @@ import re
 
 from diffsync import DiffSync
 from diffsync.enum import DiffSyncFlags
+from nautobot.extras.plugins.exceptions import PluginImproperlyConfigured
 from nautobot_ssot_infoblox.diffsync.client import InfobloxApi
 from nautobot_ssot_infoblox.diffsync.models.infoblox import (
     InfobloxAggregate,
@@ -37,6 +38,12 @@ class InfobloxAdapter(DiffSync):
         self.sync = sync
         self.conn = conn
         self.subnets = []
+
+        if self.conn in [None, False]:
+            self.job.log_failure(
+                message="Improperly configured settings for communicating to Infoblox. Please validate accuracy."
+            )
+            raise PluginImproperlyConfigured
 
     def load_prefixes(self):
         """Load InfobloxNetwork DiffSync model."""
