@@ -71,15 +71,15 @@ Below are the data mappings between objects within Infoblox and the correspondin
 
 ### DiffSyncModel - Network
 
-![Diffsync Model - Network](./diffsyncmodel-network.png)
+![Diffsync Model - Network](./static/diffsyncmodel-network.png)
 
 ### DiffSyncModel - IPAddress
 
-![Diffsync Model - IPAddress](./diffsyncmodel-ipaddress.png)
+![Diffsync Model - IPAddress](./static/diffsyncmodel-ipaddress.png)
 
 ### DiffSyncModel - Aggregate
 
-![Diffsync Model - Aggregate](./diffsyncmodel-aggregate.png)
+![Diffsync Model - Aggregate](./static/diffsyncmodel-aggregate.png)
 
 ## Contributing
 
@@ -220,6 +220,6 @@ Sign up [here](http://slack.networktocode.com/)
 
 ## Screenshots
 
-![Infoblox SSoT Status](./ssot-status.png)
+![Infoblox SSoT Status](./static/ssot-status.png)
 
-![Infoblox SSoT Logs](./ssot-logs.png)
+![Infoblox SSoT Logs](./static/ssot-logs.png)
