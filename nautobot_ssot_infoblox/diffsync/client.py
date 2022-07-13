@@ -43,11 +43,10 @@ class InfobloxApi:  # pylint: disable=too-many-public-methods,  too-many-instanc
     ):  # pylint: disable=too-many-arguments
         """Initialize Infoblox class."""
         parsed_url = parse_url(url.strip())
-        self.url = (
-            parsed_url._replace(scheme="https").geturl()
-            if parsed_url.scheme or not parsed_url.scheme
-            else parsed_url.geturl()
-        )
+        if parsed_url.scheme != "https":
+            self.url = parsed_url._replace(scheme="https").geturl()
+        else:
+            self.url = parsed_url.geturl()
         self.username = username
         self.password = password
         self.verify_ssl = verify_ssl
