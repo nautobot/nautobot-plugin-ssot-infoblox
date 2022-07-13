@@ -62,7 +62,7 @@ class InfobloxIPAddress(IPAddress):
 
     @classmethod
     def create(cls, diffsync, ids, attrs):
-        """Will create either a host record or fixed address (Not implemented).
+        """Create either a host record or fixed address (Not implemented).
 
         This requires the IP Address to either have a DNS name
         """
@@ -71,7 +71,7 @@ class InfobloxIPAddress(IPAddress):
         return super().create(ids=ids, diffsync=diffsync, attrs=attrs)
 
     def update(self, attrs):
-        """Updates IP Address object in Infoblox."""
+        """Update IP Address object in Infoblox."""
         json = {"configure_for_dns": False}
         if attrs.get("description"):
             json.update({"comment": attrs["description"]})
