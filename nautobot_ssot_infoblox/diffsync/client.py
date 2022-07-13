@@ -15,7 +15,7 @@ from nautobot_ssot_infoblox.constant import PLUGIN_CFG
 logger = logging.getLogger(__name__)
 
 
-def urlparse(address):
+def parse_url(address):
     """Handle outside case where protocol isn't included in URL address.
 
     Args:
@@ -42,7 +42,7 @@ class InfobloxApi:  # pylint: disable=too-many-public-methods,  too-many-instanc
         cookie=None,
     ):  # pylint: disable=too-many-arguments
         """Initialize Infoblox class."""
-        parsed_url = urlparse(url.strip())
+        parsed_url = parse_url(url.strip())
         self.url = (
             parsed_url._replace(scheme="https").geturl()
             if parsed_url.scheme or not parsed_url.scheme
