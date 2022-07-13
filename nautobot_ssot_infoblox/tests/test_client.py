@@ -9,6 +9,7 @@ from unittest.mock import patch
 import pytest
 from requests.models import HTTPError
 import requests_mock
+
 # from requests_mock.mocker import mock
 from nautobot_ssot_infoblox.diffsync.client import InvalidUrlScheme
 from nautobot_ssot_infoblox.tests.fixtures_infoblox import (
