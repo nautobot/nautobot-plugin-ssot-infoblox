@@ -172,11 +172,11 @@ class InfobloxApi:  # pylint: disable=too-many-public-methods,  too-many-instanc
             if item["network"] == prefix:
                 return item["_ref"]
 
-    def get_all_ipv4address_networks(self, prefix):
+    def get_all_ipv4address_networks(self, prefixes):
         """Get all used / unused IPv4 addresses within the supplied network.
 
         Args:
-            prefix (str): Network prefix - '10.220.0.0/22'
+            prefixes (List[tuple]): List of Network prefixes and associated network view - ('10.220.0.0/22', 'default')
 
         Returns:
             (list): IPv4 dict objects
@@ -230,31 +230,27 @@ class InfobloxApi:  # pylint: disable=too-many-public-methods,  too-many-instanc
             }
         ]
         """
-        params = {
-            "network": prefix,
-            "status": "USED",
-            "_return_as_object": 1,
-            "_paging": 1,
-            "_max_results": 10000,
-            "_return_fields": "ip_address,mac_address,names,network,objects,status,types,usage,comment",
-        }
-        api_path = "ipv4address"
-        results = []
+        url_path = "request"
+        payload = []
+        for prefix in prefixes:
+            payload.append(
+                {
+                    "method": "GET",
+                    "object": "ipv4address",
+                    "data": {"network_view": prefix[1], "network": prefix[0], "status": "USED"},
+                    "args": {
+                        "_return_fields": "ip_address,mac_address,names,network,objects,status,types,usage,comment"
+                    },
+                }
+            )
+        data = json.dumps(payload)
         try:
-            response = self._request("GET", api_path, params=params)
+            response = self._request(method="POST", path=url_path, data=data)
         except HTTPError as err:
             logger.info(err.response.text)
-            return results
-        logger.info(response.json())
-        while True:
-            if "next_page_id" in response.json():
-                results.extend(response.json().get("result"))
-                params["_page_id"] = response.json()["next_page_id"]
-                response = self._request("GET", api_path, params=params)
-            else:
-                results.extend(response.json().get("result"))
-                break
-        return results
+            return []
+        logger.info(response.json()[0])
+        return response.json()[0]
 
     def get_all_networks(self, prefix=None):
         """Get all IPv4 networks.
@@ -708,7 +704,7 @@ class InfobloxApi:  # pylint: disable=too-many-public-methods,  too-many-instanc
         ]
         """
         url_path = "network"
-        params = {"_return_as_object": 1, "_return_fields": "network,comment", "_max_results": 10000}
+        params = {"_return_as_object": 1, "_return_fields": "network,network_view,comment", "_max_results": 10000}
         try:
             response = self._request("GET", url_path, params=params)
         except HTTPError as err:
@@ -1015,28 +1011,43 @@ class InfobloxApi:  # pylint: disable=too-many-public-methods,  too-many-instanc
         Return Response:
         [
             {
-                "_ref": "vlan/ZG5zLnZsYW4kLmNvbS5pbmZvYmxveC5kbnMudmxhbl92aWV3JFZMVmlldzEuMTAuMjAuMTA:VLView1/VL10/10",
-                "description": "Test VL10",
-                "id": 10,
-                "name": "VL10"
+                "_ref": "vlan/ZG5zLnZsYW4kLmNvbS5pbmZvYmxveC5kbnMudmxhbl92aWV3JGRlZmF1bHQuMS40MDk0LjIw:default/DATA_VLAN/20",
+                "assigned_to": [
+                    "network/ZG5zLm5ldHdvcmskMTkyLjE2OC4xLjAvMjQvMA:192.168.1.0/24/default"
+                ],
+                "description": "PC Users",
+                "id": 20,
+                "name": "DATA_VLAN",
+                "reserved": false,
+                "status": "ASSIGNED"
             },
             {
-                "_ref": "vlan/ZG5zLnZsYW4kLmNvbS5pbmZvYmxveC5kbnMudmxhbl92aWV3JFZMVmlldzEuMTAuMjAuMTE:VLView1/test11/11",
-                "id": 11,
-                "name": "test11"
+                "_ref": "vlan/ZG5zLnZsYW4kLmNvbS5pbmZvYmxveC5kbnMudmxhbl92aWV3JGRlZmF1bHQuMS40MDk0Ljk5:default/VOICE_VLAN/99",
+                "comment": "Only Cisco IP Phones",
+                "id": 99,
+                "name": "VOICE_VLAN",
+                "reserved": false,
+                "status": "UNASSIGNED"
             }
         ]
         """
-        url_path = "vlan"
-        params = {
-            "_return_as_object": 1,
-            "_paging": 1,
-            "_max_results": 100000000,
-            "_return_fields": "assigned_to,id,name,comment,contact,department,description,parent,reserved,status",
-        }
-        response = self._request("GET", url_path, params=params)
-        logger.info(response.json())
-        return response.json()["result"]
+        url_path = "request"
+        payload = json.dumps(
+            [
+                {
+                    "method": "GET",
+                    "object": "vlan",
+                    "data": {},
+                    "args": {
+                        "_max_results": 100000000,
+                        "_return_fields": "assigned_to,id,name,comment,contact,department,description,reserved,status",
+                    },
+                }
+            ]
+        )
+        response = self._request("POST", url_path, data=payload)
+        logger.info(response.json()[0])
+        return response.json()[0]
 
     def create_vlan(self, vlan_id, vlan_name, vlan_view):
         """Create a VLAN in Infoblox.

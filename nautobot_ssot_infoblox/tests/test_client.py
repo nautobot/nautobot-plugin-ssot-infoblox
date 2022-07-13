@@ -103,25 +103,25 @@ class TestInfobloxTest(unittest.TestCase):
 
     def test_get_all_ipv4_address_networks_success(self):
         """Test get_all_ipv4_address_networks success."""
-        mock_prefix = "1.1.1.1/10"
+        mock_prefix = "10.220.0.100/31"
         mock_response = get_all_ipv4address_networks()
-        mock_uri = "ipv4address"
+        mock_uri = "request"
 
         with requests_mock.Mocker() as req:
-            req.get(f"{LOCALHOST}/{mock_uri}", json=mock_response, status_code=200)
-            resp = self.infoblox_client.get_all_ipv4address_networks(mock_prefix)
+            req.post(f"{LOCALHOST}/{mock_uri}", json=mock_response, status_code=200)
+            resp = self.infoblox_client.get_all_ipv4address_networks(prefixes=[(mock_prefix, "default")])
 
-        self.assertEqual(resp, mock_response["result"])
+        self.assertEqual(resp, mock_response[0])
 
     def test_get_all_ipv4_address_networks_failed(self):
         """Test get_all_ipv4_address_networks error."""
-        mock_prefix = "1.1.1.1/10"
+        mock_prefix = "10.220.0.100/31"
         mock_response = ""
-        mock_uri = "ipv4address"
+        mock_uri = "request"
 
         with requests_mock.Mocker() as req:
-            req.get(f"{LOCALHOST}/{mock_uri}", json=mock_response, status_code=404)
-            response = self.infoblox_client.get_all_ipv4address_networks(mock_prefix)
+            req.post(f"{LOCALHOST}/{mock_uri}", json=mock_response, status_code=404)
+            response = self.infoblox_client.get_all_ipv4address_networks([(mock_prefix, "default")])
 
             self.assertEqual(response, [])
 
