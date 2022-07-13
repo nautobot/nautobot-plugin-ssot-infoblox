@@ -63,8 +63,8 @@ Below are the data mappings between objects within Infoblox and the correspondin
 | ----------------- | -------------- |
 | Network           | Prefix         |
 | IP Address        | IP Address     |
-| ~~Vlan~~          | ~~VLAN~~       |
-| ~~Vlan view~~     | ~~VLAN Group~~ |
+| VLAN              | VLAN           |
+| VLAN view         | VLAN Group     |
 | Network container | Aggregate      |
 
 > **_NOTE_**: VLAN and VLAN Group will be turned on within the next available releases.
@@ -102,12 +102,12 @@ Below is a quick start guide if you're already familiar with the development env
 
 The [PyInvoke](http://www.pyinvoke.org/) library is used to provide some helper commands based on the environment.  There are a few configuration parameters which can be passed to PyInvoke to override the default configuration:
 
-* `nautobot_ver`: the version of Nautobot to use as a base for any built docker containers (default: 1.1.4)
-* `project_name`: the default docker compose project name (default: nautobot_ssot_infoblox)
-* `python_ver`: the version of Python to use as a base for any built docker containers (default: 3.6)
-* `local`: a boolean flag indicating if invoke tasks should be run on the host or inside the docker containers (default: False, commands will be run in docker containers)
-* `compose_dir`: the full path to a directory containing the project compose files
-* `compose_files`: a list of compose files applied in order (see [Multiple Compose files](https://docs.docker.com/compose/extends/#multiple-compose-files) for more information)
+- `nautobot_ver`: the version of Nautobot to use as a base for any built docker containers (default: 1.1.4)
+- `project_name`: the default docker compose project name (default: nautobot_ssot_infoblox)
+- `python_ver`: the version of Python to use as a base for any built docker containers (default: 3.6)
+- `local`: a boolean flag indicating if invoke tasks should be run on the host or inside the docker containers (default: False, commands will be run in docker containers)
+- `compose_dir`: the full path to a directory containing the project compose files
+- `compose_files`: a list of compose files applied in order (see [Multiple Compose files](https://docs.docker.com/compose/extends/#multiple-compose-files) for more information)
 
 Using **PyInvoke** these configuration options can be overridden using [several methods](http://docs.pyinvoke.org/en/stable/concepts/configuration.html).  Perhaps the simplest is simply setting an environment variable `INVOKE_NAUTOBOT_SSOT_INFOBLOX_VARIABLE_NAME` where `VARIABLE_NAME` is the variable you are trying to override.  The only exception is `compose_files`, because it is a list it must be overridden in a yaml file.  There is an example `invoke.yml` (`invoke.example.yml`) in this directory which can be used as a starting point.
 
