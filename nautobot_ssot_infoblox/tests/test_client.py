@@ -11,7 +11,7 @@ from requests.models import HTTPError
 import requests_mock
 
 # from requests_mock.mocker import mock
-from nautobot_ssot_infoblox.diffsync.client import InvalidUrlScheme
+from nautobot_ssot_infoblox.utils.client import InvalidUrlScheme
 from nautobot_ssot_infoblox.tests.fixtures_infoblox import (
     get_ptr_record_by_name,
     localhost_client_infoblox,
@@ -423,7 +423,7 @@ class TestInfobloxTest(unittest.TestCase):
 
         self.assertEqual(response, [])
 
-    @patch("nautobot_ssot_infoblox.diffsync.client.InfobloxApi._find_network_reference")
+    @patch("nautobot_ssot_infoblox.utils.client.InfobloxApi._find_network_reference")
     def test_find_next_available_ip_success(self, mock_find_network_reference):
         test_network = "10.220.0.0/22"
         mock_find_network_reference.return_value = find_network_reference().get("result")
@@ -437,7 +437,7 @@ class TestInfobloxTest(unittest.TestCase):
         print(next_ip)
         self.assertEqual(next_ip, "10.220.0.1")
 
-    @patch("nautobot_ssot_infoblox.diffsync.client.InfobloxApi._find_network_reference")
+    @patch("nautobot_ssot_infoblox.utils.client.InfobloxApi._find_network_reference")
     def test_find_next_available_ip_no_network_reference(self, mock_find_network_reference):
         test_network = "10.220.0.0/22"
         mock_find_network_reference.side_effect = Exception
@@ -451,7 +451,7 @@ class TestInfobloxTest(unittest.TestCase):
 
         self.assertEqual(next_ip, "")
 
-    @patch("nautobot_ssot_infoblox.diffsync.client.InfobloxApi.find_next_available_ip")
+    @patch("nautobot_ssot_infoblox.utils.client.InfobloxApi.find_next_available_ip")
     def test_reserve_fixed_address_success(self, mock_find_next_available_ip):
         test_network = "10.220.0.0/22"
         test_mac = "11:22:33:AA:BB:CC"
@@ -466,7 +466,7 @@ class TestInfobloxTest(unittest.TestCase):
 
         self.assertEqual(reserved_ip, "10.220.0.1")
 
-    @patch("nautobot_ssot_infoblox.diffsync.client.InfobloxApi.find_next_available_ip")
+    @patch("nautobot_ssot_infoblox.utils.client.InfobloxApi.find_next_available_ip")
     def test_reserve_fixed_address_no_ip(self, mock_find_next_available_ip):
         test_network = "10.220.0.0/22"
         test_mac = "11:22:33:AA:BB:CC"

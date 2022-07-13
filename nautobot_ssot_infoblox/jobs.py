@@ -7,7 +7,7 @@ from nautobot_ssot.jobs.base import DataMapping, DataSource, DataTarget
 
 from diffsync import DiffSyncFlags
 from nautobot_ssot_infoblox.diffsync.adapters import infoblox, nautobot
-from nautobot_ssot_infoblox.diffsync.client import InfobloxApi
+from nautobot_ssot_infoblox.utils.client import InfobloxApi
 from nautobot_ssot_infoblox.constant import PLUGIN_CFG
 
 
