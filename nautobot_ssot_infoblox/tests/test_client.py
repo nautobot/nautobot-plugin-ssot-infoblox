@@ -72,8 +72,9 @@ class TestInfobloxTest(unittest.TestCase):
 
     def test_urlparse_with_file_protocol(self):
         """Test urlparse returns HTTPS when file link sent."""
-        infoblox_client = localhost_client_infoblox("file://mock_file.txt")
-        self.assertEqual(infoblox_client.url, "https://mock_file.txt")
+        with self.assertRaises(InvalidUrlScheme):
+            localhost_client_infoblox("file://mock_file.txt")
+        self.assertLogs("Invalid URL scheme 'https' found for Infoblox URL. Please correct to use HTTPS.")
 
     def test_request_success_generic(self):
         """Test generic _request with OK status."""

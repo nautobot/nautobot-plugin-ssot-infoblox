@@ -29,6 +29,19 @@ def parse_url(address):
     return urllib.parse.urlparse(address)
 
 
+class InvalidUrlScheme(Exception):
+    """Exception raised for wrong scheme being passed for URL.
+
+    Attributes:
+        message (str): Returned explanation of Error.
+    """
+
+    def __init__(self, scheme):
+        """Initialize Exception with wrong scheme in message."""
+        self.message = f"Invalid URL scheme '{scheme}' found for Infoblox URL. Please correct to use HTTPS."
+        super().__init__(self.message)
+
+
 class InfobloxApi:  # pylint: disable=too-many-public-methods,  too-many-instance-attributes
     """Representation and methods for interacting with Infoblox."""
 
@@ -44,7 +57,10 @@ class InfobloxApi:  # pylint: disable=too-many-public-methods,  too-many-instanc
         """Initialize Infoblox class."""
         parsed_url = parse_url(url.strip())
         if parsed_url.scheme != "https":
-            self.url = parsed_url._replace(scheme="https").geturl()
+            if parsed_url.scheme == "http":
+                self.url = parsed_url._replace(scheme="https").geturl()
+            else:
+                raise InvalidUrlScheme(scheme=parsed_url.scheme)
         else:
             self.url = parsed_url.geturl()
         self.username = username
