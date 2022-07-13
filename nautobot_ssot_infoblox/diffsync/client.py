@@ -4,7 +4,7 @@ import copy
 import json
 import logging
 import re
-from urllib.parse import urlparse
+import urllib.parse
 import requests
 from requests.exceptions import HTTPError
 from requests.compat import urljoin
@@ -13,6 +13,33 @@ from nautobot.core.settings_funcs import is_truthy
 from nautobot_ssot_infoblox.constant import PLUGIN_CFG
 
 logger = logging.getLogger(__name__)
+
+
+def parse_url(address):
+    """Handle outside case where protocol isn't included in URL address.
+
+    Args:
+        address (str): URL set by end user for Infoblox instance.
+
+    Returns:
+        ParseResult: The parsed results from urllib.
+    """
+    if not re.search(r"^[A-Za-z0-9+.\-]+://", address):
+        address = f"https://{address}"
+    return urllib.parse.urlparse(address)
+
+
+class InvalidUrlScheme(Exception):
+    """Exception raised for wrong scheme being passed for URL.
+
+    Attributes:
+        message (str): Returned explanation of Error.
+    """
+
+    def __init__(self, scheme):
+        """Initialize Exception with wrong scheme in message."""
+        self.message = f"Invalid URL scheme '{scheme}' found for Infoblox URL. Please correct to use HTTPS."
+        super().__init__(self.message)
 
 
 class InfobloxApi:  # pylint: disable=too-many-public-methods,  too-many-instance-attributes
@@ -28,8 +55,14 @@ class InfobloxApi:  # pylint: disable=too-many-public-methods,  too-many-instanc
         cookie=None,
     ):  # pylint: disable=too-many-arguments
         """Initialize Infoblox class."""
-        parsed_url = urlparse(url.strip())
-        self.url = parsed_url._replace(scheme="https").geturl() if not parsed_url.scheme else parsed_url.geturl()
+        parsed_url = parse_url(url.strip())
+        if parsed_url.scheme != "https":
+            if parsed_url.scheme == "http":
+                self.url = parsed_url._replace(scheme="https").geturl()
+            else:
+                raise InvalidUrlScheme(scheme=parsed_url.scheme)
+        else:
+            self.url = parsed_url.geturl()
         self.username = username
         self.password = password
         self.verify_ssl = verify_ssl
@@ -588,32 +621,9 @@ class InfobloxApi:  # pylint: disable=too-many-public-methods,  too-many-instanc
                 lease_to_check,
             )
         )
-        data = []
         if ips > 0:
-            # Data used for demo
-            data = [
-                {
-                    "_ref": "lease/ZG5zLmxlYXNlJDQvMTcyLjE2LjIwMC4xMDEvMC8:172.26.1.250/default1",
-                    "binding_state": "ACTIVE",
-                    "fingerprint": "Cisco/Linksys SPA series IP Phone",
-                    "hardware": "16:55:a4:1b:98:c9",
-                }
-            ]
-            # Delete lines above!!
-            # return self.get_dhcp_lease_from_ipv4(lease_to_check)
-        else:
-            # Data used for demo
-            data = [
-                {
-                    "_ref": "lease/ZG5zLmxlYXNlJC8xOTIuMTY4LjQuMy8wLzE3:192.168.4.3/Company%201",
-                    "binding_state": "STATIC",
-                    "client_hostname": "test",
-                    "hardware": "12:34:56:78:91:23",
-                }
-            ]
-            # Delete lines above!!
-            # return self.get_dhcp_lease_from_hostname(lease_to_check)
-        return data
+            return self.get_dhcp_lease_from_ipv4(lease_to_check)
+        return self.get_dhcp_lease_from_hostname(lease_to_check)
 
     def get_dhcp_lease_from_ipv4(self, ip_address):
         """Get a DHCP lease for the IP address passed in.

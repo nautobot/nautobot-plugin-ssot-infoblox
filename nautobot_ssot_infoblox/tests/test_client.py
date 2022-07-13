@@ -11,6 +11,7 @@ from requests.models import HTTPError
 import requests_mock
 
 # from requests_mock.mocker import mock
+from nautobot_ssot_infoblox.diffsync.client import InvalidUrlScheme
 from nautobot_ssot_infoblox.tests.fixtures_infoblox import (
     get_ptr_record_by_name,
     localhost_client_infoblox,
@@ -54,6 +55,27 @@ class TestInfobloxTest(unittest.TestCase):
 
     def setUp(self) -> None:
         self.infoblox_client = localhost_client_infoblox(LOCALHOST)
+
+    def test_urlparse_without_protocol(self):
+        """Test urlparse returns HTTPS when only URL sent."""
+        infoblox_client = localhost_client_infoblox("mock_url.com")
+        self.assertEqual(infoblox_client.url, "https://mock_url.com")
+
+    def test_urlparse_with_http_protocol(self):
+        """Test urlparse returns HTTPS when HTTP protocol sent."""
+        infoblox_client = localhost_client_infoblox("http://mock_url.com")
+        self.assertEqual(infoblox_client.url, "https://mock_url.com")
+
+    def test_urlparse_with_https_protocol(self):
+        """Test urlparse returns HTTPS when HTTPS protocol sent."""
+        infoblox_client = localhost_client_infoblox("https://mock_url.com")
+        self.assertEqual(infoblox_client.url, "https://mock_url.com")
+
+    def test_urlparse_with_file_protocol(self):
+        """Test urlparse returns HTTPS when file link sent."""
+        with self.assertRaises(InvalidUrlScheme):
+            localhost_client_infoblox("file://mock_file.txt")
+        self.assertLogs("Invalid URL scheme 'file' found for Infoblox URL. Please correct to use HTTPS.")
 
     def test_request_success_generic(self):
         """Test generic _request with OK status."""
