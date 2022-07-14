@@ -650,7 +650,7 @@ class InfobloxApi:  # pylint: disable=too-many-public-methods,  too-many-instanc
         logger.info(response.json)
         return response.json()
 
-    def get_all_subnets(self, prefix: str):
+    def get_all_subnets(self, prefix: str = None):
         """Get all Subnets.
 
         Args:
