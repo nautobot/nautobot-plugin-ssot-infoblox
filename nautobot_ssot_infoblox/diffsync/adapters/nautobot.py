@@ -105,6 +105,7 @@ class NautobotAdapter(NautobotMixin, DiffSync):
                 network=str(prefix.prefix),
                 description=prefix.description,
                 status=prefix.status.slug if hasattr(prefix, "status") else "container",
+                ext_attrs=prefix.custom_field_data,
                 pk=prefix.id,
             )
             try:
@@ -142,6 +143,7 @@ class NautobotAdapter(NautobotMixin, DiffSync):
                     prefix_length=prefix.prefix_length if prefix else ipaddr.prefix_length,
                     dns_name=ipaddr.dns_name,
                     description=ipaddr.description,
+                    ext_attrs=ipaddr.custom_field_data,
                     pk=ipaddr.id,
                 )
                 try:
@@ -152,7 +154,7 @@ class NautobotAdapter(NautobotMixin, DiffSync):
     def load_vlangroups(self):
         """Load VLAN Groups from Nautobot."""
         for grp in VLANGroup.objects.all():
-            _vg = self.vlangroup(name=grp.name, description=grp.description, pk=grp.id)
+            _vg = self.vlangroup(name=grp.name, description=grp.description, ext_attrs=grp.custom_field_data, pk=grp.id)
             self.add(_vg)
 
     def load_vlans(self):
@@ -164,6 +166,7 @@ class NautobotAdapter(NautobotMixin, DiffSync):
                 description=vlan.description,
                 vlangroup=vlan.group.name if vlan.group else "",
                 status=nautobot_vlan_status(vlan.status.name),
+                ext_attrs=vlan.custom_field_data,
                 pk=vlan.id,
             )
             self.add(_vlan)
@@ -198,6 +201,9 @@ class NautobotAggregateAdapter(NautobotMixin, DiffSync):
         """Load aggregate models from Nautobot."""
         for aggregate in Aggregate.objects.all():
             _aggregate = self.aggregate(
-                network=str(aggregate.prefix), description=aggregate.description, pk=aggregate.id
+                network=str(aggregate.prefix),
+                description=aggregate.description,
+                ext_attrs=aggregate.custom_field_data,
+                pk=aggregate.id,
             )
             self.add(_aggregate)
