@@ -152,7 +152,7 @@ class InfobloxApi:  # pylint: disable=too-many-public-methods,  too-many-instanc
         Returns Response:
             "network/ZG5zLm5ldHdvcmskMTkyLjAuMi4wLzI0LzA:192.0.2.0/24/default"
         """
-        for item in self.get_all_networks(prefix):
+        for item in self.get_all_subnets(prefix):
             if item["network"] == prefix:
                 return item["_ref"]
 
@@ -251,39 +251,6 @@ class InfobloxApi:  # pylint: disable=too-many-public-methods,  too-many-instanc
             return []
         logger.info(response.json()[0])
         return response.json()[0]
-
-    def get_all_networks(self, prefix=None):
-        """Get all IPv4 networks.
-
-        Args:
-            prefix (str): Network prefix - '10.220.0.0/22'
-
-        Returns:
-            (list): IPv4 dict objects
-
-        Return Response:
-        [
-            {
-                "_ref": "network/ZG5zLm5ldHdvcmskMTAuMjIzLjAuMC8yMS8w:10.223.0.0/21/default",
-                "network": "10.223.0.0/21",
-                "network_view": "default"
-            },
-            {
-                "_ref": "network/ZG5zLm5ldHdvcmskMTAuMjIwLjY0LjAvMjEvMA:10.220.64.0/21/default",
-                "network": "10.220.64.0/21",
-                "network_view": "default"
-            }
-        ]
-        """
-        params = {"_return_as_object": 1}
-
-        if prefix:
-            params.update({"network": prefix})
-
-        api_path = "network"
-        response = self._request("GET", api_path, params=params)
-        logger.info(response.json)
-        return response.json().get("result")
 
     def create_network(self, prefix, comment=None):
         """Create a network.
@@ -683,8 +650,11 @@ class InfobloxApi:  # pylint: disable=too-many-public-methods,  too-many-instanc
         logger.info(response.json)
         return response.json()
 
-    def get_all_subnets(self):
+    def get_all_subnets(self, prefix: str = None):
         """Get all Subnets.
+
+        Args:
+            prefix (str): Network prefix - '10.220.0.0/22'
 
         Returns:
             (list) of record dicts
@@ -705,6 +675,9 @@ class InfobloxApi:  # pylint: disable=too-many-public-methods,  too-many-instanc
         """
         url_path = "network"
         params = {"_return_as_object": 1, "_return_fields": "network,network_view,comment", "_max_results": 10000}
+
+        if prefix:
+            params.update({"network": prefix})
         try:
             response = self._request("GET", url_path, params=params)
         except HTTPError as err:
