@@ -675,7 +675,7 @@ class InfobloxApi:  # pylint: disable=too-many-public-methods,  too-many-instanc
         """
         url_path = "network"
         params = {"_return_as_object": 1, "_return_fields": "network,network_view,comment", "_max_results": 10000}
-        
+
         if prefix:
             params.update({"network": prefix})
         try:
