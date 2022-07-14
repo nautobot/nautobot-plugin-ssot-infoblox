@@ -1,7 +1,7 @@
 """Util tests that do not require Django."""
 import unittest
 
-from nautobot_ssot_infoblox.utils.utilities import get_vlan_view_name, nautobot_vlan_status
+from nautobot_ssot_infoblox.utils.utilities import get_vlan_view_name, nautobot_vlan_status, get_ext_attr_dict
 
 
 class TestUtils(unittest.TestCase):
@@ -18,3 +18,10 @@ class TestUtils(unittest.TestCase):
         """Test nautobot_vlan_status."""
         status = nautobot_vlan_status("Active")
         self.assertEqual(status, "ASSIGNED")
+
+    def test_get_ext_attr_dict(self):
+        """Test get_ext_attr_dict."""
+        test_dict = {"Site": {"value": "HQ"}, "Region": {"value": "Central"}}
+        expected = {"Site": "HQ", "Region": "Central"}
+        standardized_dict = get_ext_attr_dict(test_dict)
+        self.assertEqual(standardized_dict, expected)
