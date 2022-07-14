@@ -33,6 +33,7 @@ class NautobotSSoTInfobloxConfig(PluginConfig):
     caching_config = {}
 
     def ready(self):
+        """Trigger callback when database is ready."""
         super().ready()
 
         nautobot_database_ready.connect(nautobot_database_ready_callback, sender=self)

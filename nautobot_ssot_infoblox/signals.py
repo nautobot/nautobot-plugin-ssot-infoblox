@@ -6,7 +6,10 @@ from nautobot_ssot_infoblox.constant import TAG_COLOR
 
 
 def nautobot_database_ready_callback(sender, *, apps, **kwargs):  # pylint: disable=unused-argument
-    """Callback function triggered by the nautobot_database_ready signal when the Nautobot database is fully ready."""
+    """Create Tag and CustomField to note System of Record for SSoT.
+
+    Callback function triggered by the nautobot_database_ready signal when the Nautobot database is fully ready.
+    """
     # pylint: disable=invalid-name
     ContentType = apps.get_model("contenttypes", "ContentType")
     CustomField = apps.get_model("extras", "CustomField")

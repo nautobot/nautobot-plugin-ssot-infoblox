@@ -38,9 +38,9 @@ namespace = Collection("nautobot_ssot_infoblox")
 namespace.configure(
     {
         "nautobot_ssot_infoblox": {
-            "nautobot_ver": "1.2.3",
+            "nautobot_ver": "1.3.6",
             "project_name": "nautobot_ssot_infoblox",
-            "python_ver": "3.7",
+            "python_ver": "3.8",
             "local": False,
             "compose_dir": os.path.join(os.path.dirname(__file__), "development"),
             "compose_files": [
@@ -57,7 +57,7 @@ def task(function=None, *args, **kwargs):
     """Task decorator to override the default Invoke task decorator and add each task to the invoke namespace."""
 
     def task_wrapper(function=None):
-        """Wrapper around invoke.task to add the task to the namespace as well."""
+        """Add task to the invoke.task namespace."""
         if args or kwargs:
             task_func = invoke_task(*args, **kwargs)(function)
         else:
@@ -73,7 +73,7 @@ def task(function=None, *args, **kwargs):
 
 
 def docker_compose(context, command, **kwargs):
-    """Helper function for running a specific docker-compose command with all appropriate parameters and environment.
+    """Run a specific docker-compose command with all appropriate parameters and environment.
 
     Args:
         context (obj): Used to run specific commands
@@ -94,7 +94,7 @@ def docker_compose(context, command, **kwargs):
 
 
 def run_command(context, command, **kwargs):
-    """Wrapper to run a command locally or inside the nautobot container."""
+    """Run a command locally or inside the nautobot container."""
     if is_truthy(context.nautobot_ssot_infoblox.local):
         context.run(command, **kwargs)
     else:
@@ -245,7 +245,7 @@ def migrate(context):
 @task(help={})
 def post_upgrade(context):
     """
-    Performs Nautobot common post-upgrade operations using a single entrypoint.
+    Perform Nautobot common post-upgrade operations using a single entrypoint.
 
     This will run the following management commands with default settings, in order:
 

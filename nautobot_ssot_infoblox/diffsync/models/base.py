@@ -33,8 +33,8 @@ class Vlan(DiffSyncModel):
     """VLAN model for DiffSync."""
 
     _modelname = "vlan"
-    _identifiers = ("vid",)
-    _attributes = ("name", "description", "status", "vlangroup")
+    _identifiers = ("vid", "name", "vlangroup")
+    _attributes = ("description", "status")
 
     vid: int
     name: str

@@ -98,7 +98,7 @@ class NautobotAdapter(NautobotMixin, DiffSync):
         self.sync = sync
 
     def load_prefixes(self):
-        """Method to load Prefixes from Nautobot."""
+        """Load Prefixes from Nautobot."""
         all_prefixes = list(chain(Prefix.objects.all(), Aggregate.objects.all()))
         for prefix in all_prefixes:
             _prefix = self.prefix(
@@ -113,7 +113,7 @@ class NautobotAdapter(NautobotMixin, DiffSync):
                 self.job.log_warning(_prefix, message=f"Found duplicate prefix: {prefix.prefix}.")
 
     def load_ipaddresses(self):
-        """Method to load IP Addresses from Nautobot."""
+        """Load IP Addresses from Nautobot."""
         for ipaddr in IPAddress.objects.all():
             addr = ipaddr.host
             # the last Prefix is the most specific and is assumed the one the IP address resides in
@@ -150,13 +150,13 @@ class NautobotAdapter(NautobotMixin, DiffSync):
                     self.job.log_warning(ipaddr, message=f"Duplicate IP Address detected: {addr}.")
 
     def load_vlangroups(self):
-        """Method to load VLAN Groups from Nautobot."""
+        """Load VLAN Groups from Nautobot."""
         for grp in VLANGroup.objects.all():
             _vg = self.vlangroup(name=grp.name, description=grp.description, pk=grp.id)
             self.add(_vg)
 
     def load_vlans(self):
-        """Method to load VLANs from Nautobot."""
+        """Load VLANs from Nautobot."""
         for vlan in VLAN.objects.all():
             _vlan = self.vlan(
                 vid=vlan.vid,
@@ -169,11 +169,11 @@ class NautobotAdapter(NautobotMixin, DiffSync):
             self.add(_vlan)
 
     def load(self):
-        """Method to load models with data from Nautobot."""
+        """Load models with data from Nautobot."""
         self.load_prefixes()
         self.load_ipaddresses()
-        # self.load_vlangroups()
-        # self.load_vlans()
+        self.load_vlangroups()
+        self.load_vlans()
 
 
 class NautobotAggregateAdapter(NautobotMixin, DiffSync):
@@ -195,7 +195,7 @@ class NautobotAggregateAdapter(NautobotMixin, DiffSync):
         self.sync = sync
 
     def load(self):
-        """Method to load aggregate models from Nautobot."""
+        """Load aggregate models from Nautobot."""
         for aggregate in Aggregate.objects.all():
             _aggregate = self.aggregate(
                 network=str(aggregate.prefix), description=aggregate.description, pk=aggregate.id

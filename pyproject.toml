@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "nautobot-ssot-infoblox"
-version = "0.4.10"
+version = "0.5.1"
 description = "Nautobot SSoT Infoblox"
 authors = ["Network to Code, LLC <info@networktocode.com>"]
 license = "Apache-2.0"
@@ -17,11 +17,10 @@ packages = [
 ]
 
 [tool.poetry.dependencies]
-# Used for local development
-nautobot = { version = "*", optional = true }
-python = "^3.6"
-nautobot-ssot = "^1.0.1"
+python = "^3.7"
+nautobot = "*"
 dnspython = "^2.1.0"
+nautobot-ssot = "^1.1.0"
 
 [tool.poetry.dev-dependencies]
 bandit = "*"
@@ -39,9 +38,6 @@ pylint-django = "*"
 pytest = "*"
 requests-mock = "^1.9.3"
 yamllint = "*"
-
-[tool.poetry.extras]
-nautobot = ["nautobot"]
 
 [tool.black]
 line-length = 120
@@ -79,7 +75,6 @@ no-docstring-rgx="^(_|test_|Meta$)"
 # Pylint and Black disagree about how to format multi-line arrays; Black wins.
 disable = """,
     line-too-long,
-    bad-continuation,
     """
 
 [tool.pylint.miscellaneous]

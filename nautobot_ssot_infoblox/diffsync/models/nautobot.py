@@ -117,18 +117,18 @@ class NautobotVlan(Vlan):
         """Create VLAN object in Nautobot."""
         _vlan = OrmVlan(
             vid=ids["vid"],
-            name=attrs["name"],
+            name=ids["name"],
             status=OrmStatus.objects.get(name=cls.get_vlan_status(attrs["status"])),
-            group=OrmVlanGroup.objects.get(name=attrs["vlangroup"]) if attrs["vlangroup"] else None,
+            group=OrmVlanGroup.objects.get(name=ids["vlangroup"]) if ids["vlangroup"] else None,
             description=attrs["description"],
         )
-        _vlan.tags.add(create_tag_sync_from_infoblox)
+        _vlan.tags.add("SSoT Synced to Infoblox")
         _vlan.validated_save()
         return super().create(ids=ids, diffsync=diffsync, attrs=attrs)
 
     @staticmethod
     def get_vlan_status(status: str) -> str:
-        """Method to return VLAN Status from mapping."""
+        """Return VLAN Status from mapping."""
         statuses = {
             "ASSIGNED": "Active",
             "UNASSIGNED": "Deprecated",
@@ -143,8 +143,6 @@ class NautobotVlan(Vlan):
             _vlan.status = OrmStatus.objects.get(name=self.get_vlan_status(attrs["status"]))
         if attrs.get("description"):
             _vlan.description = attrs["description"]
-        if attrs.get("vlangroup"):
-            _vlan.group = OrmVlanGroup.objects.get(name=attrs["vlangroup"])
         _vlan.validated_save()
         return super().update(attrs)
 
@@ -168,7 +166,7 @@ class NautobotAggregate(Aggregate):
             rir=rir,
             description=attrs["description"] if attrs.get("description") else "",
         )
-        _aggregate.tags.add(create_tag_sync_from_infoblox())
+        _aggregate.tags.add("SSoT Synced to Infoblox")
         _aggregate.validated_save()
         return super().create(ids=ids, diffsync=diffsync, attrs=attrs)
 

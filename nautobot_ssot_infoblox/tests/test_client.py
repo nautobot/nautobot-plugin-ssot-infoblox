@@ -11,6 +11,7 @@ from requests.models import HTTPError
 import requests_mock
 
 # from requests_mock.mocker import mock
+from nautobot_ssot_infoblox.diffsync.client import InvalidUrlScheme
 from nautobot_ssot_infoblox.tests.fixtures_infoblox import (
     get_ptr_record_by_name,
     localhost_client_infoblox,
@@ -55,6 +56,27 @@ class TestInfobloxTest(unittest.TestCase):
     def setUp(self) -> None:
         self.infoblox_client = localhost_client_infoblox(LOCALHOST)
 
+    def test_urlparse_without_protocol(self):
+        """Test urlparse returns HTTPS when only URL sent."""
+        infoblox_client = localhost_client_infoblox("mock_url.com")
+        self.assertEqual(infoblox_client.url, "https://mock_url.com")
+
+    def test_urlparse_with_http_protocol(self):
+        """Test urlparse returns HTTPS when HTTP protocol sent."""
+        infoblox_client = localhost_client_infoblox("http://mock_url.com")
+        self.assertEqual(infoblox_client.url, "https://mock_url.com")
+
+    def test_urlparse_with_https_protocol(self):
+        """Test urlparse returns HTTPS when HTTPS protocol sent."""
+        infoblox_client = localhost_client_infoblox("https://mock_url.com")
+        self.assertEqual(infoblox_client.url, "https://mock_url.com")
+
+    def test_urlparse_with_file_protocol(self):
+        """Test urlparse returns HTTPS when file link sent."""
+        with self.assertRaises(InvalidUrlScheme):
+            localhost_client_infoblox("file://mock_file.txt")
+        self.assertLogs("Invalid URL scheme 'file' found for Infoblox URL. Please correct to use HTTPS.")
+
     def test_request_success_generic(self):
         """Test generic _request with OK status."""
         with requests_mock.Mocker() as req:
@@ -81,25 +103,25 @@ class TestInfobloxTest(unittest.TestCase):
 
     def test_get_all_ipv4_address_networks_success(self):
         """Test get_all_ipv4_address_networks success."""
-        mock_prefix = "1.1.1.1/10"
+        mock_prefix = "10.220.0.100/31"
         mock_response = get_all_ipv4address_networks()
-        mock_uri = "ipv4address"
+        mock_uri = "request"
 
         with requests_mock.Mocker() as req:
-            req.get(f"{LOCALHOST}/{mock_uri}", json=mock_response, status_code=200)
-            resp = self.infoblox_client.get_all_ipv4address_networks(mock_prefix)
+            req.post(f"{LOCALHOST}/{mock_uri}", json=mock_response, status_code=200)
+            resp = self.infoblox_client.get_all_ipv4address_networks(prefixes=[(mock_prefix, "default")])
 
-        self.assertEqual(resp, mock_response["result"])
+        self.assertEqual(resp, mock_response[0])
 
     def test_get_all_ipv4_address_networks_failed(self):
         """Test get_all_ipv4_address_networks error."""
-        mock_prefix = "1.1.1.1/10"
+        mock_prefix = "10.220.0.100/31"
         mock_response = ""
-        mock_uri = "ipv4address"
+        mock_uri = "request"
 
         with requests_mock.Mocker() as req:
-            req.get(f"{LOCALHOST}/{mock_uri}", json=mock_response, status_code=404)
-            response = self.infoblox_client.get_all_ipv4address_networks(mock_prefix)
+            req.post(f"{LOCALHOST}/{mock_uri}", json=mock_response, status_code=404)
+            response = self.infoblox_client.get_all_ipv4address_networks([(mock_prefix, "default")])
 
             self.assertEqual(response, [])
 
