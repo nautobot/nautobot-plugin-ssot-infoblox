@@ -1,5 +1,6 @@
 """Utilities for DiffSync related stuff."""
 
+from django.utils.text import slugify
 from nautobot.extras.models import Tag
 from nautobot_ssot_infoblox.constant import TAG_COLOR
 
@@ -57,5 +58,5 @@ def get_ext_attr_dict(extattrs: dict):
     """
     fixed_dict = {}
     for key, value in extattrs.items():
-        fixed_dict[key] = value["value"]
+        fixed_dict[slugify(key)] = value["value"]
     return fixed_dict

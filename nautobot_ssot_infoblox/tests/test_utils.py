@@ -22,6 +22,6 @@ class TestUtils(unittest.TestCase):
     def test_get_ext_attr_dict(self):
         """Test get_ext_attr_dict."""
         test_dict = {"Site": {"value": "HQ"}, "Region": {"value": "Central"}}
-        expected = {"Site": "HQ", "Region": "Central"}
+        expected = {"site": "HQ", "region": "Central"}
         standardized_dict = get_ext_attr_dict(test_dict)
         self.assertEqual(standardized_dict, expected)
