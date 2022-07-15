@@ -44,7 +44,7 @@ class NautobotNetwork(Network):
 
     def update(self, attrs):
         """Update Prefix object in Nautobot."""
-        _pf = OrmPrefix.objects.get(prefix=self.network)
+        _pf = OrmPrefix.objects.get(id=self.pk)
         if "description" in attrs:
             _pf.description = attrs["description"]
         if "status" in attrs:
@@ -57,7 +57,7 @@ class NautobotNetwork(Network):
     # def delete(self):
     #     """Delete Prefix object in Nautobot."""
     #     self.diffsync.job.log_warning(f"Prefix {self.network} will be deleted.")
-    #     _prefix = OrmPrefix.objects.get(prefix=self.get_identifiers()["network"])
+    #     _prefix = OrmPrefix.objects.get(id=self.pk)
     #     _prefix.delete()
     #     return super().delete()
 
@@ -132,7 +132,7 @@ class NautobotIPAddress(IPAddress):
 
     def update(self, attrs):
         """Update IPAddress object in Nautobot."""
-        _ipaddr = OrmIPAddress.objects.get(address=f"{self.address}/{self.prefix_length}")
+        _ipaddr = OrmIPAddress.objects.get(id=self.pk)
         if attrs.get("status"):
             _ipaddr.status = OrmStatus.objects.get(name=attrs["status"])
         if attrs.get("description"):
@@ -147,8 +147,7 @@ class NautobotIPAddress(IPAddress):
     # def delete(self):
     #     """Delete IPAddress object in Nautobot."""
     #     self.diffsync.job.log_warning(self, message=f"IP Address {self.address} will be deleted.")
-    #     ip_ids = self.get_identifiers()
-    #     _ipaddr = OrmIPAddress.objects.get(address=f"{ip_ids['address']}/{ip_ids['prefix_length']}")
+    #     _ipaddr = OrmIPAddress.objects.get(id=self.pk)
     #     _ipaddr.delete()
     #     return super().delete()
 
@@ -219,7 +218,7 @@ class NautobotVlanGroup(VlanView):
     def delete(self):
         """Delete VLANGroup object in Nautobot."""
         self.diffsync.job.log_warning(message=f"VLAN Group {self.name} will be deleted.")
-        _vg = OrmVlanGroup.objects.get(**self.get_identifiers())
+        _vg = OrmVlanGroup.objects.get(id=self.pk)
         _vg.delete()
         return super().delete()
 
@@ -291,7 +290,7 @@ class NautobotVlan(Vlan):
 
     def update(self, attrs):
         """Update VLAN object in Nautobot."""
-        _vlan = OrmVlan.objects.get(vid=self.vid)
+        _vlan = OrmVlan.objects.get(id=self.pk)
         if attrs.get("status"):
             _vlan.status = OrmStatus.objects.get(name=self.get_vlan_status(attrs["status"]))
         if attrs.get("description"):
@@ -311,7 +310,7 @@ class NautobotVlan(Vlan):
     def delete(self):
         """Delete VLAN object in Nautobot."""
         self.diffsync.job.log_warning(message=f"VLAN {self.vid} will be deleted.")
-        _vlan = OrmVlan.objects.get(vid=self.get_identifiers()["vid"])
+        _vlan = OrmVlan.objects.get(id=self.pk)
         _vlan.delete()
         return super().delete()
 
@@ -376,7 +375,7 @@ class NautobotAggregate(Aggregate):
 
     def update(self, attrs):
         """Update Aggregate object in Nautobot."""
-        _aggregate = OrmAggregate.objects.get(prefix=self.network)
+        _aggregate = OrmAggregate.objects.get(id=self.pk)
         if attrs.get("description"):
             _aggregate.description = attrs["description"]
         if "ext_attrs" in attrs["ext_attrs"]:
@@ -387,7 +386,7 @@ class NautobotAggregate(Aggregate):
     # def delete(self):
     #     """Delete Aggregate object in Nautobot."""
     #     self.diffsync.job.log_warning(message=f"Aggregate {self.network} will be deleted.")
-    #     _aggregate = OrmAggregate.objects.get(prefix=self.get_identifiers()["network"])
+    #     _aggregate = OrmAggregate.objects.get(id=self.pk)
     #     _aggregate.delete()
     #     return super().delete()
 
