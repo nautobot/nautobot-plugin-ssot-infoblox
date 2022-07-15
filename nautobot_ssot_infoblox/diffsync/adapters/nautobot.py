@@ -15,7 +15,7 @@ from nautobot_ssot_infoblox.diffsync.models import (
     NautobotVlan,
 )
 from nautobot_ssot_infoblox.constant import TAG_COLOR
-from nautobot_ssot_infoblox.utils import nautobot_vlan_status
+from nautobot_ssot_infoblox.utils.diffsync import nautobot_vlan_status
 
 
 class NautobotMixin:
