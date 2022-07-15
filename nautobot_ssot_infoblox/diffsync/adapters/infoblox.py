@@ -6,7 +6,7 @@ from diffsync import DiffSync
 from diffsync.enum import DiffSyncFlags
 from nautobot.extras.plugins.exceptions import PluginImproperlyConfigured
 from nautobot_ssot_infoblox.utils.client import InfobloxApi
-from nautobot_ssot_infoblox.utils.utilities import get_ext_attr_dict
+from nautobot_ssot_infoblox.utils.diffsync import get_ext_attr_dict
 from nautobot_ssot_infoblox.diffsync.models.infoblox import (
     InfobloxAggregate,
     InfobloxIPAddress,

@@ -17,7 +17,7 @@ from nautobot.ipam.models import VLANGroup as OrmVlanGroup
 from nautobot.ipam.models import VRF as OrmVRF
 from nautobot.tenancy.models import Tenant as OrmTenant
 from nautobot_ssot_infoblox.diffsync.models.base import Aggregate, Network, IPAddress, Vlan, VlanView
-from nautobot_ssot_infoblox.utils.utilities import create_tag_sync_from_infoblox
+from nautobot_ssot_infoblox.utils.diffsync import create_tag_sync_from_infoblox
 
 
 class NautobotNetwork(Network):
