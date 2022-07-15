@@ -264,7 +264,7 @@ class NautobotVlan(Vlan):
         )
         if "ext_attrs" in attrs:
             cls.process_ext_attrs(diffsync=diffsync, vlan=_vlan, extattrs=attrs["ext_attrs"])
-        _vlan.tags.add("SSoT Synced to Infoblox")
+        _vlan.tags.add(create_tag_sync_from_infoblox())
         # ensure that the VLAN Group and VLAN have the same Site
         if not _vlan.site and _vlan.group.site:
             _vlan.site = _vlan.group.site
@@ -369,7 +369,7 @@ class NautobotAggregate(Aggregate):
         )
         if "ext_attrs" in attrs["ext_attrs"]:
             cls.process_ext_attrs(diffsync=diffsync, aggregate=_aggregate, extattrs=attrs["ext_attrs"])
-        _aggregate.tags.add("SSoT Synced to Infoblox")
+        _aggregate.tags.add(create_tag_sync_from_infoblox())
         _aggregate.validated_save()
         return super().create(ids=ids, diffsync=diffsync, attrs=attrs)
 
