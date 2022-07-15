@@ -66,8 +66,9 @@ Below are the data mappings between objects within Infoblox and the correspondin
 | VLAN              | VLAN           |
 | VLAN view         | VLAN Group     |
 | Network container | Aggregate      |
+| Extensibility Attrs| Custom Fields |
 
-> **_NOTE_**: VLAN and VLAN Group will be turned on within the next available releases.
+NOTE - More information about Extensibility Attributes can be found in the [project documentation](#project-documentation).
 
 ### DiffSyncModel - Network
 
