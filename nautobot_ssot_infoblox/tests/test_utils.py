@@ -1,7 +1,7 @@
 """Util tests that do not require Django."""
 import unittest
 
-from nautobot_ssot_infoblox.utils import get_vlan_view_name, nautobot_vlan_status
+from nautobot_ssot_infoblox.utils.diffsync import get_vlan_view_name, nautobot_vlan_status
 
 
 class TestUtils(unittest.TestCase):
