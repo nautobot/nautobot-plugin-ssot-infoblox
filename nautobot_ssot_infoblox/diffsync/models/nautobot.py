@@ -5,7 +5,7 @@ from django.utils.text import slugify
 from nautobot.extras.choices import CustomFieldTypeChoices
 from nautobot.extras.models import CustomField as OrmCF
 from nautobot.extras.models import Status as OrmStatus
-from nautobot.dcim.models import Site
+from nautobot.dcim.models import Site as OrmSite
 from nautobot.ipam.choices import IPAddressRoleChoices
 from nautobot.ipam.models import RIR
 from nautobot.ipam.models import Aggregate as OrmAggregate
@@ -73,8 +73,8 @@ class NautobotNetwork(Network):
         for attr, attr_value in extattrs.items():
             if attr.lower() in ["site", "facility"]:
                 try:
-                    prefix.site = Site.objects.get(name=attr_value)
-                except Site.DoesNotExist as err:
+                    prefix.site = OrmSite.objects.get(name=attr_value)
+                except OrmSite.DoesNotExist as err:
                     diffsync.job.log_warning(
                         f"Unable to find Site {attr_value} for prefix {prefix.prefix} found in Extensibility Attributes '{attr}'. {err}"
                     )
@@ -234,8 +234,8 @@ class NautobotVlanGroup(VlanView):
         for attr, attr_value in extattrs.items():
             if attr.lower() in ["site", "facility"]:
                 try:
-                    vlan_group.site = Site.objects.get(name=attr_value)
-                except Site.DoesNotExist as err:
+                    vlan_group.site = OrmSite.objects.get(name=attr_value)
+                except OrmSite.DoesNotExist as err:
                     diffsync.job.log_warning(
                         f"Unable to find Site {attr_value} for VLAN Group {vlan_group.name} found in Extensibility Attributes '{attr}'. {err}"
                     )
@@ -326,8 +326,8 @@ class NautobotVlan(Vlan):
         for attr, attr_value in extattrs.items():
             if attr.lower() in ["site", "facility"]:
                 try:
-                    vlan.site = Site.objects.get(name=attr_value)
-                except Site.DoesNotExist as err:
+                    vlan.site = OrmSite.objects.get(name=attr_value)
+                except OrmSite.DoesNotExist as err:
                     diffsync.job.log_warning(
                         f"Unable to find Site {attr_value} for VLAN {vlan.vid} {vlan.name} found in Extensibility Attributes '{attr}'. {err}"
                     )
