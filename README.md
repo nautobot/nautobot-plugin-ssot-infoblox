@@ -66,7 +66,7 @@ Below are the data mappings between objects within Infoblox and the correspondin
 | VLAN              | VLAN           |
 | VLAN view         | VLAN Group     |
 | Network container | Aggregate      |
-| Extensibility Attrs| Custom Fields |
+| Extensibility Attrs | Custom Fields |
 
 NOTE - More information about Extensibility Attributes can be found in the [project documentation](#project-documentation).
 
