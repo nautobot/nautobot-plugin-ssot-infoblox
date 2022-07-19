@@ -44,7 +44,7 @@ def process_ext_attrs(diffsync, obj: object, extattrs: dict):
                     message=f"Unable to find VRF {attr_value} for {obj} found in Extensibility Attributes '{attr}'. {err}"
                 )
         if "role" in attr.lower():
-            if attr_value.lower() in IPAddressRoleChoices.as_dict():
+            if isinstance(obj, OrmIPAddress) and attr_value.lower() in IPAddressRoleChoices.as_dict():
                 obj.role = attr_value.lower()
             else:
                 try:
