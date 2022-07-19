@@ -1,5 +1,6 @@
 """Utilities for DiffSync related stuff."""
 
+from django.utils.text import slugify
 from nautobot.extras.models import Tag
 from nautobot_ssot_infoblox.constant import TAG_COLOR
 
@@ -40,3 +41,22 @@ def nautobot_vlan_status(status: str) -> str:
         "Reserved": "RESERVED",
     }
     return statuses[status]
+
+
+def get_ext_attr_dict(extattrs: dict):
+    """Rebuild Extensibility Attributes dict into standard k/v pattern.
+
+    The standard extattrs dict pattern is to have the dict look like so:
+
+    {<attribute_key>: {"value": <actual_value>}}
+
+    Args:
+        extattrs (dict): Extensibility Attributes dict for object.
+
+    Returns:
+        dict: Standardized dictionary for Extensibility Attributes.
+    """
+    fixed_dict = {}
+    for key, value in extattrs.items():
+        fixed_dict[slugify(key)] = value["value"]
+    return fixed_dict

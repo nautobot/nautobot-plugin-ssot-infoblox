@@ -185,6 +185,7 @@ class InfobloxApi:  # pylint: disable=too-many-public-methods,  too-many-instanc
         [
             {
                 "_ref": "ipv4address/Li5pcHY0X2FkZHJlc3MkMTAuMjIwLjAuMTAwLzA:10.220.0.100",
+                "extattrs": {"Usage": {"value": "TACACS"}},
                 "ip_address": "10.220.0.100",
                 "is_conflict": false,
                 "lease_state": "FREE",
@@ -206,6 +207,7 @@ class InfobloxApi:  # pylint: disable=too-many-public-methods,  too-many-instanc
             },
             {
                 "_ref": "ipv4address/Li5pcHY0X2FkZHJlc3MkMTAuMjIwLjAuMTAxLzA:10.220.0.101",
+                "extattrs": {},
                 "ip_address": "10.220.0.101",
                 "is_conflict": false,
                 "lease_state": "FREE",
@@ -239,7 +241,7 @@ class InfobloxApi:  # pylint: disable=too-many-public-methods,  too-many-instanc
                     "object": "ipv4address",
                     "data": {"network_view": prefix[1], "network": prefix[0], "status": "USED"},
                     "args": {
-                        "_return_fields": "ip_address,mac_address,names,network,objects,status,types,usage,comment"
+                        "_return_fields": "ip_address,mac_address,names,network,objects,status,types,usage,comment,extattrs"
                     },
                 }
             )
@@ -663,18 +665,26 @@ class InfobloxApi:  # pylint: disable=too-many-public-methods,  too-many-instanc
         [
             {
                 "_ref": "network/ZG5zLm5ldHdvcmskMTAuMjIzLjAuMC8yMS8w:10.223.0.0/21/default",
+                "extattrs": {},
                 "network": "10.223.0.0/21",
-                "network_view": "default"
+                "network_view": "default",
+                "rir": "NONE",
             },
             {
                 "_ref": "network/ZG5zLm5ldHdvcmskMTAuMjIwLjY0LjAvMjEvMA:10.220.64.0/21/default",
+                "extattrs": {},
                 "network": "10.220.64.0/21",
-                "network_view": "default"
+                "network_view": "default",
+                "rir": "NONE",
             },
         ]
         """
         url_path = "network"
-        params = {"_return_as_object": 1, "_return_fields": "network,network_view,comment", "_max_results": 10000}
+        params = {
+            "_return_as_object": 1,
+            "_return_fields": "network,network_view,comment,extattrs,rir_organization,rir",
+            "_max_results": 10000,
+        }
 
         if prefix:
             params.update({"network": prefix})
@@ -957,12 +967,14 @@ class InfobloxApi:  # pylint: disable=too-many-public-methods,  too-many-instanc
         [
             {
                 "_ref": "vlanview/ZG5zLnZsYW5fdmlldyRWTFZpZXcxLjEwLjIw:VLView1/10/20",
+                "extattrs": {},
                 "end_vlan_id": 20,
                 "name": "VLView1",
                 "start_vlan_id": 10
             },
             {
                 "_ref": "vlanview/ZG5zLnZsYW5fdmlldyROYXV0b2JvdC4xLjQwOTQ:Nautobot/1/4094",
+                "extattrs": {},
                 "end_vlan_id": 4094,
                 "name": "Nautobot",
                 "start_vlan_id": 1
@@ -970,7 +982,7 @@ class InfobloxApi:  # pylint: disable=too-many-public-methods,  too-many-instanc
         ]
         """
         url_path = "vlanview"
-        params = {"_return_fields": "name,comment,start_vlan_id,end_vlan_id"}
+        params = {"_return_fields": "name,comment,start_vlan_id,end_vlan_id,extattrs"}
         response = self._request("GET", url_path, params=params)
         logger.info(response.json())
         return response.json()
@@ -985,6 +997,7 @@ class InfobloxApi:  # pylint: disable=too-many-public-methods,  too-many-instanc
         [
             {
                 "_ref": "vlan/ZG5zLnZsYW4kLmNvbS5pbmZvYmxveC5kbnMudmxhbl92aWV3JGRlZmF1bHQuMS40MDk0LjIw:default/DATA_VLAN/20",
+                "extattrs": {},
                 "assigned_to": [
                     "network/ZG5zLm5ldHdvcmskMTkyLjE2OC4xLjAvMjQvMA:192.168.1.0/24/default"
                 ],
@@ -996,6 +1009,7 @@ class InfobloxApi:  # pylint: disable=too-many-public-methods,  too-many-instanc
             },
             {
                 "_ref": "vlan/ZG5zLnZsYW4kLmNvbS5pbmZvYmxveC5kbnMudmxhbl92aWV3JGRlZmF1bHQuMS40MDk0Ljk5:default/VOICE_VLAN/99",
+                "extattrs": {},
                 "comment": "Only Cisco IP Phones",
                 "id": 99,
                 "name": "VOICE_VLAN",
@@ -1013,7 +1027,7 @@ class InfobloxApi:  # pylint: disable=too-many-public-methods,  too-many-instanc
                     "data": {},
                     "args": {
                         "_max_results": 100000000,
-                        "_return_fields": "assigned_to,id,name,comment,contact,department,description,reserved,status",
+                        "_return_fields": "assigned_to,id,name,comment,contact,department,description,reserved,status,extattrs",
                     },
                 }
             ]
@@ -1114,14 +1128,20 @@ class InfobloxApi:  # pylint: disable=too-many-public-methods,  too-many-instanc
         [
             {
                 "_ref": "networkcontainer/ZG5zLm5ldHdvcmtfY29udGFpbmVyJDE5Mi4xNjguMi4wLzI0LzA:192.168.2.0/24/default",
+                "comment": "Campus LAN",
+                "extattrs": {},
                 "network": "192.168.2.0/24",
-                "network_view": "default"
+                "network_view": "default",
+                "rir": "NONE",
             }
         ]
         """
         url_path = "networkcontainer"
-        # params = {"_return_as_object": 1, "_return_fields": "network,comment,network_view", "_max_results": 100000}
-        params = {"_return_as_object": 1, "_max_results": 100000}
+        params = {
+            "_return_as_object": 1,
+            "_return_fields": "network,comment,network_view,extattrs,rir_organization,rir",
+            "_max_results": 100000,
+        }
         response = self._request("GET", url_path, params=params)
         response = response.json()
         logger.info(response)

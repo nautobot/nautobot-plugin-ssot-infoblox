@@ -9,11 +9,12 @@ class Network(DiffSyncModel):
 
     _modelname = "prefix"
     _identifiers = ("network",)
-    _attributes = ("description",)
+    _attributes = ("description", "status", "ext_attrs")
 
     network: str
     description: Optional[str]
     status: Optional[str]
+    ext_attrs: Optional[dict]
     pk: Optional[uuid.UUID] = None
 
 
@@ -22,10 +23,11 @@ class VlanView(DiffSyncModel):
 
     _modelname = "vlangroup"
     _identifiers = ("name",)
-    _attributes = ("description",)
+    _attributes = ("description", "ext_attrs")
 
     name: str
     description: Optional[str]
+    ext_attrs: Optional[dict]
     pk: Optional[uuid.UUID] = None
 
 
@@ -34,13 +36,14 @@ class Vlan(DiffSyncModel):
 
     _modelname = "vlan"
     _identifiers = ("vid", "name", "vlangroup")
-    _attributes = ("description", "status")
+    _attributes = ("description", "status", "ext_attrs")
 
     vid: int
     name: str
     status: str
     description: Optional[str]
     vlangroup: Optional[str]
+    ext_attrs: Optional[dict]
     pk: Optional[uuid.UUID] = None
 
 
@@ -50,7 +53,7 @@ class IPAddress(DiffSyncModel):
     _modelname = "ipaddress"
     _identifiers = ("address", "prefix", "prefix_length")
     _shortname = ("address",)
-    _attributes = ("description", "dns_name", "status")
+    _attributes = ("description", "dns_name", "status", "ext_attrs")
 
     address: str
     dns_name: str
@@ -58,6 +61,7 @@ class IPAddress(DiffSyncModel):
     prefix_length: int
     status: Optional[str]
     description: Optional[str]
+    ext_attrs: Optional[dict]
     pk: Optional[uuid.UUID] = None
 
 
@@ -66,8 +70,9 @@ class Aggregate(DiffSyncModel):
 
     _modelname = "aggregate"
     _identifiers = ("network",)
-    _attributes = ("description",)
+    _attributes = ("description", "ext_attrs")
 
     network: str
     description: Optional[str]
+    ext_attrs: Optional[dict]
     pk: Optional[uuid.UUID] = None
