@@ -6,6 +6,7 @@ from diffsync import DiffSync
 from diffsync.enum import DiffSyncFlags
 from nautobot.extras.plugins.exceptions import PluginImproperlyConfigured
 from nautobot_ssot_infoblox.utils.client import InfobloxApi
+from nautobot_ssot_infoblox.utils.diffsync import get_ext_attr_dict
 from nautobot_ssot_infoblox.diffsync.models.infoblox import (
     InfobloxAggregate,
     InfobloxIPAddress,
@@ -57,6 +58,7 @@ class InfobloxAdapter(DiffSync):
                 network=_pf["network"],
                 description=_pf.get("comment", ""),
                 status=_pf.get("status", "active"),
+                ext_attrs=get_ext_attr_dict(extattrs=_pf.get("extattrs", {})),
             )
             self.add(new_pf)
 
@@ -72,6 +74,7 @@ class InfobloxAdapter(DiffSync):
                     dns_name=_ip["names"][0],
                     status=self.conn.get_ipaddr_status(_ip),
                     description=_ip["comment"],
+                    ext_attrs=get_ext_attr_dict(extattrs=_ip.get("extattrs", {})),
                 )
                 self.add(new_ip)
 
@@ -81,6 +84,7 @@ class InfobloxAdapter(DiffSync):
             new_vv = self.vlangroup(
                 name=_vv["name"],
                 description=_vv["comment"] if _vv.get("comment") else "",
+                ext_attrs=get_ext_attr_dict(extattrs=_vv.get("extattrs", {})),
             )
             self.add(new_vv)
 
@@ -94,6 +98,7 @@ class InfobloxAdapter(DiffSync):
                 status=_vlan["status"],
                 vlangroup=vlan_group.group(1) if vlan_group else "",
                 description=_vlan["comment"] if _vlan.get("comment") else "",
+                ext_attrs=get_ext_attr_dict(extattrs=_vlan.get("extattrs", {})),
             )
             self.add(new_vlan)
 
@@ -136,5 +141,6 @@ class InfobloxAggregateAdapter(DiffSync):
                 new_aggregate = self.aggregate(
                     network=container["network"],
                     description=container["comment"] if container.get("comment") else "",
+                    ext_attrs=container.get("extattrs", {}),
                 )
                 self.add(new_aggregate)
