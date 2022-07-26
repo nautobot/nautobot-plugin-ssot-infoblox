@@ -101,10 +101,20 @@ class NautobotAdapter(NautobotMixin, DiffSync):
         """Load Prefixes from Nautobot."""
         all_prefixes = list(chain(Prefix.objects.all(), Aggregate.objects.all()))
         for prefix in all_prefixes:
+            # Reset CustomFields for Nautobot objects to blank if they failed to get linked originally.
+            if prefix.site is None:
+                prefix.custom_field_data["site"] = ""
+            if prefix.vrf is None:
+                prefix.custom_field_data["vrf"] = ""
+            if prefix.role is None:
+                prefix.custom_field_data["role"] = ""
+            if prefix.tenant is None:
+                prefix.custom_field_data["tenant"] = ""
             _prefix = self.prefix(
                 network=str(prefix.prefix),
                 description=prefix.description,
                 status=prefix.status.slug if hasattr(prefix, "status") else "container",
+                ext_attrs=prefix.custom_field_data,
                 pk=prefix.id,
             )
             try:
@@ -115,6 +125,14 @@ class NautobotAdapter(NautobotMixin, DiffSync):
     def load_ipaddresses(self):
         """Load IP Addresses from Nautobot."""
         for ipaddr in IPAddress.objects.all():
+            # Reset CustomFields for Nautobot objects to blank if they failed to get linked originally.
+            if ipaddr.vrf is None:
+                ipaddr.custom_field_data["vrf"] = ""
+            if ipaddr.role is None:
+                ipaddr.custom_field_data["role"] = ""
+            if ipaddr.tenant is None:
+                ipaddr.custom_field_data["tenant"] = ""
+
             addr = ipaddr.host
             # the last Prefix is the most specific and is assumed the one the IP address resides in
             prefix = Prefix.objects.net_contains(addr).last()
@@ -142,6 +160,7 @@ class NautobotAdapter(NautobotMixin, DiffSync):
                     prefix_length=prefix.prefix_length if prefix else ipaddr.prefix_length,
                     dns_name=ipaddr.dns_name,
                     description=ipaddr.description,
+                    ext_attrs=ipaddr.custom_field_data,
                     pk=ipaddr.id,
                 )
                 try:
@@ -152,18 +171,30 @@ class NautobotAdapter(NautobotMixin, DiffSync):
     def load_vlangroups(self):
         """Load VLAN Groups from Nautobot."""
         for grp in VLANGroup.objects.all():
-            _vg = self.vlangroup(name=grp.name, description=grp.description, pk=grp.id)
+            # Reset CustomFields for Nautobot objects to blank if they failed to get linked originally.
+            if grp.site is None:
+                grp.custom_field_data["site"] = ""
+            _vg = self.vlangroup(name=grp.name, description=grp.description, ext_attrs=grp.custom_field_data, pk=grp.id)
             self.add(_vg)
 
     def load_vlans(self):
         """Load VLANs from Nautobot."""
         for vlan in VLAN.objects.all():
+            # Reset CustomFields for Nautobot objects to blank if they failed to get linked originally.
+            if vlan.site is None:
+                vlan.custom_field_data["site"] = ""
+            if vlan.role is None:
+                vlan.custom_field_data["role"] = ""
+            if vlan.tenant is None:
+                vlan.custom_field_data["tenant"] = ""
+
             _vlan = self.vlan(
                 vid=vlan.vid,
                 name=vlan.name,
                 description=vlan.description,
                 vlangroup=vlan.group.name if vlan.group else "",
                 status=nautobot_vlan_status(vlan.status.name),
+                ext_attrs=vlan.custom_field_data,
                 pk=vlan.id,
             )
             self.add(_vlan)
@@ -197,7 +228,14 @@ class NautobotAggregateAdapter(NautobotMixin, DiffSync):
     def load(self):
         """Load aggregate models from Nautobot."""
         for aggregate in Aggregate.objects.all():
+            # Reset CustomFields for Nautobot objects to blank if they failed to get linked originally.
+            if aggregate.tenant is None:
+                aggregate.custom_field_data["tenant"] = ""
+
             _aggregate = self.aggregate(
-                network=str(aggregate.prefix), description=aggregate.description, pk=aggregate.id
+                network=str(aggregate.prefix),
+                description=aggregate.description,
+                ext_attrs=aggregate.custom_field_data,
+                pk=aggregate.id,
             )
             self.add(_aggregate)
