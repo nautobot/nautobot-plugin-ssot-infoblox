@@ -115,6 +115,7 @@ class NautobotAdapter(NautobotMixin, DiffSync):
                 description=prefix.description,
                 status=prefix.status.slug if hasattr(prefix, "status") else "container",
                 ext_attrs=prefix.custom_field_data,
+                vlans={prefix.vlan.vid: prefix.vlan.name},
                 pk=prefix.id,
             )
             try:

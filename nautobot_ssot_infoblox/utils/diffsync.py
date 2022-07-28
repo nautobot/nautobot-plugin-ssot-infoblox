@@ -60,3 +60,18 @@ def get_ext_attr_dict(extattrs: dict):
     for key, value in extattrs.items():
         fixed_dict[slugify(key)] = value["value"]
     return fixed_dict
+
+
+def build_vlan_map(vlans: list):
+    """Build map of VLAN ID to VLAN name.
+
+    Args:
+        vlans (list): List of VLANs assigned to 
+
+    Returns:
+        dict: Dictionary mapping VLAN ID to VLAN name.
+    """
+    map = {}
+    for vlan in vlans:
+        map[vlan["id"]] = vlan["name"]
+    return map
