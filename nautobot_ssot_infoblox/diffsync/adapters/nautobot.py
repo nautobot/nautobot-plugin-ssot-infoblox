@@ -84,7 +84,7 @@ class NautobotAdapter(NautobotMixin, DiffSync):
     vlangroup = NautobotVlanGroup
     vlan = NautobotVlan
 
-    top_level = ["prefix", "ipaddress", "vlangroup", "vlan"]
+    top_level = ["vlangroup", "vlan", "prefix", "ipaddress"]
 
     def __init__(self, *args, job=None, sync=None, **kwargs):
         """Initialize Nautobot.

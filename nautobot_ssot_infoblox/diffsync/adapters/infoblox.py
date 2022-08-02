@@ -24,7 +24,7 @@ class InfobloxAdapter(DiffSync):
     vlangroup = InfobloxVLANView
     vlan = InfobloxVLAN
 
-    top_level = ["prefix", "ipaddress", "vlangroup", "vlan"]
+    top_level = ["vlangroup", "vlan", "prefix", "ipaddress"]
 
     def __init__(self, *args, job=None, sync=None, conn=None, **kwargs):
         """Initialize Infoblox.
