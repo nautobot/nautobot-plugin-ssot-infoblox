@@ -3,6 +3,9 @@ from django.contrib.contenttypes.models import ContentType
 from django.core.exceptions import ValidationError
 from django.utils.text import slugify
 from nautobot.extras.choices import CustomFieldTypeChoices
+from nautobot.extras.choices import RelationshipTypeChoices
+from nautobot.extras.models import Relationship as OrmRelationship
+from nautobot.extras.models import RelationshipAssociation as OrmRelationshipAssociation
 from nautobot.extras.models import CustomField as OrmCF
 from nautobot.extras.models import Status as OrmStatus
 from nautobot.dcim.models import Site as OrmSite
@@ -87,6 +90,39 @@ class NautobotNetwork(Network):
             status=status,
             description=attrs.get("description", ""),
         )
+        if attrs.get("vlans") and len(attrs["vlans"].keys()) >= 1:
+            relationship_dict = {
+                "name": "Prefix -> VLAN",
+                "slug": "prefix_to_vlan",
+                "type": RelationshipTypeChoices.TYPE_ONE_TO_MANY,
+                "source_type": ContentType.objects.get_for_model(OrmPrefix),
+                "source_label": "Prefix",
+                "destination_type": ContentType.objects.get_for_model(OrmVlan),
+                "destination_label": "VLAN",
+            }
+            relation, _ = OrmRelationship.objects.get_or_create(
+                name=relationship_dict["name"], defaults=relationship_dict
+            )
+            for _, _vlan in attrs["vlans"].items():
+                index = 0
+                try:
+                    found_vlan = OrmVlan.objects.get(vid=_vlan["vid"], name=_vlan["name"], group__name=_vlan["group"])
+                    if found_vlan:
+                        if index == 0:
+                            _prefix.vlan = found_vlan
+                        OrmRelationshipAssociation.objects.get_or_create(
+                            relationship_id=relation.id,
+                            source_type=ContentType.objects.get_for_model(OrmPrefix),
+                            source_id=_prefix.id,
+                            destination_type=ContentType.objects.get_for_model(OrmVlan),
+                            destination_id=found_vlan.id,
+                        )
+                    index += 1
+                except OrmVlan.DoesNotExist as err:
+                    diffsync.job.log_warning(
+                        message=f"Unable to find VLAN {_vlan['vid']} {_vlan['name']} in {_vlan['group']}. {err}"
+                    )
+
         if attrs.get("ext_attrs"):
             process_ext_attrs(diffsync=diffsync, obj=_prefix, extattrs=attrs["ext_attrs"])
         _prefix.tags.add(create_tag_sync_from_infoblox())
