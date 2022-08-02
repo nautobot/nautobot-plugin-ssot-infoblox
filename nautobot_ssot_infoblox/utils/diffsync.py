@@ -66,12 +66,12 @@ def build_vlan_map(vlans: list):
     """Build map of VLAN ID to VLAN name.
 
     Args:
-        vlans (list): List of VLANs assigned to 
+        vlans (list): List of VLANs assigned to
 
     Returns:
-        dict: Dictionary mapping VLAN ID to VLAN name.
+        dict: Dictionary mapping VLAN ID to VLAN name, VLAN ID, and VLAN View (group).
     """
-    map = {}
+    vlan_map = {}
     for vlan in vlans:
-        map[vlan["id"]] = vlan["name"]
-    return map
+        vlan_map[vlan["id"]] = {"vid": vlan["id"], "name": vlan["name"], "group": get_vlan_view_name(vlan["vlan"])}
+    return vlan_map
