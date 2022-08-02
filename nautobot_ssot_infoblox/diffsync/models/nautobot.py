@@ -71,7 +71,7 @@ def process_ext_attrs(diffsync, obj: object, extattrs: dict):
         }
         field, _ = OrmCF.objects.get_or_create(name=_cf_dict["name"], defaults=_cf_dict)
         field.content_types.add(ContentType.objects.get_for_model(type(obj)).id)
-        obj.custom_field_data.update({_cf_dict["name"]: attr_value})
+        obj.custom_field_data.update({_cf_dict["name"]: str(attr_value)})
 
 
 class NautobotNetwork(Network):
