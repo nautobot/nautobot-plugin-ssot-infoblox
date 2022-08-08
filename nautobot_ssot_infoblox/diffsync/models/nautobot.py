@@ -90,7 +90,7 @@ class NautobotNetwork(Network):
             status=status,
             description=attrs.get("description", ""),
         )
-        if attrs.get("vlans") and len(attrs["vlans"].keys()) >= 1:
+        if attrs.get("vlans"):
             relationship_dict = {
                 "name": "Prefix -> VLAN",
                 "slug": "prefix_to_vlan",
