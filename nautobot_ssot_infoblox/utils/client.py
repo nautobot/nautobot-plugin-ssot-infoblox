@@ -669,6 +669,7 @@ class InfobloxApi:  # pylint: disable=too-many-public-methods,  too-many-instanc
                 "network": "10.223.0.0/21",
                 "network_view": "default",
                 "rir": "NONE",
+                "vlans": [],
             },
             {
                 "_ref": "network/ZG5zLm5ldHdvcmskMTAuMjIwLjY0LjAvMjEvMA:10.220.64.0/21/default",
@@ -676,13 +677,14 @@ class InfobloxApi:  # pylint: disable=too-many-public-methods,  too-many-instanc
                 "network": "10.220.64.0/21",
                 "network_view": "default",
                 "rir": "NONE",
+                "vlans": [],
             },
         ]
         """
         url_path = "network"
         params = {
             "_return_as_object": 1,
-            "_return_fields": "network,network_view,comment,extattrs,rir_organization,rir",
+            "_return_fields": "network,network_view,comment,extattrs,rir_organization,rir,vlans",
             "_max_results": 10000,
         }
 

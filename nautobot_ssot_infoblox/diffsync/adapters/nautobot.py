@@ -84,7 +84,7 @@ class NautobotAdapter(NautobotMixin, DiffSync):
     vlangroup = NautobotVlanGroup
     vlan = NautobotVlan
 
-    top_level = ["prefix", "ipaddress", "vlangroup", "vlan"]
+    top_level = ["vlangroup", "vlan", "prefix", "ipaddress"]
 
     def __init__(self, *args, job=None, sync=None, **kwargs):
         """Initialize Nautobot.
@@ -115,6 +115,7 @@ class NautobotAdapter(NautobotMixin, DiffSync):
                 description=prefix.description,
                 status=prefix.status.slug if hasattr(prefix, "status") else "container",
                 ext_attrs=prefix.custom_field_data,
+                vlans={prefix.vlan.vid: prefix.vlan.name} if hasattr(prefix, "vlan") else {},
                 pk=prefix.id,
             )
             try:
