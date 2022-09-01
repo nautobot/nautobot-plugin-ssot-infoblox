@@ -249,7 +249,7 @@ class NautobotVlan(Vlan):
             _vlan.validated_save()
         except ValidationError as err:
             diffsync.job.log_warning(message=f"Unable to create VLAN {ids['name']} {ids['vid']}. {err}")
-            return False
+            return None
         return super().create(ids=ids, diffsync=diffsync, attrs=attrs)
 
     @staticmethod
@@ -278,7 +278,7 @@ class NautobotVlan(Vlan):
             _vlan.validated_save()
         except ValidationError as err:
             self.diffsync.job.log_warning(message=f"Unable to update VLAN {_vlan.name} {_vlan.vid}. {err}")
-            return False
+            return None
         return super().update(attrs)
 
     def delete(self):
