@@ -5,7 +5,6 @@ import re
 from diffsync import DiffSync
 from diffsync.enum import DiffSyncFlags
 from nautobot.extras.plugins.exceptions import PluginImproperlyConfigured
-from nautobot_ssot_infoblox.utils.client import InfobloxApi
 from nautobot_ssot_infoblox.utils.diffsync import get_ext_attr_dict, build_vlan_map
 from nautobot_ssot_infoblox.diffsync.models.infoblox import (
     InfobloxAggregate,
@@ -122,7 +121,7 @@ class InfobloxAggregateAdapter(DiffSync):
 
     top_level = ["aggregate"]
 
-    def __init__(self, *args, job=None, sync=None, **kwargs):
+    def __init__(self, *args, job=None, sync=None, conn=None, **kwargs):
         """Initialize Infoblox.
 
         Args:
@@ -132,7 +131,13 @@ class InfobloxAggregateAdapter(DiffSync):
         super().__init__(*args, **kwargs)
         self.job = job
         self.sync = sync
-        self.conn = InfobloxApi()
+        self.conn = conn
+
+        if self.conn in [None, False]:
+            self.job.log_failure(
+                message="Improperly configured settings for communicating to Infoblox. Please validate accuracy."
+            )
+            raise PluginImproperlyConfigured
 
     def load(self):
         """Load aggregate models."""
