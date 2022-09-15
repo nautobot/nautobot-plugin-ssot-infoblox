@@ -96,7 +96,8 @@ class InfobloxDataTarget(DataTarget, Job):
     def load_target_adapter(self):
         """Load Infoblox data."""
         self.log_info(message="Connecting to Infoblox")
-        self.target_adapter = infoblox.InfobloxAdapter(job=self, sync=self.sync)
+        client = InfobloxApi()
+        self.target_adapter = infoblox.InfobloxAdapter(job=self, sync=self.sync, conn=client)
         self.log_info(message="Loading data from Infoblox...")
         self.target_adapter.load()
 
@@ -127,7 +128,8 @@ class InfobloxNetworkContainerSource(DataSource, Job):
     def load_source_adapter(self):
         """Load Infoblox data."""
         self.log_info(message="Connecting to Infoblox")
-        self.source_adapter = infoblox.InfobloxAggregateAdapter(job=self, sync=self.sync)
+        client = InfobloxApi()
+        self.source_adapter = infoblox.InfobloxAggregateAdapter(job=self, sync=self.sync, conn=client)
         self.log_info(message="Loading data from Infoblox...")
         self.source_adapter.load()
 
