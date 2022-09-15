@@ -133,6 +133,12 @@ class InfobloxAggregateAdapter(DiffSync):
         self.sync = sync
         self.conn = conn
 
+        if self.conn in [None, False]:
+            self.job.log_failure(
+                message="Improperly configured settings for communicating to Infoblox. Please validate accuracy."
+            )
+            raise PluginImproperlyConfigured
+
     def load(self):
         """Load aggregate models."""
         for container in self.conn.get_network_containers():
