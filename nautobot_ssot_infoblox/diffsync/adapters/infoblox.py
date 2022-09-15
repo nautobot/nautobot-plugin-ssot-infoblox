@@ -122,7 +122,7 @@ class InfobloxAggregateAdapter(DiffSync):
 
     top_level = ["aggregate"]
 
-    def __init__(self, *args, job=None, sync=None, **kwargs):
+    def __init__(self, *args, job=None, sync=None, conn=None, **kwargs):
         """Initialize Infoblox.
 
         Args:
@@ -132,7 +132,7 @@ class InfobloxAggregateAdapter(DiffSync):
         super().__init__(*args, **kwargs)
         self.job = job
         self.sync = sync
-        self.conn = InfobloxApi()
+        self.conn = conn
 
     def load(self):
         """Load aggregate models."""
