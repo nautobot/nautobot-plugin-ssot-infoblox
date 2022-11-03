@@ -21,6 +21,7 @@ from nautobot.ipam.models import VRF as OrmVRF
 from nautobot.tenancy.models import Tenant as OrmTenant
 from nautobot_ssot_infoblox.diffsync.models.base import Aggregate, Network, IPAddress, Vlan, VlanView
 from nautobot_ssot_infoblox.utils.diffsync import create_tag_sync_from_infoblox
+from nautobot_ssot_infoblox.utils.nautobot import get_prefix_vlans
 
 
 def process_ext_attrs(diffsync, obj: object, extattrs: dict):
@@ -132,12 +133,42 @@ class NautobotNetwork(Network):
     def update(self, attrs):
         """Update Prefix object in Nautobot."""
         _pf = OrmPrefix.objects.get(id=self.pk)
+        if self.diffsync.job.kwargs.get("debug"):
+            self.diffsync.job.log_debug(message=f"Attempting to update Prefix {_pf.prefix} with {attrs}.")
         if "description" in attrs:
             _pf.description = attrs["description"]
         if "status" in attrs:
             _pf.status = OrmStatus.objects.get(slug=attrs["status"])
         if "ext_attrs" in attrs:
             process_ext_attrs(diffsync=self.diffsync, obj=_pf, extattrs=attrs["ext_attrs"])
+        if "vlans" in attrs:
+            current_vlans = get_prefix_vlans(prefix=_pf)
+            if len(current_vlans) < len(attrs["vlans"]):
+                for _, item in attrs["vlans"].items():
+                    vlan = OrmVlan.objects.get(vid=item["vid"], name=item["name"], group__name=item["group"])
+                    if vlan not in current_vlans:
+                        if self.diffsync.job.kwargs.get("debug"):
+                            self.diffsync.job.log_debug(message=f"Adding VLAN {vlan.vid} to {_pf.prefix}.")
+                        OrmRelationshipAssociation.objects.get_or_create(
+                            relationship_id=OrmRelationship.objects.get(name="Prefix -> VLAN").id,
+                            source_type=ContentType.objects.get_for_model(OrmPrefix),
+                            source_id=_pf.id,
+                            destination_type=ContentType.objects.get_for_model(OrmVlan),
+                            destination_id=vlan.id,
+                        )
+            else:
+                for vlan in current_vlans:
+                    if vlan.vid not in attrs["vlans"]:
+                        del_vlan = OrmRelationshipAssociation.objects.get(
+                            relationship_id=OrmRelationship.objects.get(name="Prefix -> VLAN").id,
+                            source_type=ContentType.objects.get_for_model(OrmPrefix),
+                            source_id=_pf.id,
+                            destination_type=ContentType.objects.get_for_model(OrmVlan),
+                            destination_id=vlan.id,
+                        )
+                        if self.diffsync.job.kwargs.get("debug"):
+                            self.diffsync.job.log_debug(message=f"Removing VLAN {vlan.vid} from {_pf.prefix}.")
+                        del_vlan.delete()
         _pf.validated_save()
         return super().update(attrs)
 

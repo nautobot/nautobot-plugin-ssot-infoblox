@@ -16,6 +16,7 @@ from nautobot_ssot_infoblox.diffsync.models import (
 )
 from nautobot_ssot_infoblox.constant import TAG_COLOR
 from nautobot_ssot_infoblox.utils.diffsync import nautobot_vlan_status, get_default_custom_fields
+from nautobot_ssot_infoblox.utils.nautobot import build_vlan_map_from_relations, get_prefix_vlans
 
 
 class NautobotMixin:
@@ -104,12 +105,13 @@ class NautobotAdapter(NautobotMixin, DiffSync):
         for prefix in all_prefixes:
             if "ssot-synced-to-infoblox" in prefix.custom_field_data:
                 prefix.custom_field_data.pop("ssot-synced-to-infoblox")
+            current_vlans = get_prefix_vlans(prefix=prefix)
             _prefix = self.prefix(
                 network=str(prefix.prefix),
                 description=prefix.description,
                 status=prefix.status.slug if hasattr(prefix, "status") else "container",
                 ext_attrs={**default_cfs, **prefix.custom_field_data},
-                vlans={prefix.vlan.vid: prefix.vlan.name} if prefix.vlan is not None else {},
+                vlans=build_vlan_map_from_relations(vlans=current_vlans),
                 pk=prefix.id,
             )
             try:
