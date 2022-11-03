@@ -127,6 +127,7 @@ class InfobloxAggregateAdapter(DiffSync):
         Args:
             job (object, optional): Infoblox job. Defaults to None.
             sync (object, optional): Infoblox DiffSync. Defaults to None.
+            conn (object): InfobloxAPI connection.
         """
         super().__init__(*args, **kwargs)
         self.job = job
