@@ -86,10 +86,10 @@ def get_default_custom_fields(cf_contenttype: ContentType) -> dict:
     Returns:
         dict: Dictionary of all Custom Fields for a specific object type.
     """
-    cfs = CustomField.objects.filter(content_types=cf_contenttype)
+    customfields = CustomField.objects.filter(content_types=cf_contenttype)
     default_cfs = {}
-    for cf in cfs:
-        if cf.name != "ssot-synced-to-infoblox":
-            if cf.name not in default_cfs:
-                default_cfs[cf.name] = None
+    for customfield in customfields:
+        if customfield.name != "ssot-synced-to-infoblox":
+            if customfield.name not in default_cfs:
+                default_cfs[customfield.name] = None
     return default_cfs
