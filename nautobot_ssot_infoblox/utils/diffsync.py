@@ -1,7 +1,7 @@
 """Utilities for DiffSync related stuff."""
-
+from django.contrib.contenttypes.models import ContentType
 from django.utils.text import slugify
-from nautobot.extras.models import Tag
+from nautobot.extras.models import CustomField, Tag
 from nautobot_ssot_infoblox.constant import TAG_COLOR
 
 
@@ -75,3 +75,21 @@ def build_vlan_map(vlans: list):
     for vlan in vlans:
         vlan_map[vlan["id"]] = {"vid": vlan["id"], "name": vlan["name"], "group": get_vlan_view_name(vlan["vlan"])}
     return vlan_map
+
+
+def get_default_custom_fields(cf_contenttype: ContentType) -> dict:
+    """Get default Custom Fields for specific ContentType.
+
+    Args:
+        cf_contenttype (ContentType): Specific ContentType to get all Custom Fields for.
+
+    Returns:
+        dict: Dictionary of all Custom Fields for a specific object type.
+    """
+    cfs = CustomField.objects.filter(content_types=cf_contenttype)
+    default_cfs = {}
+    for cf in cfs:
+        if cf.name != "ssot-synced-to-infoblox":
+            if cf.name not in default_cfs:
+                default_cfs[cf.name] = None
+    return default_cfs
