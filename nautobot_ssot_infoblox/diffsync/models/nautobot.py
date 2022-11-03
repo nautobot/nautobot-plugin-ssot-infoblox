@@ -130,7 +130,7 @@ class NautobotNetwork(Network):
         _prefix.validated_save()
         return super().create(ids=ids, diffsync=diffsync, attrs=attrs)
 
-    def update(self, attrs):
+    def update(self, attrs):  # pylint: disable=too-many-branches
         """Update Prefix object in Nautobot."""
         _pf = OrmPrefix.objects.get(id=self.pk)
         if self.diffsync.job.kwargs.get("debug"):
