@@ -22,7 +22,7 @@ Once installed, the plugin needs to be enabled in your `nautobot_config.py`
 
 ```python
 # In your nautobot_config.py
-PLUGINS = ["nautobot_ssot_infoblox"]
+PLUGINS = ["nautobot_ssot", "nautobot_ssot_infoblox"]
 ```
 
 See the section below for configuration settings.
@@ -43,6 +43,9 @@ See the section below for configuration settings.
 
 ```python
 PLUGINS_CONFIG = {
+    "nautobot_ssot": {
+        "hide_example_jobs": True,  # defaults to False if unspecified
+    }
     "nautobot_ssot_infoblox": {
         "NAUTOBOT_INFOBLOX_URL": os.getenv("NAUTOBOT_INFOBLOX_URL", ""),
         "NAUTOBOT_INFOBLOX_USERNAME": os.getenv("NAUTOBOT_INFOBLOX_USERNAME", ""),
