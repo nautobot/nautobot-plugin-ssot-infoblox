@@ -42,9 +42,9 @@ def get_default_ext_attrs(review_list: list) -> dict:
     default_ext_attrs = {}
     for item in review_list:
         pf_ext_attrs = get_ext_attr_dict(extattrs=item.get("extattrs", {}))
-        for k in pf_ext_attrs:
-            if k not in default_ext_attrs:
-                default_ext_attrs[k] = None
+        for attr in pf_ext_attrs:
+            if attr not in default_ext_attrs:
+                default_ext_attrs[attr] = None
     return default_ext_attrs
 
 
