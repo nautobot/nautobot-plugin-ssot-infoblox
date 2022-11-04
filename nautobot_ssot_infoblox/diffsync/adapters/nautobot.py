@@ -15,7 +15,8 @@ from nautobot_ssot_infoblox.diffsync.models import (
     NautobotVlan,
 )
 from nautobot_ssot_infoblox.constant import TAG_COLOR
-from nautobot_ssot_infoblox.utils.diffsync import nautobot_vlan_status
+from nautobot_ssot_infoblox.utils.diffsync import nautobot_vlan_status, get_default_custom_fields
+from nautobot_ssot_infoblox.utils.nautobot import build_vlan_map_from_relations, get_prefix_vlans
 
 
 class NautobotMixin:
@@ -100,22 +101,17 @@ class NautobotAdapter(NautobotMixin, DiffSync):
     def load_prefixes(self):
         """Load Prefixes from Nautobot."""
         all_prefixes = list(chain(Prefix.objects.all(), Aggregate.objects.all()))
+        default_cfs = get_default_custom_fields(cf_contenttype=ContentType.objects.get_for_model(Prefix))
         for prefix in all_prefixes:
-            # Reset CustomFields for Nautobot objects to blank if they failed to get linked originally.
-            if prefix.site is None:
-                prefix.custom_field_data["site"] = ""
-            if prefix.vrf is None:
-                prefix.custom_field_data["vrf"] = ""
-            if prefix.role is None:
-                prefix.custom_field_data["role"] = ""
-            if prefix.tenant is None:
-                prefix.custom_field_data["tenant"] = ""
+            if "ssot-synced-to-infoblox" in prefix.custom_field_data:
+                prefix.custom_field_data.pop("ssot-synced-to-infoblox")
+            current_vlans = get_prefix_vlans(prefix=prefix)
             _prefix = self.prefix(
                 network=str(prefix.prefix),
                 description=prefix.description,
                 status=prefix.status.slug if hasattr(prefix, "status") else "container",
-                ext_attrs=prefix.custom_field_data,
-                vlans={prefix.vlan.vid: prefix.vlan.name} if prefix.vlan is not None else {},
+                ext_attrs={**default_cfs, **prefix.custom_field_data},
+                vlans=build_vlan_map_from_relations(vlans=current_vlans),
                 pk=prefix.id,
             )
             try:
@@ -125,15 +121,8 @@ class NautobotAdapter(NautobotMixin, DiffSync):
 
     def load_ipaddresses(self):
         """Load IP Addresses from Nautobot."""
+        default_cfs = get_default_custom_fields(cf_contenttype=ContentType.objects.get_for_model(IPAddress))
         for ipaddr in IPAddress.objects.all():
-            # Reset CustomFields for Nautobot objects to blank if they failed to get linked originally.
-            if ipaddr.vrf is None:
-                ipaddr.custom_field_data["vrf"] = ""
-            if ipaddr.role is None:
-                ipaddr.custom_field_data["role"] = ""
-            if ipaddr.tenant is None:
-                ipaddr.custom_field_data["tenant"] = ""
-
             addr = ipaddr.host
             # the last Prefix is the most specific and is assumed the one the IP address resides in
             prefix = Prefix.objects.net_contains(addr).last()
@@ -154,6 +143,8 @@ class NautobotAdapter(NautobotMixin, DiffSync):
                 continue
 
             if ipaddr.dns_name:
+                if "ssot-synced-to-infoblox" in ipaddr.custom_field_data:
+                    ipaddr.custom_field_data.pop("ssot-synced-to-infoblox")
                 _ip = self.ipaddress(
                     address=addr,
                     prefix=str(prefix),
@@ -161,7 +152,7 @@ class NautobotAdapter(NautobotMixin, DiffSync):
                     prefix_length=prefix.prefix_length if prefix else ipaddr.prefix_length,
                     dns_name=ipaddr.dns_name,
                     description=ipaddr.description,
-                    ext_attrs=ipaddr.custom_field_data,
+                    ext_attrs={**default_cfs, **ipaddr.custom_field_data},
                     pk=ipaddr.id,
                 )
                 try:
@@ -171,31 +162,31 @@ class NautobotAdapter(NautobotMixin, DiffSync):
 
     def load_vlangroups(self):
         """Load VLAN Groups from Nautobot."""
+        default_cfs = get_default_custom_fields(cf_contenttype=ContentType.objects.get_for_model(VLANGroup))
         for grp in VLANGroup.objects.all():
-            # Reset CustomFields for Nautobot objects to blank if they failed to get linked originally.
-            if grp.site is None:
-                grp.custom_field_data["site"] = ""
-            _vg = self.vlangroup(name=grp.name, description=grp.description, ext_attrs=grp.custom_field_data, pk=grp.id)
+            if "ssot-synced-to-infoblox" in grp.custom_field_data:
+                grp.custom_field_data.pop("ssot-synced-to-infoblox")
+            _vg = self.vlangroup(
+                name=grp.name,
+                description=grp.description,
+                ext_attrs={**default_cfs, **grp.custom_field_data},
+                pk=grp.id,
+            )
             self.add(_vg)
 
     def load_vlans(self):
         """Load VLANs from Nautobot."""
+        default_cfs = get_default_custom_fields(cf_contenttype=ContentType.objects.get_for_model(VLAN))
         for vlan in VLAN.objects.all():
-            # Reset CustomFields for Nautobot objects to blank if they failed to get linked originally.
-            if vlan.site is None:
-                vlan.custom_field_data["site"] = ""
-            if vlan.role is None:
-                vlan.custom_field_data["role"] = ""
-            if vlan.tenant is None:
-                vlan.custom_field_data["tenant"] = ""
-
+            if "ssot-synced-to-infoblox" in vlan.custom_field_data:
+                vlan.custom_field_data.pop("ssot-synced-to-infoblox")
             _vlan = self.vlan(
                 vid=vlan.vid,
                 name=vlan.name,
                 description=vlan.description,
                 vlangroup=vlan.group.name if vlan.group else "",
                 status=nautobot_vlan_status(vlan.status.name),
-                ext_attrs=vlan.custom_field_data,
+                ext_attrs={**default_cfs, **vlan.custom_field_data},
                 pk=vlan.id,
             )
             self.add(_vlan)

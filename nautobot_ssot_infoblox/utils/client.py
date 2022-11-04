@@ -11,6 +11,7 @@ from requests.compat import urljoin
 from dns import reversename
 from nautobot.core.settings_funcs import is_truthy
 from nautobot_ssot_infoblox.constant import PLUGIN_CFG
+from nautobot_ssot_infoblox.utils.diffsync import get_ext_attr_dict
 
 logger = logging.getLogger(__name__)
 
@@ -27,6 +28,24 @@ def parse_url(address):
     if not re.search(r"^[A-Za-z0-9+.\-]+://", address):
         address = f"https://{address}"
     return urllib.parse.urlparse(address)
+
+
+def get_default_ext_attrs(review_list: list) -> dict:
+    """Determine the default Extensibility Attributes for an object being processed.
+
+    Args:
+        review_list (list): The list of objects that need to be reviewed to gather default Extensibility Attributes.
+
+    Returns:
+        dict: Dictionary of default Extensibility Attributes for a VLAN View, VLANs, Prefixes, or IP Addresses.
+    """
+    default_ext_attrs = {}
+    for item in review_list:
+        pf_ext_attrs = get_ext_attr_dict(extattrs=item.get("extattrs", {}))
+        for attr in pf_ext_attrs:
+            if attr not in default_ext_attrs:
+                default_ext_attrs[attr] = None
+    return default_ext_attrs
 
 
 class InvalidUrlScheme(Exception):
