@@ -38,6 +38,7 @@ pylint-django = "*"
 pytest = "*"
 requests-mock = "^1.9.3"
 yamllint = "*"
+python-semantic-release = "^7.32.2"
 
 [tool.black]
 line-length = 120
@@ -109,3 +110,15 @@ testpaths = [
     "tests"
 ]
 addopts = "-vv --doctest-modules"
+
+[tool.semantic_release]
+version_toml = [
+    "pyproject.toml:tool.poetry.version"
+]
+major_on_zero = true
+branch = "main"
+upload_to_repository = false
+upload_to_release = false
+changelog_file = "CHANGELOG.md"
+build_command = false
+version_source = "tag"

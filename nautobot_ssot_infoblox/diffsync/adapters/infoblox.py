@@ -5,6 +5,7 @@ import re
 from diffsync import DiffSync
 from diffsync.enum import DiffSyncFlags
 from nautobot.extras.plugins.exceptions import PluginImproperlyConfigured
+from nautobot_ssot_infoblox.utils.client import get_default_ext_attrs
 from nautobot_ssot_infoblox.utils.diffsync import get_ext_attr_dict, build_vlan_map
 from nautobot_ssot_infoblox.diffsync.models.infoblox import (
     InfobloxAggregate,
@@ -52,21 +53,26 @@ class InfobloxAdapter(DiffSync):
         subnets = self.conn.get_all_subnets()
         self.subnets = [(x["network"], x["network_view"]) for x in subnets]
         all_networks = containers + subnets
+        default_ext_attrs = get_default_ext_attrs(review_list=all_networks)
         for _pf in all_networks:
+            pf_ext_attrs = get_ext_attr_dict(extattrs=_pf.get("extattrs", {}))
             new_pf = self.prefix(
                 network=_pf["network"],
                 description=_pf.get("comment", ""),
                 status=_pf.get("status", "active"),
-                ext_attrs=get_ext_attr_dict(extattrs=_pf.get("extattrs", {})),
+                ext_attrs={**default_ext_attrs, **pf_ext_attrs},
                 vlans=build_vlan_map(vlans=_pf["vlans"]) if _pf.get("vlans") else {},
             )
             self.add(new_pf)
 
     def load_ipaddresses(self):
         """Load InfobloxIPAddress DiffSync model."""
-        for _ip in self.conn.get_all_ipv4address_networks(prefixes=self.subnets):
+        ipaddrs = self.conn.get_all_ipv4address_networks(prefixes=self.subnets)
+        default_ext_attrs = get_default_ext_attrs(review_list=ipaddrs)
+        for _ip in ipaddrs:
             _, prefix_length = _ip["network"].split("/")
             if _ip["names"]:
+                ip_ext_attrs = get_ext_attr_dict(extattrs=_ip.get("extattrs", {}))
                 new_ip = self.ipaddress(
                     address=_ip["ip_address"],
                     prefix=_ip["network"],
@@ -74,23 +80,29 @@ class InfobloxAdapter(DiffSync):
                     dns_name=_ip["names"][0],
                     status=self.conn.get_ipaddr_status(_ip),
                     description=_ip["comment"],
-                    ext_attrs=get_ext_attr_dict(extattrs=_ip.get("extattrs", {})),
+                    ext_attrs={**default_ext_attrs, **ip_ext_attrs},
                 )
                 self.add(new_ip)
 
     def load_vlanviews(self):
         """Load InfobloxVLANView DiffSync model."""
-        for _vv in self.conn.get_vlanviews():
+        vlanviews = self.conn.get_vlanviews()
+        default_ext_attrs = get_default_ext_attrs(review_list=vlanviews)
+        for _vv in vlanviews:
+            vv_ext_attrs = get_ext_attr_dict(extattrs=_vv.get("extattrs", {}))
             new_vv = self.vlangroup(
                 name=_vv["name"],
                 description=_vv["comment"] if _vv.get("comment") else "",
-                ext_attrs=get_ext_attr_dict(extattrs=_vv.get("extattrs", {})),
+                ext_attrs={**default_ext_attrs, **vv_ext_attrs},
             )
             self.add(new_vv)
 
     def load_vlans(self):
         """Load InfobloxVlan DiffSync model."""
-        for _vlan in self.conn.get_vlans():
+        vlans = self.conn.get_vlans()
+        default_ext_attrs = get_default_ext_attrs(review_list=vlans)
+        for _vlan in vlans:
+            vlan_ext_attrs = get_ext_attr_dict(extattrs=_vlan.get("extattrs", {}))
             vlan_group = re.search(r"(?:.+\:)(\S+)(?:\/\S+\/.+)", _vlan["_ref"])
             new_vlan = self.vlan(
                 name=_vlan["name"],
@@ -98,7 +110,7 @@ class InfobloxAdapter(DiffSync):
                 status=_vlan["status"],
                 vlangroup=vlan_group.group(1) if vlan_group else "",
                 description=_vlan["comment"] if _vlan.get("comment") else "",
-                ext_attrs=get_ext_attr_dict(extattrs=_vlan.get("extattrs", {})),
+                ext_attrs={**default_ext_attrs, **vlan_ext_attrs},
             )
             self.add(new_vlan)
 
@@ -127,6 +139,7 @@ class InfobloxAggregateAdapter(DiffSync):
         Args:
             job (object, optional): Infoblox job. Defaults to None.
             sync (object, optional): Infoblox DiffSync. Defaults to None.
+            conn (object): InfobloxAPI connection.
         """
         super().__init__(*args, **kwargs)
         self.job = job
@@ -141,12 +154,15 @@ class InfobloxAggregateAdapter(DiffSync):
 
     def load(self):
         """Load aggregate models."""
-        for container in self.conn.get_network_containers():
+        containers = self.conn.get_network_containers()
+        default_ext_attrs = get_default_ext_attrs(review_list=containers)
+        for container in containers:
             network = ipaddress.ip_network(container["network"])
+            container_ext_attrs = get_ext_attr_dict(extattrs=container.get("extattrs", {}))
             if network.is_private and container["network"] in ["10.0.0.0/8", "172.16.0.0/12", "192.168.0.0/16"]:
                 new_aggregate = self.aggregate(
                     network=container["network"],
                     description=container["comment"] if container.get("comment") else "",
-                    ext_attrs=container.get("extattrs", {}),
+                    ext_attrs={**default_ext_attrs, **container_ext_attrs},
                 )
                 self.add(new_aggregate)
