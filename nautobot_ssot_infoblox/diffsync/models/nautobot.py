@@ -92,18 +92,7 @@ class NautobotNetwork(Network):
             description=attrs.get("description", ""),
         )
         if attrs.get("vlans"):
-            relationship_dict = {
-                "name": "Prefix -> VLAN",
-                "slug": "prefix_to_vlan",
-                "type": RelationshipTypeChoices.TYPE_ONE_TO_MANY,
-                "source_type": ContentType.objects.get_for_model(OrmPrefix),
-                "source_label": "Prefix",
-                "destination_type": ContentType.objects.get_for_model(OrmVlan),
-                "destination_label": "VLAN",
-            }
-            relation, _ = OrmRelationship.objects.get_or_create(
-                name=relationship_dict["name"], defaults=relationship_dict
-            )
+            relation = OrmRelationship.objects.get(name="Prefix -> VLAN")
             for _, _vlan in attrs["vlans"].items():
                 index = 0
                 try:
