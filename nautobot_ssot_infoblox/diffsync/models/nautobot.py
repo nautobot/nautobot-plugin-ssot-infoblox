@@ -3,7 +3,6 @@ from django.contrib.contenttypes.models import ContentType
 from django.core.exceptions import ValidationError
 from django.utils.text import slugify
 from nautobot.extras.choices import CustomFieldTypeChoices
-from nautobot.extras.choices import RelationshipTypeChoices
 from nautobot.extras.models import Relationship as OrmRelationship
 from nautobot.extras.models import RelationshipAssociation as OrmRelationshipAssociation
 from nautobot.extras.models import CustomField as OrmCF
