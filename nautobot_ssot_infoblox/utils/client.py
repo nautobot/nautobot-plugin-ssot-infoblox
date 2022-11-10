@@ -2,6 +2,7 @@
 
 import copy
 import json
+import ipaddress
 import logging
 import re
 import urllib.parse
@@ -251,27 +252,51 @@ class InfobloxApi:  # pylint: disable=too-many-public-methods,  too-many-instanc
             }
         ]
         """
+
+        def get_ipaddrs(url_path, data):
+            try:
+                response = self._request(method="POST", path=url_path, data=data)
+            except HTTPError as err:
+                logger.info(err.response.text)
+                return []
+            logger.info(response.json()[0])
+            return response.json()[0]
+
+        def create_payload(prefix: str, view: str):
+            query = {
+                "method": "GET",
+                "object": "ipv4address",
+                "data": {"network_view": view, "network": prefix, "status": "USED"},
+                "args": {
+                    "_return_fields": "ip_address,mac_address,names,network,objects,status,types,usage,comment,extattrs"
+                },
+            }
+            return query
+
         url_path = "request"
-        payload = []
+        payload, ipaddrs = [], []
+        num_hosts = 0
         for prefix in prefixes:
-            payload.append(
-                {
-                    "method": "GET",
-                    "object": "ipv4address",
-                    "data": {"network_view": prefix[1], "network": prefix[0], "status": "USED"},
-                    "args": {
-                        "_return_fields": "ip_address,mac_address,names,network,objects,status,types,usage,comment,extattrs"
-                    },
-                }
-            )
-        data = json.dumps(payload)
-        try:
-            response = self._request(method="POST", path=url_path, data=data)
-        except HTTPError as err:
-            logger.info(err.response.text)
-            return []
-        logger.info(response.json()[0])
-        return response.json()[0]
+            view = prefix[1]
+            network = ipaddress.ip_network(prefix[0])
+            # append payloads to list until number of hosts is 1000
+            if network.num_addresses + num_hosts <= 1000:
+                num_hosts += network.num_addresses
+                payload.append(create_payload(prefix=prefix[0], view=view))
+            else:
+                # if we can't add more hosts, make call to get IP addresses with existing payload
+                if network.num_addresses + num_hosts > 1000:
+                    ipaddrs.append(get_ipaddrs(url_path=url_path, data=json.dumps(payload)))
+                    payload = []
+                    num_hosts = 0
+                else:
+                    # make call with individual network if it's larger than 1000 hosts
+                    payload = create_payload(prefix=str(network), view=view)
+                    payload["args"]["_max_results"] = network.num_addresses
+                    ipaddrs.append(get_ipaddrs(url_path=url_path, data=json.dumps(payload)))
+                    payload = []
+                    num_hosts = 0
+        return ipaddrs
 
     def create_network(self, prefix, comment=None):
         """Create a network.
