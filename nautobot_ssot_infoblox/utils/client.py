@@ -258,9 +258,10 @@ class InfobloxApi:  # pylint: disable=too-many-public-methods,  too-many-instanc
                 response = self._request(method="POST", path=url_path, data=data)
             except HTTPError as err:
                 logger.info(err.response.text)
-                return []
-            logger.info(response.json()[0])
-            return response.json()[0]
+            if len(response.json()) > 0:
+                logger.info(response.json()[0])
+                return response.json()[0]
+            return []
 
         def create_payload(prefix: str, view: str):
             query = {
