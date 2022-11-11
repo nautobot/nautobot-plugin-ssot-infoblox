@@ -130,7 +130,7 @@ class NautobotNetwork(Network):
             _pf.status = OrmStatus.objects.get(slug=attrs["status"])
         if "ext_attrs" in attrs:
             process_ext_attrs(diffsync=self.diffsync, obj=_pf, extattrs=attrs["ext_attrs"])
-        if "vlans" in attrs:
+        if "vlans" in attrs:  # pylint: disable=too-many-nested-blocks
             current_vlans = get_prefix_vlans(prefix=_pf)
             if len(current_vlans) < len(attrs["vlans"]):
                 for _, item in attrs["vlans"].items():
