@@ -11,7 +11,7 @@ from requests.models import HTTPError
 import requests_mock
 
 # from requests_mock.mocker import mock
-from nautobot_ssot_infoblox.utils.client import InvalidUrlScheme
+from nautobot_ssot_infoblox.utils.client import InvalidUrlScheme, get_dns_name
 from nautobot_ssot_infoblox.tests.fixtures_infoblox import (
     get_ptr_record_by_name,
     localhost_client_infoblox,
@@ -76,6 +76,18 @@ class TestInfobloxTest(unittest.TestCase):
         with self.assertRaises(InvalidUrlScheme):
             localhost_client_infoblox("file://mock_file.txt")
         self.assertLogs("Invalid URL scheme 'file' found for Infoblox URL. Please correct to use HTTPS.")
+
+    def test_get_dns_name(self):
+        """Test that get_dns_name method returns what we expect."""
+        tests = {
+            "www.test.com": "www.test.com",
+            "ServerName (Dev)": "ServerName_Dev",
+            "Test Printer": "Test_Printer",
+            "(TEST)": "",
+        }
+        for fqdn, expected in tests.items():
+            results = get_dns_name(possible_fqdn=fqdn)
+            self.assertEqual(results, expected)
 
     def test_request_success_generic(self):
         """Test generic _request with OK status."""

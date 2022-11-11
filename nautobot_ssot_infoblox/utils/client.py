@@ -49,6 +49,33 @@ def get_default_ext_attrs(review_list: list) -> dict:
     return default_ext_attrs
 
 
+def get_dns_name(possible_fqdn: str) -> str:
+    """Validates passed FQDN and returns if found.
+
+    Args:
+        possible_fqdn (str): Potential string to be used for IP Address dns_name.
+
+    Returns:
+        str: Validated FQDN or blank string if not valid.
+    """
+    dns_name = ""
+    # validate that the FQDN attempting to be imported is valid
+    if re.match(
+        pattern=r"(?=^.{1,253}$)(^(((?!-)[a-zA-Z0-9-]{1,63}(?<!-))|((?!-)[a-zA-Z0-9-]{1,63}(?<!-)\.)+[a-zA-Z]{2,63})$)",
+        string=possible_fqdn,
+    ):
+        return possible_fqdn
+    # if dns_name is just some text with spaces, replace spaces with underscore
+    if " " in possible_fqdn and "." not in possible_fqdn:
+        dns_name = possible_fqdn.replace("(", "").replace(")", "").replace(" ", "_")
+    else:
+        # if FQDN isn't valid than we need to strip the invalid part
+        match = re.match(pattern="^(?P<fqdn>[0-9A-Za-z._-]+)", string=possible_fqdn)
+        if match:
+            dns_name = match.group("fqdn")
+    return dns_name
+
+
 class InvalidUrlScheme(Exception):
     """Exception raised for wrong scheme being passed for URL.
 
@@ -254,11 +281,12 @@ class InfobloxApi:  # pylint: disable=too-many-public-methods,  too-many-instanc
         """
 
         def get_ipaddrs(url_path, data):
+            response = None
             try:
                 response = self._request(method="POST", path=url_path, data=data)
             except HTTPError as err:
                 logger.info(err.response.text)
-            if len(response.json()) > 0:
+            if response and len(response.json()) > 0:
                 logger.info(response.json()[0])
                 return response.json()[0]
             return []
@@ -284,6 +312,11 @@ class InfobloxApi:  # pylint: disable=too-many-public-methods,  too-many-instanc
             if network.num_addresses + num_hosts <= 1000:
                 num_hosts += network.num_addresses
                 payload.append(create_payload(prefix=prefix[0], view=view))
+                # check if last prefix in list, if it is, send payload otherwise keep processing
+                if prefixes[-1] == prefix:
+                    ipaddrs = get_ipaddrs(url_path=url_path, data=json.dumps(payload))
+                    payload = []
+                    num_hosts = 0
             else:
                 # if we can't add more hosts, make call to get IP addresses with existing payload
                 if network.num_addresses + num_hosts > 1000:
@@ -929,7 +962,7 @@ class InfobloxApi:  # pylint: disable=too-many-public-methods,  too-many-instanc
         logger.info("Infoblox PTR record created: %s", response.json())
         return response.json().get("result")
 
-    def search_ipv4_address(self, ipaddress):
+    def search_ipv4_address(self, ip_address):
         """Find if IP address is in IPAM. Returns empty list if address does not exist.
 
         Returns:
@@ -958,7 +991,7 @@ class InfobloxApi:  # pylint: disable=too-many-public-methods,  too-many-instanc
         ]
         """
         url_path = "search"
-        params = {"address": ipaddress, "_return_as_object": 1}
+        params = {"address": ip_address, "_return_as_object": 1}
         response = self._request("GET", url_path, params=params)
         logger.info(response.json())
         return response.json().get("result")
