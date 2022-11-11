@@ -287,14 +287,18 @@ class InfobloxApi:  # pylint: disable=too-many-public-methods,  too-many-instanc
             else:
                 # if we can't add more hosts, make call to get IP addresses with existing payload
                 if network.num_addresses + num_hosts > 1000:
-                    ipaddrs.append(get_ipaddrs(url_path=url_path, data=json.dumps(payload)))
+                    addrs = get_ipaddrs(url_path=url_path, data=json.dumps(payload))
+                    if addrs:
+                        ipaddrs = ipaddrs + addrs
                     payload = []
                     num_hosts = 0
                 else:
                     # make call with individual network if it's larger than 1000 hosts
                     payload = create_payload(prefix=str(network), view=view)
                     payload["args"]["_max_results"] = network.num_addresses
-                    ipaddrs.append(get_ipaddrs(url_path=url_path, data=json.dumps(payload)))
+                    addrs = get_ipaddrs(url_path=url_path, data=json.dumps(payload))
+                    if addrs:
+                        ipaddrs = ipaddrs + addrs
                     payload = []
                     num_hosts = 0
         return ipaddrs
