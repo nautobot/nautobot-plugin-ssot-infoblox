@@ -134,17 +134,24 @@ class NautobotNetwork(Network):
             current_vlans = get_prefix_vlans(prefix=_pf)
             if len(current_vlans) < len(attrs["vlans"]):
                 for _, item in attrs["vlans"].items():
-                    vlan = OrmVlan.objects.get(vid=item["vid"], name=item["name"], group__name=item["group"])
-                    if vlan not in current_vlans:
+                    try:
+                        vlan = OrmVlan.objects.get(vid=item["vid"], name=item["name"], group__name=item["group"])
+                        if vlan not in current_vlans:
+                            if self.diffsync.job.kwargs.get("debug"):
+                                self.diffsync.job.log_debug(message=f"Adding VLAN {vlan.vid} to {_pf.prefix}.")
+                            OrmRelationshipAssociation.objects.get_or_create(
+                                relationship_id=OrmRelationship.objects.get(name="Prefix -> VLAN").id,
+                                source_type=ContentType.objects.get_for_model(OrmPrefix),
+                                source_id=_pf.id,
+                                destination_type=ContentType.objects.get_for_model(OrmVlan),
+                                destination_id=vlan.id,
+                            )
+                    except OrmVlan.DoesNotExist:
                         if self.diffsync.job.kwargs.get("debug"):
-                            self.diffsync.job.log_debug(message=f"Adding VLAN {vlan.vid} to {_pf.prefix}.")
-                        OrmRelationshipAssociation.objects.get_or_create(
-                            relationship_id=OrmRelationship.objects.get(name="Prefix -> VLAN").id,
-                            source_type=ContentType.objects.get_for_model(OrmPrefix),
-                            source_id=_pf.id,
-                            destination_type=ContentType.objects.get_for_model(OrmVlan),
-                            destination_id=vlan.id,
-                        )
+                            self.diffsync.job.log_debug(
+                                message=f"Unable to find VLAN {item['vid']} {item['name']} in {item['group']} to assign to prefix {_pf.prefix}."
+                            )
+                            continue
             else:
                 for vlan in current_vlans:
                     if vlan.vid not in attrs["vlans"]:
