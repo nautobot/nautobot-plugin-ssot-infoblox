@@ -308,32 +308,35 @@ class InfobloxApi:  # pylint: disable=too-many-public-methods,  too-many-instanc
         for prefix in prefixes:
             view = prefix[1]
             network = ipaddress.ip_network(prefix[0])
+            # make call with individual network if it's larger than 1000 hosts
+            if network.num_addresses > 1000:
+                pf_payload = create_payload(prefix=prefix[0], view=view)
+                pf_payload["args"]["_max_results"] = network.num_addresses
+                addrs = get_ipaddrs(url_path=url_path, data=json.dumps([pf_payload]))
+                if addrs:
+                    ipaddrs = ipaddrs + addrs
+                continue
+
             # append payloads to list until number of hosts is 1000
             if network.num_addresses + num_hosts <= 1000:
                 num_hosts += network.num_addresses
                 payload.append(create_payload(prefix=prefix[0], view=view))
-                # check if last prefix in list, if it is, send payload otherwise keep processing
-                if prefixes[-1] == prefix:
-                    ipaddrs = get_ipaddrs(url_path=url_path, data=json.dumps(payload))
-                    payload = []
-                    num_hosts = 0
             else:
                 # if we can't add more hosts, make call to get IP addresses with existing payload
-                if network.num_addresses + num_hosts > 1000:
-                    addrs = get_ipaddrs(url_path=url_path, data=json.dumps(payload))
-                    if addrs:
-                        ipaddrs = ipaddrs + addrs
-                    payload = []
-                    num_hosts = 0
-                else:
-                    # make call with individual network if it's larger than 1000 hosts
-                    payload = create_payload(prefix=str(network), view=view)
-                    payload["args"]["_max_results"] = network.num_addresses
-                    addrs = get_ipaddrs(url_path=url_path, data=json.dumps(payload))
-                    if addrs:
-                        ipaddrs = ipaddrs + addrs
-                    payload = []
-                    num_hosts = 0
+                addrs = get_ipaddrs(url_path=url_path, data=json.dumps(payload))
+                if addrs:
+                    ipaddrs = ipaddrs + addrs
+                # reset payload as all addresses are processed
+                payload = []
+                payload.append(create_payload(prefix=prefix[0], view=view))
+                num_hosts = network.num_addresses
+            # check if last prefix in list, if it is, send payload otherwise keep processing
+            if prefixes[-1] == prefix:
+                addrs = get_ipaddrs(url_path=url_path, data=json.dumps(payload))
+                if addrs:
+                    ipaddrs = ipaddrs + addrs
+                payload = []
+                num_hosts = 0
         return ipaddrs
 
     def create_network(self, prefix, comment=None):

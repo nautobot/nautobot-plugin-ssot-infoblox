@@ -7,7 +7,7 @@
 			"lease_state": "FREE",
 			"mac_address": "55:55:55:55:55:55",
 			"names": [],
-			"network": "10.220.0.0/22",
+			"network": "10.220.0.0/31",
 			"network_view": "default",
 			"objects": [
 				"fixedaddress/ZG5zLmZpeGVkX2FkZHJlc3MkMTAuMjIwLjAuMTAwLjAuLg:10.220.0.100/default"
@@ -30,7 +30,7 @@
 			"names": [
 				"testdevice1.test"
 			],
-			"network": "10.220.0.0/22",
+			"network": "10.220.0.0/31",
 			"network_view": "default",
 			"objects": [
 				"record:host/ZG5zLmhvc3QkLl9kZWZhdWx0LnRlc3QudGVzdGRldmljZTE:testdevice1.test/default"
