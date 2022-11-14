@@ -50,7 +50,7 @@ def get_default_ext_attrs(review_list: list) -> dict:
 
 
 def get_dns_name(possible_fqdn: str) -> str:
-    """Validates passed FQDN and returns if found.
+    """Validate passed FQDN and returns if found.
 
     Args:
         possible_fqdn (str): Potential string to be used for IP Address dns_name.
