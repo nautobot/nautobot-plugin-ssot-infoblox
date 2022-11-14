@@ -287,7 +287,7 @@ class InfobloxApi:  # pylint: disable=too-many-public-methods,  too-many-instanc
             except HTTPError as err:
                 logger.info(err.response.text)
             if response and len(response.json()) > 0:
-                logger.info(response.json()[0])
+                logger.debug(response.json()[0])
                 return response.json()[0]
             return []
 
