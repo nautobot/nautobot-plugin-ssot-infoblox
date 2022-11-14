@@ -3,7 +3,6 @@ from django.contrib.contenttypes.models import ContentType
 from django.core.exceptions import ValidationError
 from django.utils.text import slugify
 from nautobot.extras.choices import CustomFieldTypeChoices
-from nautobot.extras.choices import RelationshipTypeChoices
 from nautobot.extras.models import Relationship as OrmRelationship
 from nautobot.extras.models import RelationshipAssociation as OrmRelationshipAssociation
 from nautobot.extras.models import CustomField as OrmCF
@@ -33,46 +32,47 @@ def process_ext_attrs(diffsync, obj: object, extattrs: dict):
         extattrs (dict): The Extensibility Attributes to be analyzed and applied to passed `prefix`.
     """
     for attr, attr_value in extattrs.items():
-        if attr.lower() in ["site", "facility"]:
-            try:
-                obj.site = OrmSite.objects.get(name=attr_value)
-            except OrmSite.DoesNotExist as err:
-                diffsync.job.log_warning(
-                    message=f"Unable to find Site {attr_value} for {obj} found in Extensibility Attributes '{attr}'. {err}"
-                )
-        if attr.lower() == "vrf":
-            try:
-                obj.vrf = OrmVRF.objects.get(name=attr_value)
-            except OrmVRF.DoesNotExist as err:
-                diffsync.job.log_warning(
-                    message=f"Unable to find VRF {attr_value} for {obj} found in Extensibility Attributes '{attr}'. {err}"
-                )
-        if "role" in attr.lower():
-            if isinstance(obj, OrmIPAddress) and attr_value.lower() in IPAddressRoleChoices.as_dict():
-                obj.role = attr_value.lower()
-            else:
+        if attr_value:
+            if attr.lower() in ["site", "facility"]:
                 try:
-                    obj.role = OrmPrefixRole.objects.get(name=attr_value)
-                except OrmPrefixRole.DoesNotExist as err:
+                    obj.site = OrmSite.objects.get(name=attr_value)
+                except OrmSite.DoesNotExist as err:
                     diffsync.job.log_warning(
-                        message=f"Unable to find Role {attr_value} for {obj} found in Extensibility Attributes '{attr}'. {err}"
+                        message=f"Unable to find Site {attr_value} for {obj} found in Extensibility Attributes '{attr}'. {err}"
                     )
+            if attr.lower() == "vrf":
+                try:
+                    obj.vrf = OrmVRF.objects.get(name=attr_value)
+                except OrmVRF.DoesNotExist as err:
+                    diffsync.job.log_warning(
+                        message=f"Unable to find VRF {attr_value} for {obj} found in Extensibility Attributes '{attr}'. {err}"
+                    )
+            if "role" in attr.lower():
+                if isinstance(obj, OrmIPAddress) and attr_value.lower() in IPAddressRoleChoices.as_dict():
+                    obj.role = attr_value.lower()
+                else:
+                    try:
+                        obj.role = OrmPrefixRole.objects.get(name=attr_value)
+                    except OrmPrefixRole.DoesNotExist as err:
+                        diffsync.job.log_warning(
+                            message=f"Unable to find Role {attr_value} for {obj} found in Extensibility Attributes '{attr}'. {err}"
+                        )
 
-        if attr.lower() in ["tenant", "dept", "department"]:
-            try:
-                obj.tenant = OrmTenant.objects.get(name=attr_value)
-            except OrmTenant.DoesNotExist as err:
-                diffsync.job.log_warning(
-                    message=f"Unable to find Tenant {attr_value} for {obj} found in Extensibility Attributes '{attr}'. {err}"
-                )
-        _cf_dict = {
-            "name": slugify(attr),
-            "type": CustomFieldTypeChoices.TYPE_TEXT,
-            "label": attr,
-        }
-        field, _ = OrmCF.objects.get_or_create(name=_cf_dict["name"], defaults=_cf_dict)
-        field.content_types.add(ContentType.objects.get_for_model(type(obj)).id)
-        obj.custom_field_data.update({_cf_dict["name"]: str(attr_value)})
+            if attr.lower() in ["tenant", "dept", "department"]:
+                try:
+                    obj.tenant = OrmTenant.objects.get(name=attr_value)
+                except OrmTenant.DoesNotExist as err:
+                    diffsync.job.log_warning(
+                        message=f"Unable to find Tenant {attr_value} for {obj} found in Extensibility Attributes '{attr}'. {err}"
+                    )
+            _cf_dict = {
+                "name": slugify(attr),
+                "type": CustomFieldTypeChoices.TYPE_TEXT,
+                "label": attr,
+            }
+            field, _ = OrmCF.objects.get_or_create(name=_cf_dict["name"], defaults=_cf_dict)
+            field.content_types.add(ContentType.objects.get_for_model(type(obj)).id)
+            obj.custom_field_data.update({_cf_dict["name"]: str(attr_value)})
 
 
 class NautobotNetwork(Network):
@@ -92,18 +92,7 @@ class NautobotNetwork(Network):
             description=attrs.get("description", ""),
         )
         if attrs.get("vlans"):
-            relationship_dict = {
-                "name": "Prefix -> VLAN",
-                "slug": "prefix_to_vlan",
-                "type": RelationshipTypeChoices.TYPE_ONE_TO_MANY,
-                "source_type": ContentType.objects.get_for_model(OrmPrefix),
-                "source_label": "Prefix",
-                "destination_type": ContentType.objects.get_for_model(OrmVlan),
-                "destination_label": "VLAN",
-            }
-            relation, _ = OrmRelationship.objects.get_or_create(
-                name=relationship_dict["name"], defaults=relationship_dict
-            )
+            relation = OrmRelationship.objects.get(name="Prefix -> VLAN")
             for _, _vlan in attrs["vlans"].items():
                 index = 0
                 try:
