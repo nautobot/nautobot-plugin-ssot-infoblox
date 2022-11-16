@@ -119,9 +119,13 @@ class InfobloxAdapter(DiffSync):
     def load(self):
         """Load all models by calling other methods."""
         self.load_prefixes()
+        self.job.log(message=f"Loaded {len(self.dict()['prefix'])} prefixes from Infoblox.")
         self.load_ipaddresses()
+        self.job.log(message=f"Loaded {len(self.dict()['ipaddress'])} IP addresses from Infoblox.")
         self.load_vlanviews()
+        self.job.log(message=f"Loaded {len(self.dict()['vlangroup'])} VLAN views from Infoblox.")
         self.load_vlans()
+        self.job.log(message=f"Loaded {len(self.dict()['vlan'])} VLANs from Infoblox.")
 
     def sync_complete(self, source, diff, flags=DiffSyncFlags.NONE, logger=None):
         """Add tags and custom fields to synced objects."""
