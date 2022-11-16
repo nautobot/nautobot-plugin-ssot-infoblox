@@ -194,13 +194,17 @@ class NautobotAdapter(NautobotMixin, DiffSync):
     def load(self):
         """Load models with data from Nautobot."""
         self.load_prefixes()
-        self.job.log(message=f"Loaded {len(self.dict()['prefix'])} prefixes from Nautobot.")
+        if "prefix" in self.dict():
+            self.job.log(message=f"Loaded {len(self.dict()['prefix'])} prefixes from Nautobot.")
         self.load_ipaddresses()
-        self.job.log(message=f"Loaded {len(self.dict()['ipaddress'])} IP addresses from Nautobot.")
+        if "ipaddress" in self.dict():
+            self.job.log(message=f"Loaded {len(self.dict()['ipaddress'])} IP addresses from Nautobot.")
         self.load_vlangroups()
-        self.job.log(message=f"Loaded {len(self.dict()['vlangroup'])} VLAN Groups from Nautobot.")
+        if "vlangroup" in self.dict():
+            self.job.log(message=f"Loaded {len(self.dict()['vlangroup'])} VLAN Groups from Nautobot.")
         self.load_vlans()
-        self.job.log(message=f"Loaded {len(self.dict()['vlan'])} VLANs from Nautobot.")
+        if "vlan" in self.dict():
+            self.job.log(message=f"Loaded {len(self.dict()['vlan'])} VLANs from Nautobot.")
 
 
 class NautobotAggregateAdapter(NautobotMixin, DiffSync):
