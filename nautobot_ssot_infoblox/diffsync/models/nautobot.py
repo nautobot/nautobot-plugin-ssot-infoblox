@@ -218,9 +218,7 @@ class NautobotIPAddress(IPAddress):
             _ipaddr.validated_save()
             return super().update(attrs)
         except ValidationError as err:
-            self.diffsync.job.log_warning(
-                message=f"Error with updating IP Address {self.address}. {err}"
-            )
+            self.diffsync.job.log_warning(message=f"Error with updating IP Address {self.address}. {err}")
             return None
 
     # def delete(self):
