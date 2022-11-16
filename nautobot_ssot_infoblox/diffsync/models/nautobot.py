@@ -194,8 +194,14 @@ class NautobotIPAddress(IPAddress):
         _ip.tags.add(create_tag_sync_from_infoblox())
         if attrs.get("ext_attrs"):
             process_ext_attrs(diffsync=diffsync, obj=_ip, extattrs=attrs["ext_attrs"])
-        _ip.validated_save()
-        return super().create(ids=ids, diffsync=diffsync, attrs=attrs)
+        try:
+            _ip.validated_save()
+            return super().create(ids=ids, diffsync=diffsync, attrs=attrs)
+        except ValidationError as err:
+            diffsync.job.log_warning(
+                message=f"Error with creating IP Address {ids['address']}/{_pf.prefix_length}. {err}"
+            )
+            return None
 
     def update(self, attrs):
         """Update IPAddress object in Nautobot."""
@@ -208,8 +214,14 @@ class NautobotIPAddress(IPAddress):
             _ipaddr.dns_name = attrs["dns_name"]
         if "ext_attrs" in attrs:
             process_ext_attrs(diffsync=self.diffsync, obj=_ipaddr, extattrs=attrs["ext_attrs"])
-        _ipaddr.validated_save()
-        return super().update(attrs)
+        try:
+            _ipaddr.validated_save()
+            return super().update(attrs)
+        except ValidationError as err:
+            self.diffsync.job.log_warning(
+                message=f"Error with updating IP Address {self.address}. {err}"
+            )
+            return None
 
     # def delete(self):
     #     """Delete IPAddress object in Nautobot."""
