@@ -280,7 +280,16 @@ class InfobloxApi:  # pylint: disable=too-many-public-methods,  too-many-instanc
         ]
         """
 
-        def get_ipaddrs(url_path, data):
+        def get_ipaddrs(url_path: str, data: dict) -> list:
+            """Retrieve IP addresses specified in data payload.
+
+            Args:
+                url_path (str): The URL path to the API endpoint for requests.
+                data (dict): The data payload query of IP Addresses.
+
+            Returns:
+                list: List of dicts of IP Addresses for the specified prefixes or an empty list if no response.
+            """
             response = None
             try:
                 response = self._request(method="POST", path=url_path, data=data)
@@ -291,7 +300,16 @@ class InfobloxApi:  # pylint: disable=too-many-public-methods,  too-many-instanc
                 return response.json()[0]
             return []
 
-        def create_payload(prefix: str, view: str):
+        def create_payload(prefix: str, view: str) -> dict:
+            """Create the payload structure for querying IP Addresses from subnets.
+
+            Args:
+                prefix (str): The prefix to get IP addresses for.
+                view (str): The Network View of the prefix being queried.
+
+            Returns:
+                dict: Dictionary containing query parameters for IP addresses from a prefix intended to be part of a list sent to request endpoint.
+            """
             query = {
                 "method": "GET",
                 "object": "ipv4address",
