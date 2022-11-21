@@ -279,8 +279,8 @@ class NautobotVlan(Vlan):
         _vlan = OrmVlan(
             vid=ids["vid"],
             name=ids["name"],
-            status=diffsync.status_map[cls.get_vlan_status(attrs["status"])],
-            group=OrmVlanGroup.objects.get(name=ids["vlangroup"]) if ids["vlangroup"] else None,
+            status_id=diffsync.status_map[cls.get_vlan_status(attrs["status"])],
+            group_id=diffsync.vlangroup_map[ids["vlangroup"]],
             description=attrs["description"],
         )
         if "ext_attrs" in attrs:
@@ -317,7 +317,7 @@ class NautobotVlan(Vlan):
         """Update VLAN object in Nautobot."""
         _vlan = OrmVlan.objects.get(id=self.pk)
         if attrs.get("status"):
-            _vlan.status = self.diffsync.status_map[self.get_vlan_status(attrs["status"])]
+            _vlan.status_id = self.diffsync.status_map[self.get_vlan_status(attrs["status"])]
         if attrs.get("description"):
             _vlan.description = attrs["description"]
         if "ext_attrs" in attrs:
