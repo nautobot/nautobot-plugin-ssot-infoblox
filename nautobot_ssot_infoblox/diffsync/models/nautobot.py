@@ -100,7 +100,7 @@ class NautobotNetwork(Network):
                             source_type=ContentType.objects.get_for_model(OrmPrefix),
                             source_id=_prefix.id,
                             destination_type=ContentType.objects.get_for_model(OrmVlan),
-                            destination_id=found_vlan.id,
+                            destination_id=found_vlan,
                         )
                     index += 1
                 except KeyError as err:
@@ -185,7 +185,7 @@ class NautobotIPAddress(IPAddress):
         """Create IPAddress object in Nautobot."""
         _pf = ipaddress.ip_network(ids["prefix"])
         try:
-            status = diffsync.status_map[attrs["status"]]
+            status = diffsync.status_map[slugify(attrs["status"])]
         except KeyError:
             status = diffsync.status_map["active"]
         _ip = OrmIPAddress(
@@ -213,7 +213,7 @@ class NautobotIPAddress(IPAddress):
         _ipaddr = OrmIPAddress.objects.get(id=self.pk)
         if attrs.get("status"):
             try:
-                status = self.diffsync.status_map[attrs["status"]]
+                status = self.diffsync.status_map[slugify(attrs["status"])]
             except KeyError:
                 status = self.diffsync.status_map["active"]
             _ipaddr.status_id = status
