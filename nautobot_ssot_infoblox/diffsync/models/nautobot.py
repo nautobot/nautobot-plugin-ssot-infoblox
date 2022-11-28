@@ -198,7 +198,6 @@ class NautobotIPAddress(IPAddress):
         if attrs.get("ext_attrs"):
             process_ext_attrs(diffsync=diffsync, obj=_ip, extattrs=attrs["ext_attrs"])
         try:
-            _ip.clean()
             diffsync.objects_to_create["ipaddrs"].append(_ip)
             diffsync.ipaddr_map[_ip.address] = _ip.id
             return super().create(ids=ids, diffsync=diffsync, attrs=attrs)
@@ -286,18 +285,11 @@ class NautobotVlan(Vlan):
         if "ext_attrs" in attrs:
             process_ext_attrs(diffsync=diffsync, obj=_vlan, extattrs=attrs["ext_attrs"])
         _vlan.tags.add(create_tag_sync_from_infoblox())
-        # ensure that the VLAN Group and VLAN have the same Site
-        if not _vlan.site and _vlan.group.site:
-            _vlan.site = _vlan.group.site
-        if not _vlan.group.site and _vlan.site:
-            _vlan.group.site = _vlan.site
-            _vlan.group.validated_save()
         try:
-            _vlan.clean()
-            diffsync.object_to_create["vlans"].append(_vlan)
-            if _vlan.group not in diffsync.vlan_map:
-                diffsync.vlan_map[_vlan.group.name] = {}
-            diffsync.vlan_map[_vlan.group.name][_vlan.vid] = _vlan.id
+            diffsync.objects_to_create["vlans"].append(_vlan)
+            if ids["vlangroup"] not in diffsync.vlan_map:
+                diffsync.vlan_map[ids["vlangroup"]] = {}
+            diffsync.vlan_map[ids["vlangroup"]][_vlan.vid] = _vlan.id
             return super().create(ids=ids, diffsync=diffsync, attrs=attrs)
         except ValidationError as err:
             diffsync.job.log_warning(message=f"Unable to create VLAN {ids['name']} {ids['vid']}. {err}")
