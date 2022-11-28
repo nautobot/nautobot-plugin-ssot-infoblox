@@ -13,6 +13,7 @@ from nautobot.ipam.models import IPAddress as OrmIPAddress
 from nautobot.ipam.models import Prefix as OrmPrefix
 from nautobot.ipam.models import VLAN as OrmVlan
 from nautobot.ipam.models import VLANGroup as OrmVlanGroup
+from nautobot_ssot_infoblox.constant import PLUGIN_CFG
 from nautobot_ssot_infoblox.diffsync.models.base import Aggregate, Network, IPAddress, Vlan, VlanView
 from nautobot_ssot_infoblox.utils.diffsync import create_tag_sync_from_infoblox
 from nautobot_ssot_infoblox.utils.nautobot import get_prefix_vlans
@@ -79,7 +80,7 @@ class NautobotNetwork(Network):
         try:
             status = diffsync.status_map[attrs["status"]]
         except KeyError:
-            status = diffsync.status_map["active"]
+            status = diffsync.status_map[slugify(PLUGIN_CFG.get("default_status", "active"))]
 
         _prefix = OrmPrefix(
             prefix=ids["network"],
@@ -124,7 +125,7 @@ class NautobotNetwork(Network):
             _pf.description = attrs["description"]
         if "status" in attrs:
             try:
-                _pf.status_id = self.diffsync.status_map[attrs["status"]]
+                _pf.status_id = self.diffsync.status_map[slugify(attrs["status"])]
             except KeyError:
                 self.diffsync.job.log_warning(
                     message=f"Unable to find Status {attrs['status']} to update prefix {_pf.prefix}."
@@ -187,7 +188,7 @@ class NautobotIPAddress(IPAddress):
         try:
             status = diffsync.status_map[slugify(attrs["status"])]
         except KeyError:
-            status = diffsync.status_map["active"]
+            status = diffsync.status_map[slugify(PLUGIN_CFG.get("default_status", "active"))]
         _ip = OrmIPAddress(
             address=f"{ids['address']}/{_pf.prefixlen}",
             status_id=status,
@@ -214,7 +215,7 @@ class NautobotIPAddress(IPAddress):
             try:
                 status = self.diffsync.status_map[slugify(attrs["status"])]
             except KeyError:
-                status = self.diffsync.status_map["active"]
+                status = self.diffsync.status_map[slugify(PLUGIN_CFG.get("default_status", "active"))]
             _ipaddr.status_id = status
         if attrs.get("description"):
             _ipaddr.description = attrs["description"]
