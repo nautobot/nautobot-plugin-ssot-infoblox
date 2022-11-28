@@ -213,6 +213,8 @@ class NautobotAdapter(NautobotMixin, DiffSync):  # pylint: disable=too-many-inst
     def load_vlans(self):
         """Load VLANs from Nautobot."""
         default_cfs = get_default_custom_fields(cf_contenttype=ContentType.objects.get_for_model(VLAN))
+        # To ensure we are only dealing with VLANs imported from Infoblox we need to filter to those with a
+        # VLAN Group assigned to match how Infoblox requires a VLAN View to be associated to VLANs.
         for vlan in VLAN.objects.filter(group__isnull=False):
             if vlan.group.name not in self.vlan_map:
                 self.vlan_map[vlan.group.name] = {}
