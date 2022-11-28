@@ -178,23 +178,22 @@ class NautobotAdapter(NautobotMixin, DiffSync):  # pylint: disable=too-many-inst
                 )
                 continue
 
-            if ipaddr.dns_name:
-                if "ssot-synced-to-infoblox" in ipaddr.custom_field_data:
-                    ipaddr.custom_field_data.pop("ssot-synced-to-infoblox")
-                _ip = self.ipaddress(
-                    address=addr,
-                    prefix=str(prefix),
-                    status=ipaddr.status.name if ipaddr.status else None,
-                    prefix_length=prefix.prefix_length if prefix else ipaddr.prefix_length,
-                    dns_name=ipaddr.dns_name,
-                    description=ipaddr.description,
-                    ext_attrs={**default_cfs, **ipaddr.custom_field_data},
-                    pk=ipaddr.id,
-                )
-                try:
-                    self.add(_ip)
-                except ObjectAlreadyExists:
-                    self.job.log_warning(ipaddr, message=f"Duplicate IP Address detected: {addr}.")
+            if "ssot-synced-to-infoblox" in ipaddr.custom_field_data:
+                ipaddr.custom_field_data.pop("ssot-synced-to-infoblox")
+            _ip = self.ipaddress(
+                address=addr,
+                prefix=str(prefix),
+                status=ipaddr.status.name if ipaddr.status else None,
+                prefix_length=prefix.prefix_length if prefix else ipaddr.prefix_length,
+                dns_name=ipaddr.dns_name,
+                description=ipaddr.description,
+                ext_attrs={**default_cfs, **ipaddr.custom_field_data},
+                pk=ipaddr.id,
+            )
+            try:
+                self.add(_ip)
+            except ObjectAlreadyExists:
+                self.job.log_warning(ipaddr, message=f"Duplicate IP Address detected: {addr}.")
 
     def load_vlangroups(self):
         """Load VLAN Groups from Nautobot."""
