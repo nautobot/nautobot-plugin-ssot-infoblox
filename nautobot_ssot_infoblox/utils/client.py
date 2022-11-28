@@ -326,7 +326,8 @@ class InfobloxApi:  # pylint: disable=too-many-public-methods,  too-many-instanc
         for prefix in prefixes:
             view = prefix[1]
             network = ipaddress.ip_network(prefix[0])
-            # make call with individual network if it's larger than 1000 hosts
+            # Due to default of 1000 max_results from Infoblox we must specify a max result limit or limit response to 1000.
+            # Make individual request if it's larger than 1000 hosts and specify max result limit to be number of hosts in prefix.
             if network.num_addresses > 1000:
                 pf_payload = create_payload(prefix=prefix[0], view=view)
                 pf_payload["args"]["_max_results"] = network.num_addresses
