@@ -30,6 +30,21 @@ def get_all_ipv4address_networks():
     return _json_read_fixture("get_all_ipv4address_networks.json")
 
 
+def get_all_ipv4address_networks_medium():
+    """Return all IPv4Address networks from medium size network."""
+    return _json_read_fixture("get_all_ipv4address_networks_medium.json")
+
+
+def get_all_ipv4address_networks_large():
+    """Return all IPv4Address networks from large size network."""
+    return _json_read_fixture("get_all_ipv4address_networks_large.json")
+
+
+def get_all_ipv4address_networks_bulk():
+    """Return all IPv4Address networks from multiple medium networks that result in over 1k addresses."""
+    return _json_read_fixture("get_all_ipv4address_networks_bulk.json")
+
+
 def create_ptr_record():
     """Return a PTR record."""
     return _json_read_fixture("create_ptr_record.json")

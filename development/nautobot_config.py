@@ -307,6 +307,7 @@ PLUGINS_CONFIG = {
         "NAUTOBOT_INFOBLOX_WAPI_VERSION": os.getenv("NAUTOBOT_INFOBLOX_WAPI_VERSION", "v2.12"),
         "enable_sync_to_infoblox": True,
         "enable_rfc1918_network_containers": True,
+        "default_status": "active",
     },
     "nautobot_ssot": {
         "hide_example_jobs": True,
