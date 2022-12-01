@@ -1,12 +1,15 @@
 """Nautobot Adapter for Infoblox integration with SSoT plugin."""
+from collections import defaultdict
 import datetime
 from itertools import chain
 from diffsync import DiffSync
 from diffsync.exceptions import ObjectAlreadyExists, ObjectNotFound
 from django.contrib.contenttypes.models import ContentType
+from nautobot.dcim.models import Site
 from nautobot.extras.choices import CustomFieldTypeChoices
-from nautobot.extras.models import Tag, CustomField
-from nautobot.ipam.models import Aggregate, IPAddress, Prefix, VLAN, VLANGroup
+from nautobot.extras.models import Relationship, Status, Tag, CustomField
+from nautobot.ipam.models import Aggregate, IPAddress, Prefix, Role, VLAN, VLANGroup
+from nautobot.tenancy.models import Tenant
 from nautobot_ssot_infoblox.diffsync.models import (
     NautobotAggregate,
     NautobotNetwork,
@@ -77,7 +80,7 @@ class NautobotMixin:
             _tag_object(Prefix.objects.get(pk=model_instance.pk))
 
 
-class NautobotAdapter(NautobotMixin, DiffSync):
+class NautobotAdapter(NautobotMixin, DiffSync):  # pylint: disable=too-many-instance-attributes
     """DiffSync adapter using ORM to communicate to Nautobot."""
 
     prefix = NautobotNetwork
@@ -86,6 +89,17 @@ class NautobotAdapter(NautobotMixin, DiffSync):
     vlan = NautobotVlan
 
     top_level = ["vlangroup", "vlan", "prefix", "ipaddress"]
+
+    status_map = {}
+    site_map = {}
+    relationship_map = {}
+    tenant_map = {}
+    vrf_map = {}
+    prefix_map = {}
+    role_map = {}
+    ipaddr_map = {}
+    vlan_map = {}
+    vlangroup_map = {}
 
     def __init__(self, *args, job=None, sync=None, **kwargs):
         """Initialize Nautobot.
@@ -97,12 +111,33 @@ class NautobotAdapter(NautobotMixin, DiffSync):
         super().__init__(*args, **kwargs)
         self.job = job
         self.sync = sync
+        self.objects_to_create = defaultdict(list)
+
+    def sync_complete(self, source: DiffSync, *args, **kwargs):
+        """Process object creations/updates using bulk operations.
+
+        Args:
+            source (DiffSync): Source DiffSync adapter data.
+        """
+        if len(self.objects_to_create["vlangroups"]) > 0:
+            self.job.log_info(message="Performing bulk create of VLAN Groups in Nautobot")
+            VLANGroup.objects.bulk_create(self.objects_to_create["vlangroups"], batch_size=250)
+        if len(self.objects_to_create["vlans"]) > 0:
+            self.job.log_info(message="Performing bulk create of VLANs in Nautobot.")
+            VLAN.objects.bulk_create(self.objects_to_create["vlans"], batch_size=500)
+        if len(self.objects_to_create["prefixes"]) > 0:
+            self.job.log_info(message="Performing bulk create of Prefixes in Nautobot")
+            Prefix.objects.bulk_create(self.objects_to_create["prefixes"], batch_size=500)
+        if len(self.objects_to_create["ipaddrs"]) > 0:
+            self.job.log_info(message="Performing bulk create of IP Addresses in Nautobot")
+            IPAddress.objects.bulk_create(self.objects_to_create["ipaddrs"], batch_size=1000)
 
     def load_prefixes(self):
         """Load Prefixes from Nautobot."""
         all_prefixes = list(chain(Prefix.objects.all(), Aggregate.objects.all()))
         default_cfs = get_default_custom_fields(cf_contenttype=ContentType.objects.get_for_model(Prefix))
         for prefix in all_prefixes:
+            self.prefix_map[str(prefix.prefix)] = prefix.id
             if "ssot-synced-to-infoblox" in prefix.custom_field_data:
                 prefix.custom_field_data.pop("ssot-synced-to-infoblox")
             current_vlans = get_prefix_vlans(prefix=prefix)
@@ -123,6 +158,7 @@ class NautobotAdapter(NautobotMixin, DiffSync):
         """Load IP Addresses from Nautobot."""
         default_cfs = get_default_custom_fields(cf_contenttype=ContentType.objects.get_for_model(IPAddress))
         for ipaddr in IPAddress.objects.all():
+            self.ipaddr_map[str(ipaddr.address)] = ipaddr.id
             addr = ipaddr.host
             # the last Prefix is the most specific and is assumed the one the IP address resides in
             prefix = Prefix.objects.net_contains(addr).last()
@@ -142,28 +178,28 @@ class NautobotAdapter(NautobotMixin, DiffSync):
                 )
                 continue
 
-            if ipaddr.dns_name:
-                if "ssot-synced-to-infoblox" in ipaddr.custom_field_data:
-                    ipaddr.custom_field_data.pop("ssot-synced-to-infoblox")
-                _ip = self.ipaddress(
-                    address=addr,
-                    prefix=str(prefix),
-                    status=ipaddr.status.name if ipaddr.status else None,
-                    prefix_length=prefix.prefix_length if prefix else ipaddr.prefix_length,
-                    dns_name=ipaddr.dns_name,
-                    description=ipaddr.description,
-                    ext_attrs={**default_cfs, **ipaddr.custom_field_data},
-                    pk=ipaddr.id,
-                )
-                try:
-                    self.add(_ip)
-                except ObjectAlreadyExists:
-                    self.job.log_warning(ipaddr, message=f"Duplicate IP Address detected: {addr}.")
+            if "ssot-synced-to-infoblox" in ipaddr.custom_field_data:
+                ipaddr.custom_field_data.pop("ssot-synced-to-infoblox")
+            _ip = self.ipaddress(
+                address=addr,
+                prefix=str(prefix),
+                status=ipaddr.status.name if ipaddr.status else None,
+                prefix_length=prefix.prefix_length if prefix else ipaddr.prefix_length,
+                dns_name=ipaddr.dns_name,
+                description=ipaddr.description,
+                ext_attrs={**default_cfs, **ipaddr.custom_field_data},
+                pk=ipaddr.id,
+            )
+            try:
+                self.add(_ip)
+            except ObjectAlreadyExists:
+                self.job.log_warning(ipaddr, message=f"Duplicate IP Address detected: {addr}.")
 
     def load_vlangroups(self):
         """Load VLAN Groups from Nautobot."""
         default_cfs = get_default_custom_fields(cf_contenttype=ContentType.objects.get_for_model(VLANGroup))
         for grp in VLANGroup.objects.all():
+            self.vlangroup_map[grp.name] = grp.id
             if "ssot-synced-to-infoblox" in grp.custom_field_data:
                 grp.custom_field_data.pop("ssot-synced-to-infoblox")
             _vg = self.vlangroup(
@@ -177,7 +213,12 @@ class NautobotAdapter(NautobotMixin, DiffSync):
     def load_vlans(self):
         """Load VLANs from Nautobot."""
         default_cfs = get_default_custom_fields(cf_contenttype=ContentType.objects.get_for_model(VLAN))
-        for vlan in VLAN.objects.all():
+        # To ensure we are only dealing with VLANs imported from Infoblox we need to filter to those with a
+        # VLAN Group assigned to match how Infoblox requires a VLAN View to be associated to VLANs.
+        for vlan in VLAN.objects.filter(group__isnull=False):
+            if vlan.group.name not in self.vlan_map:
+                self.vlan_map[vlan.group.name] = {}
+            self.vlan_map[vlan.group.name][vlan.vid] = vlan.id
             if "ssot-synced-to-infoblox" in vlan.custom_field_data:
                 vlan.custom_field_data.pop("ssot-synced-to-infoblox")
             _vlan = self.vlan(
@@ -193,10 +234,23 @@ class NautobotAdapter(NautobotMixin, DiffSync):
 
     def load(self):
         """Load models with data from Nautobot."""
+        self.relationship_map = {r.name: r.id for r in Relationship.objects.only("id", "name")}
+        self.status_map = {s.slug: s.id for s in Status.objects.only("id", "slug")}
+        self.site_map = {s.name: s.id for s in Site.objects.only("id", "name")}
+        self.tenant_map = {t.name: t.id for t in Tenant.objects.only("id", "name")}
+        self.role_map = {r.name: r.id for r in Role.objects.only("id", "name")}
         self.load_prefixes()
+        if "prefix" in self.dict():
+            self.job.log(message=f"Loaded {len(self.dict()['prefix'])} prefixes from Nautobot.")
         self.load_ipaddresses()
+        if "ipaddress" in self.dict():
+            self.job.log(message=f"Loaded {len(self.dict()['ipaddress'])} IP addresses from Nautobot.")
         self.load_vlangroups()
+        if "vlangroup" in self.dict():
+            self.job.log(message=f"Loaded {len(self.dict()['vlangroup'])} VLAN Groups from Nautobot.")
         self.load_vlans()
+        if "vlan" in self.dict():
+            self.job.log(message=f"Loaded {len(self.dict()['vlan'])} VLANs from Nautobot.")
 
 
 class NautobotAggregateAdapter(NautobotMixin, DiffSync):

@@ -1,7 +1,6 @@
 """Signal handlers for nautobot_ssot_infoblox."""
 
-
-from nautobot.extras.choices import CustomFieldTypeChoices
+from nautobot.extras.choices import CustomFieldTypeChoices, RelationshipTypeChoices
 from nautobot_ssot_infoblox.constant import TAG_COLOR
 
 
@@ -17,6 +16,8 @@ def nautobot_database_ready_callback(sender, *, apps, **kwargs):  # pylint: disa
     IPAddress = apps.get_model("ipam", "IPAddress")
     Aggregate = apps.get_model("ipam", "Aggregate")
     Tag = apps.get_model("extras", "Tag")
+    Relationship = apps.get_model("extras", "Relationship")
+    VLAN = apps.get_model("ipam", "VLAN")
 
     Tag.objects.get_or_create(
         slug="ssot-synced-from-infoblox",
@@ -47,3 +48,15 @@ def nautobot_database_ready_callback(sender, *, apps, **kwargs):  # pylint: disa
         ContentType.objects.get_for_model(Aggregate),
     ]:
         custom_field.content_types.add(content_type)
+
+    # add Prefix -> VLAN Relationship
+    relationship_dict = {
+        "name": "Prefix -> VLAN",
+        "slug": "prefix_to_vlan",
+        "type": RelationshipTypeChoices.TYPE_ONE_TO_MANY,
+        "source_type": ContentType.objects.get_for_model(Prefix),
+        "source_label": "Prefix",
+        "destination_type": ContentType.objects.get_for_model(VLAN),
+        "destination_label": "VLAN",
+    }
+    Relationship.objects.get_or_create(name=relationship_dict["name"], defaults=relationship_dict)

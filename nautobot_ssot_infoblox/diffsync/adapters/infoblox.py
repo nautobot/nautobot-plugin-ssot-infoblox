@@ -5,7 +5,7 @@ import re
 from diffsync import DiffSync
 from diffsync.enum import DiffSyncFlags
 from nautobot.extras.plugins.exceptions import PluginImproperlyConfigured
-from nautobot_ssot_infoblox.utils.client import get_default_ext_attrs
+from nautobot_ssot_infoblox.utils.client import get_default_ext_attrs, get_dns_name
 from nautobot_ssot_infoblox.utils.diffsync import get_ext_attr_dict, build_vlan_map
 from nautobot_ssot_infoblox.diffsync.models.infoblox import (
     InfobloxAggregate,
@@ -71,18 +71,20 @@ class InfobloxAdapter(DiffSync):
         default_ext_attrs = get_default_ext_attrs(review_list=ipaddrs)
         for _ip in ipaddrs:
             _, prefix_length = _ip["network"].split("/")
+            dns_name = ""
             if _ip["names"]:
-                ip_ext_attrs = get_ext_attr_dict(extattrs=_ip.get("extattrs", {}))
-                new_ip = self.ipaddress(
-                    address=_ip["ip_address"],
-                    prefix=_ip["network"],
-                    prefix_length=prefix_length,
-                    dns_name=_ip["names"][0],
-                    status=self.conn.get_ipaddr_status(_ip),
-                    description=_ip["comment"],
-                    ext_attrs={**default_ext_attrs, **ip_ext_attrs},
-                )
-                self.add(new_ip)
+                dns_name = get_dns_name(possible_fqdn=_ip["names"][0])
+            ip_ext_attrs = get_ext_attr_dict(extattrs=_ip.get("extattrs", {}))
+            new_ip = self.ipaddress(
+                address=_ip["ip_address"],
+                prefix=_ip["network"],
+                prefix_length=prefix_length,
+                dns_name=dns_name,
+                status=self.conn.get_ipaddr_status(_ip),
+                description=_ip["comment"],
+                ext_attrs={**default_ext_attrs, **ip_ext_attrs},
+            )
+            self.add(new_ip)
 
     def load_vlanviews(self):
         """Load InfobloxVLANView DiffSync model."""
@@ -117,9 +119,17 @@ class InfobloxAdapter(DiffSync):
     def load(self):
         """Load all models by calling other methods."""
         self.load_prefixes()
+        if "prefix" in self.dict():
+            self.job.log(message=f"Loaded {len(self.dict()['prefix'])} prefixes from Infoblox.")
         self.load_ipaddresses()
+        if "ipaddress" in self.dict():
+            self.job.log(message=f"Loaded {len(self.dict()['ipaddress'])} IP addresses from Infoblox.")
         self.load_vlanviews()
+        if "vlangroup" in self.dict():
+            self.job.log(message=f"Loaded {len(self.dict()['vlangroup'])} VLAN views from Infoblox.")
         self.load_vlans()
+        if "vlan" in self.dict():
+            self.job.log(message=f"Loaded {len(self.dict()['vlan'])} VLANs from Infoblox.")
 
     def sync_complete(self, source, diff, flags=DiffSyncFlags.NONE, logger=None):
         """Add tags and custom fields to synced objects."""

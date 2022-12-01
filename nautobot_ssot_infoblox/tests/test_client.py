@@ -11,11 +11,14 @@ from requests.models import HTTPError
 import requests_mock
 
 # from requests_mock.mocker import mock
-from nautobot_ssot_infoblox.utils.client import InvalidUrlScheme
+from nautobot_ssot_infoblox.utils.client import InvalidUrlScheme, get_dns_name
 from nautobot_ssot_infoblox.tests.fixtures_infoblox import (
     get_ptr_record_by_name,
     localhost_client_infoblox,
     get_all_ipv4address_networks,
+    get_all_ipv4address_networks_medium,
+    get_all_ipv4address_networks_large,
+    get_all_ipv4address_networks_bulk,
     create_ptr_record,
     create_a_record,
     create_host_record,
@@ -77,6 +80,18 @@ class TestInfobloxTest(unittest.TestCase):
             localhost_client_infoblox("file://mock_file.txt")
         self.assertLogs("Invalid URL scheme 'file' found for Infoblox URL. Please correct to use HTTPS.")
 
+    def test_get_dns_name(self):
+        """Test that get_dns_name method returns what we expect."""
+        tests = {
+            "www.test.com": "www.test.com",
+            "ServerName (Dev)": "ServerName_Dev",
+            "Test Printer": "Test_Printer",
+            "(TEST)": "",
+        }
+        for fqdn, expected in tests.items():
+            results = get_dns_name(possible_fqdn=fqdn)
+            self.assertEqual(results, expected)
+
     def test_request_success_generic(self):
         """Test generic _request with OK status."""
         with requests_mock.Mocker() as req:
@@ -124,6 +139,53 @@ class TestInfobloxTest(unittest.TestCase):
             response = self.infoblox_client.get_all_ipv4address_networks([(mock_prefix, "default")])
 
             self.assertEqual(response, [])
+
+    def test_get_all_ipv4_address_networks_medium_data_success(self):
+        """Test get_all_ipv4_address_networks success with medium data set."""
+        prefixes = [("172.16.0.0/29", "default"), ("10.220.0.100/31", "default")]
+        mock_uri = "request"
+        response = [get_all_ipv4address_networks_medium()[0] + get_all_ipv4address_networks()[0]]
+        with requests_mock.Mocker() as req:
+            req.post(
+                f"{LOCALHOST}/{mock_uri}",
+                json=response,
+                status_code=201,
+            )
+            resp = self.infoblox_client.get_all_ipv4address_networks(prefixes=prefixes)
+        expected = get_all_ipv4address_networks_medium()[0] + get_all_ipv4address_networks()[0]
+        self.assertEqual(resp, expected)
+
+    def test_get_all_ipv4_address_networks_large_data_success(self):
+        """Test get_all_ipv4_address_networks success with large data set."""
+        prefixes = [("10.0.0.0/22", "default"), ("10.220.0.100/31", "default")]
+
+        mock_response = [
+            {"json": get_all_ipv4address_networks_large(), "status_code": 201},
+            {"json": get_all_ipv4address_networks(), "status_code": 201},
+        ]
+        mock_uri = "request"
+
+        with requests_mock.Mocker() as req:
+            req.post(f"{LOCALHOST}/{mock_uri}", mock_response)
+            resp = self.infoblox_client.get_all_ipv4address_networks(prefixes=prefixes)
+
+        expected = get_all_ipv4address_networks_large()[0] + get_all_ipv4address_networks()[0]
+        self.assertEqual(resp, expected)
+
+    def test_get_all_ipv4_address_networks_bulk_data_success(self):
+        """Test get_all_ipv4_address_networks success with a bulk data set that exceeds 1k results."""
+        prefixes = [("192.168.0.0/23", "default"), ("192.168.2.0/23", "default")]
+        mock_uri = "request"
+        with requests_mock.Mocker() as req:
+            req.post(
+                f"{LOCALHOST}/{mock_uri}",
+                [
+                    {"json": get_all_ipv4address_networks_bulk(), "status_code": 201},
+                    {"json": [], "status_code": 201},
+                ],
+            )
+            resp = self.infoblox_client.get_all_ipv4address_networks(prefixes=prefixes)
+        self.assertEqual(resp, get_all_ipv4address_networks_bulk()[0])
 
     def test_get_host_record_by_name_success(self):
         """Test get_host_by_record success."""

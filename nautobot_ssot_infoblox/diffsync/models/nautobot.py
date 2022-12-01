@@ -1,24 +1,19 @@
 """Nautobot Models for Infoblox integration with SSoT plugin."""
+import ipaddress
 from django.contrib.contenttypes.models import ContentType
 from django.core.exceptions import ValidationError
 from django.utils.text import slugify
 from nautobot.extras.choices import CustomFieldTypeChoices
-from nautobot.extras.choices import RelationshipTypeChoices
-from nautobot.extras.models import Relationship as OrmRelationship
 from nautobot.extras.models import RelationshipAssociation as OrmRelationshipAssociation
 from nautobot.extras.models import CustomField as OrmCF
-from nautobot.extras.models import Status as OrmStatus
-from nautobot.dcim.models import Site as OrmSite
 from nautobot.ipam.choices import IPAddressRoleChoices
 from nautobot.ipam.models import RIR
 from nautobot.ipam.models import Aggregate as OrmAggregate
 from nautobot.ipam.models import IPAddress as OrmIPAddress
 from nautobot.ipam.models import Prefix as OrmPrefix
-from nautobot.ipam.models import Role as OrmPrefixRole
 from nautobot.ipam.models import VLAN as OrmVlan
 from nautobot.ipam.models import VLANGroup as OrmVlanGroup
-from nautobot.ipam.models import VRF as OrmVRF
-from nautobot.tenancy.models import Tenant as OrmTenant
+from nautobot_ssot_infoblox.constant import PLUGIN_CFG
 from nautobot_ssot_infoblox.diffsync.models.base import Aggregate, Network, IPAddress, Vlan, VlanView
 from nautobot_ssot_infoblox.utils.diffsync import create_tag_sync_from_infoblox
 from nautobot_ssot_infoblox.utils.nautobot import get_prefix_vlans
@@ -33,46 +28,47 @@ def process_ext_attrs(diffsync, obj: object, extattrs: dict):
         extattrs (dict): The Extensibility Attributes to be analyzed and applied to passed `prefix`.
     """
     for attr, attr_value in extattrs.items():
-        if attr.lower() in ["site", "facility"]:
-            try:
-                obj.site = OrmSite.objects.get(name=attr_value)
-            except OrmSite.DoesNotExist as err:
-                diffsync.job.log_warning(
-                    message=f"Unable to find Site {attr_value} for {obj} found in Extensibility Attributes '{attr}'. {err}"
-                )
-        if attr.lower() == "vrf":
-            try:
-                obj.vrf = OrmVRF.objects.get(name=attr_value)
-            except OrmVRF.DoesNotExist as err:
-                diffsync.job.log_warning(
-                    message=f"Unable to find VRF {attr_value} for {obj} found in Extensibility Attributes '{attr}'. {err}"
-                )
-        if "role" in attr.lower():
-            if isinstance(obj, OrmIPAddress) and attr_value.lower() in IPAddressRoleChoices.as_dict():
-                obj.role = attr_value.lower()
-            else:
+        if attr_value:
+            if attr.lower() in ["site", "facility"]:
                 try:
-                    obj.role = OrmPrefixRole.objects.get(name=attr_value)
-                except OrmPrefixRole.DoesNotExist as err:
+                    obj.site_id = diffsync.site_map[attr_value]
+                except KeyError as err:
                     diffsync.job.log_warning(
-                        message=f"Unable to find Role {attr_value} for {obj} found in Extensibility Attributes '{attr}'. {err}"
+                        message=f"Unable to find Site {attr_value} for {obj} found in Extensibility Attributes '{attr}'. {err}"
                     )
+            if attr.lower() == "vrf":
+                try:
+                    obj.vrf = diffsync.vrf_map[attr_value]
+                except KeyError as err:
+                    diffsync.job.log_warning(
+                        message=f"Unable to find VRF {attr_value} for {obj} found in Extensibility Attributes '{attr}'. {err}"
+                    )
+            if "role" in attr.lower():
+                if isinstance(obj, OrmIPAddress) and attr_value.lower() in IPAddressRoleChoices.as_dict():
+                    obj.role = attr_value.lower()
+                else:
+                    try:
+                        obj.role = diffsync.role_map[attr_value]
+                    except KeyError as err:
+                        diffsync.job.log_warning(
+                            message=f"Unable to find Role {attr_value} for {obj} found in Extensibility Attributes '{attr}'. {err}"
+                        )
 
-        if attr.lower() in ["tenant", "dept", "department"]:
-            try:
-                obj.tenant = OrmTenant.objects.get(name=attr_value)
-            except OrmTenant.DoesNotExist as err:
-                diffsync.job.log_warning(
-                    message=f"Unable to find Tenant {attr_value} for {obj} found in Extensibility Attributes '{attr}'. {err}"
-                )
-        _cf_dict = {
-            "name": slugify(attr),
-            "type": CustomFieldTypeChoices.TYPE_TEXT,
-            "label": attr,
-        }
-        field, _ = OrmCF.objects.get_or_create(name=_cf_dict["name"], defaults=_cf_dict)
-        field.content_types.add(ContentType.objects.get_for_model(type(obj)).id)
-        obj.custom_field_data.update({_cf_dict["name"]: str(attr_value)})
+            if attr.lower() in ["tenant", "dept", "department"]:
+                try:
+                    obj.tenant = diffsync.tenant_map[attr_value]
+                except KeyError as err:
+                    diffsync.job.log_warning(
+                        message=f"Unable to find Tenant {attr_value} for {obj} found in Extensibility Attributes '{attr}'. {err}"
+                    )
+            _cf_dict = {
+                "name": slugify(attr),
+                "type": CustomFieldTypeChoices.TYPE_TEXT,
+                "label": attr,
+            }
+            field, _ = OrmCF.objects.get_or_create(name=_cf_dict["name"], defaults=_cf_dict)
+            field.content_types.add(ContentType.objects.get_for_model(type(obj)).id)
+            obj.custom_field_data.update({_cf_dict["name"]: str(attr_value)})
 
 
 class NautobotNetwork(Network):
@@ -82,44 +78,33 @@ class NautobotNetwork(Network):
     def create(cls, diffsync, ids, attrs):
         """Create Prefix object in Nautobot."""
         try:
-            status = OrmStatus.objects.get(slug=attrs.get("status", "active"))
-        except OrmStatus.DoesNotExist:
-            status = OrmStatus.objects.get(slug="active")
+            status = diffsync.status_map[attrs["status"]]
+        except KeyError:
+            status = diffsync.status_map[slugify(PLUGIN_CFG.get("default_status", "active"))]
 
         _prefix = OrmPrefix(
             prefix=ids["network"],
-            status=status,
+            status_id=status,
             description=attrs.get("description", ""),
         )
         if attrs.get("vlans"):
-            relationship_dict = {
-                "name": "Prefix -> VLAN",
-                "slug": "prefix_to_vlan",
-                "type": RelationshipTypeChoices.TYPE_ONE_TO_MANY,
-                "source_type": ContentType.objects.get_for_model(OrmPrefix),
-                "source_label": "Prefix",
-                "destination_type": ContentType.objects.get_for_model(OrmVlan),
-                "destination_label": "VLAN",
-            }
-            relation, _ = OrmRelationship.objects.get_or_create(
-                name=relationship_dict["name"], defaults=relationship_dict
-            )
+            relation = diffsync.relationship_map["Prefix -> VLAN"]
             for _, _vlan in attrs["vlans"].items():
                 index = 0
                 try:
-                    found_vlan = OrmVlan.objects.get(vid=_vlan["vid"], name=_vlan["name"], group__name=_vlan["group"])
+                    found_vlan = diffsync.vlan_map[_vlan["group"]][_vlan["vid"]]
                     if found_vlan:
                         if index == 0:
-                            _prefix.vlan = found_vlan
+                            _prefix.vlan_id = found_vlan
                         OrmRelationshipAssociation.objects.get_or_create(
-                            relationship_id=relation.id,
+                            relationship_id=relation,
                             source_type=ContentType.objects.get_for_model(OrmPrefix),
                             source_id=_prefix.id,
                             destination_type=ContentType.objects.get_for_model(OrmVlan),
-                            destination_id=found_vlan.id,
+                            destination_id=found_vlan,
                         )
                     index += 1
-                except OrmVlan.DoesNotExist as err:
+                except KeyError as err:
                     diffsync.job.log_warning(
                         message=f"Unable to find VLAN {_vlan['vid']} {_vlan['name']} in {_vlan['group']}. {err}"
                     )
@@ -127,7 +112,8 @@ class NautobotNetwork(Network):
         if attrs.get("ext_attrs"):
             process_ext_attrs(diffsync=diffsync, obj=_prefix, extattrs=attrs["ext_attrs"])
         _prefix.tags.add(create_tag_sync_from_infoblox())
-        _prefix.validated_save()
+        diffsync.objects_to_create["prefixes"].append(_prefix)
+        diffsync.prefix_map[ids["network"]] = _prefix.id
         return super().create(ids=ids, diffsync=diffsync, attrs=attrs)
 
     def update(self, attrs):  # pylint: disable=too-many-branches
@@ -138,29 +124,41 @@ class NautobotNetwork(Network):
         if "description" in attrs:
             _pf.description = attrs["description"]
         if "status" in attrs:
-            _pf.status = OrmStatus.objects.get(slug=attrs["status"])
+            try:
+                _pf.status_id = self.diffsync.status_map[slugify(attrs["status"])]
+            except KeyError:
+                self.diffsync.job.log_warning(
+                    message=f"Unable to find Status {attrs['status']} to update prefix {_pf.prefix}."
+                )
         if "ext_attrs" in attrs:
             process_ext_attrs(diffsync=self.diffsync, obj=_pf, extattrs=attrs["ext_attrs"])
-        if "vlans" in attrs:
+        if "vlans" in attrs:  # pylint: disable=too-many-nested-blocks
             current_vlans = get_prefix_vlans(prefix=_pf)
             if len(current_vlans) < len(attrs["vlans"]):
                 for _, item in attrs["vlans"].items():
-                    vlan = OrmVlan.objects.get(vid=item["vid"], name=item["name"], group__name=item["group"])
-                    if vlan not in current_vlans:
+                    try:
+                        vlan = OrmVlan.objects.get(vid=item["vid"], name=item["name"], group__name=item["group"])
+                        if vlan not in current_vlans:
+                            if self.diffsync.job.kwargs.get("debug"):
+                                self.diffsync.job.log_debug(message=f"Adding VLAN {vlan.vid} to {_pf.prefix}.")
+                            OrmRelationshipAssociation.objects.get_or_create(
+                                relationship_id=self.diffsync.relationship_map["Prefix -> VLAN"],
+                                source_type=ContentType.objects.get_for_model(OrmPrefix),
+                                source_id=_pf.id,
+                                destination_type=ContentType.objects.get_for_model(OrmVlan),
+                                destination_id=vlan.id,
+                            )
+                    except OrmVlan.DoesNotExist:
                         if self.diffsync.job.kwargs.get("debug"):
-                            self.diffsync.job.log_debug(message=f"Adding VLAN {vlan.vid} to {_pf.prefix}.")
-                        OrmRelationshipAssociation.objects.get_or_create(
-                            relationship_id=OrmRelationship.objects.get(name="Prefix -> VLAN").id,
-                            source_type=ContentType.objects.get_for_model(OrmPrefix),
-                            source_id=_pf.id,
-                            destination_type=ContentType.objects.get_for_model(OrmVlan),
-                            destination_id=vlan.id,
-                        )
+                            self.diffsync.job.log_debug(
+                                message=f"Unable to find VLAN {item['vid']} {item['name']} in {item['group']} to assign to prefix {_pf.prefix}."
+                            )
+                            continue
             else:
                 for vlan in current_vlans:
                     if vlan.vid not in attrs["vlans"]:
                         del_vlan = OrmRelationshipAssociation.objects.get(
-                            relationship_id=OrmRelationship.objects.get(name="Prefix -> VLAN").id,
+                            relationship_id=self.diffsync.relationship_map["Prefix -> VLAN"],
                             source_type=ContentType.objects.get_for_model(OrmPrefix),
                             source_id=_pf.id,
                             destination_type=ContentType.objects.get_for_model(OrmVlan),
@@ -186,34 +184,51 @@ class NautobotIPAddress(IPAddress):
     @classmethod
     def create(cls, diffsync, ids, attrs):
         """Create IPAddress object in Nautobot."""
-        _pf = OrmPrefix.objects.get(prefix=ids["prefix"])
+        _pf = ipaddress.ip_network(ids["prefix"])
+        try:
+            status = diffsync.status_map[slugify(attrs["status"])]
+        except KeyError:
+            status = diffsync.status_map[slugify(PLUGIN_CFG.get("default_status", "active"))]
         _ip = OrmIPAddress(
-            address=f"{ids['address']}/{_pf.prefix_length}",
-            status=OrmStatus.objects.get(name="Active")
-            if not attrs.get("status")
-            else OrmStatus.objects.get(name=attrs["status"]),
+            address=f"{ids['address']}/{_pf.prefixlen}",
+            status_id=status,
             description=attrs.get("description", ""),
             dns_name=attrs.get("dns_name", ""),
         )
         _ip.tags.add(create_tag_sync_from_infoblox())
         if attrs.get("ext_attrs"):
             process_ext_attrs(diffsync=diffsync, obj=_ip, extattrs=attrs["ext_attrs"])
-        _ip.validated_save()
-        return super().create(ids=ids, diffsync=diffsync, attrs=attrs)
+        try:
+            diffsync.objects_to_create["ipaddrs"].append(_ip)
+            diffsync.ipaddr_map[_ip.address] = _ip.id
+            return super().create(ids=ids, diffsync=diffsync, attrs=attrs)
+        except ValidationError as err:
+            diffsync.job.log_warning(
+                message=f"Error with validating IP Address {ids['address']}/{_pf.prefixlen}. {err}"
+            )
+            return None
 
     def update(self, attrs):
         """Update IPAddress object in Nautobot."""
         _ipaddr = OrmIPAddress.objects.get(id=self.pk)
         if attrs.get("status"):
-            _ipaddr.status = OrmStatus.objects.get(name=attrs["status"])
+            try:
+                status = self.diffsync.status_map[slugify(attrs["status"])]
+            except KeyError:
+                status = self.diffsync.status_map[slugify(PLUGIN_CFG.get("default_status", "active"))]
+            _ipaddr.status_id = status
         if attrs.get("description"):
             _ipaddr.description = attrs["description"]
         if attrs.get("dns_name"):
             _ipaddr.dns_name = attrs["dns_name"]
         if "ext_attrs" in attrs:
             process_ext_attrs(diffsync=self.diffsync, obj=_ipaddr, extattrs=attrs["ext_attrs"])
-        _ipaddr.validated_save()
-        return super().update(attrs)
+        try:
+            _ipaddr.validated_save()
+            return super().update(attrs)
+        except ValidationError as err:
+            self.diffsync.job.log_warning(message=f"Error with updating IP Address {self.address}. {err}")
+            return None
 
     # def delete(self):
     #     """Delete IPAddress object in Nautobot."""
@@ -236,7 +251,8 @@ class NautobotVlanGroup(VlanView):
         )
         if attrs.get("ext_attrs"):
             process_ext_attrs(diffsync=diffsync, obj=_vg, extattrs=attrs["ext_attrs"])
-        _vg.validated_save()
+        diffsync.objects_to_create["vlangroups"].append(_vg)
+        diffsync.vlangroup_map[ids["name"]] = _vg.id
         return super().create(ids=ids, diffsync=diffsync, attrs=attrs)
 
     def update(self, attrs):
@@ -263,33 +279,30 @@ class NautobotVlan(Vlan):
         _vlan = OrmVlan(
             vid=ids["vid"],
             name=ids["name"],
-            status=OrmStatus.objects.get(name=cls.get_vlan_status(attrs["status"])),
-            group=OrmVlanGroup.objects.get(name=ids["vlangroup"]) if ids["vlangroup"] else None,
+            status_id=diffsync.status_map[cls.get_vlan_status(attrs["status"])],
+            group_id=diffsync.vlangroup_map[ids["vlangroup"]],
             description=attrs["description"],
         )
         if "ext_attrs" in attrs:
             process_ext_attrs(diffsync=diffsync, obj=_vlan, extattrs=attrs["ext_attrs"])
         _vlan.tags.add(create_tag_sync_from_infoblox())
-        # ensure that the VLAN Group and VLAN have the same Site
-        if not _vlan.site and _vlan.group.site:
-            _vlan.site = _vlan.group.site
-        if not _vlan.group.site and _vlan.site:
-            _vlan.group.site = _vlan.site
-            _vlan.group.validated_save()
         try:
-            _vlan.validated_save()
+            diffsync.objects_to_create["vlans"].append(_vlan)
+            if ids["vlangroup"] not in diffsync.vlan_map:
+                diffsync.vlan_map[ids["vlangroup"]] = {}
+            diffsync.vlan_map[ids["vlangroup"]][_vlan.vid] = _vlan.id
+            return super().create(ids=ids, diffsync=diffsync, attrs=attrs)
         except ValidationError as err:
             diffsync.job.log_warning(message=f"Unable to create VLAN {ids['name']} {ids['vid']}. {err}")
             return None
-        return super().create(ids=ids, diffsync=diffsync, attrs=attrs)
 
     @staticmethod
     def get_vlan_status(status: str) -> str:
         """Return VLAN Status from mapping."""
         statuses = {
-            "ASSIGNED": "Active",
-            "UNASSIGNED": "Deprecated",
-            "RESERVED": "Reserved",
+            "ASSIGNED": "active",
+            "UNASSIGNED": "deprecated",
+            "RESERVED": "reserved",
         }
         return statuses[status]
 
@@ -297,7 +310,7 @@ class NautobotVlan(Vlan):
         """Update VLAN object in Nautobot."""
         _vlan = OrmVlan.objects.get(id=self.pk)
         if attrs.get("status"):
-            _vlan.status = OrmStatus.objects.get(name=self.get_vlan_status(attrs["status"]))
+            _vlan.status_id = self.diffsync.status_map[self.get_vlan_status(attrs["status"])]
         if attrs.get("description"):
             _vlan.description = attrs["description"]
         if "ext_attrs" in attrs:
