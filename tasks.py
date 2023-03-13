@@ -38,7 +38,7 @@ namespace = Collection("nautobot_ssot_infoblox")
 namespace.configure(
     {
         "nautobot_ssot_infoblox": {
-            "nautobot_ver": "1.3.6",
+            "nautobot_ver": "1.4.0",
             "project_name": "nautobot_ssot_infoblox",
             "python_ver": "3.8",
             "local": False,

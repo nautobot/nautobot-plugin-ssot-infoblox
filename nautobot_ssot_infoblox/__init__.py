@@ -24,7 +24,7 @@ class NautobotSSoTInfobloxConfig(PluginConfig):
     description = "Nautobot SSoT Infoblox."
     base_url = "ssot-infoblox"
     required_settings = []
-    min_version = "1.2.0"
+    min_version = "1.4.0"
     max_version = "1.9999"
     default_settings = {
         "enable_sync_to_infoblox": False,
