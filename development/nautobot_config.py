@@ -308,6 +308,13 @@ PLUGINS_CONFIG = {
         "enable_sync_to_infoblox": True,
         "enable_rfc1918_network_containers": True,
         "default_status": "active",
+        "import_objects": {
+            "vlan_views": os.getenv("NAUTOBOT_INFOBLOX_IMPORT_VLAN_VIEWS", True),
+            "vlans": os.getenv("NAUTOBOT_INFOBLOX_IMPORT_VLANS", True),
+            "subnets": os.getenv("NAUTOBOT_INFOBLOX_IMPORT_SUBNETS", True),
+            "ip_addresses": os.getenv("NAUTOBOT_INFOBLOX_IMPORT_IP_ADDRESSES", True),
+        },
+        "import_subnets": ["10.46.128.0/18", "192.168.1.0/24"],
     },
     "nautobot_ssot": {
         "hide_example_jobs": True,

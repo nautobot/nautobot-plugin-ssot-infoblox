@@ -5,6 +5,7 @@ import re
 from diffsync import DiffSync
 from diffsync.enum import DiffSyncFlags
 from nautobot.extras.plugins.exceptions import PluginImproperlyConfigured
+from nautobot_ssot_infoblox.constant import PLUGIN_CFG
 from nautobot_ssot_infoblox.utils.client import get_default_ext_attrs, get_dns_name
 from nautobot_ssot_infoblox.utils.diffsync import get_ext_attr_dict, build_vlan_map
 from nautobot_ssot_infoblox.diffsync.models.infoblox import (
@@ -48,11 +49,17 @@ class InfobloxAdapter(DiffSync):
 
     def load_prefixes(self):
         """Load InfobloxNetwork DiffSync model."""
-        # Need to load containers here to prevent duplicates when syncing back to Infoblox
-        containers = self.conn.get_network_containers()
-        subnets = self.conn.get_all_subnets()
+        if PLUGIN_CFG.get("import_subnets"):
+            subnets = []
+            for prefix in PLUGIN_CFG["import_subnets"]:
+                subnets.extend(self.conn.get_all_subnets(prefix=prefix))
+            all_networks = subnets
+        else:
+            # Need to load containers here to prevent duplicates when syncing back to Infoblox
+            containers = self.conn.get_network_containers()
+            subnets = self.conn.get_all_subnets()
+            all_networks = containers + subnets
         self.subnets = [(x["network"], x["network_view"]) for x in subnets]
-        all_networks = containers + subnets
         default_ext_attrs = get_default_ext_attrs(review_list=all_networks)
         for _pf in all_networks:
             pf_ext_attrs = get_ext_attr_dict(extattrs=_pf.get("extattrs", {}))
@@ -118,18 +125,24 @@ class InfobloxAdapter(DiffSync):
 
     def load(self):
         """Load all models by calling other methods."""
-        self.load_prefixes()
-        if "prefix" in self.dict():
-            self.job.log(message=f"Loaded {len(self.dict()['prefix'])} prefixes from Infoblox.")
-        self.load_ipaddresses()
-        if "ipaddress" in self.dict():
-            self.job.log(message=f"Loaded {len(self.dict()['ipaddress'])} IP addresses from Infoblox.")
-        self.load_vlanviews()
-        if "vlangroup" in self.dict():
-            self.job.log(message=f"Loaded {len(self.dict()['vlangroup'])} VLAN views from Infoblox.")
-        self.load_vlans()
-        if "vlan" in self.dict():
-            self.job.log(message=f"Loaded {len(self.dict()['vlan'])} VLANs from Infoblox.")
+        if "import_objects" in PLUGIN_CFG:
+            if PLUGIN_CFG["import_objects"].get("subnets"):
+                self.load_prefixes()
+            if PLUGIN_CFG["import_objects"].get("ip_addresses"):
+                self.load_ipaddresses()
+            if PLUGIN_CFG["import_objects"].get("vlan_views"):
+                self.load_vlanviews()
+            if PLUGIN_CFG["import_objects"].get("vlans"):
+                self.load_vlans()
+        else:
+            self.job.log_info(message="The `import_objects` setting was not found so all objects will be imported.")
+            self.load_prefixes()
+            self.load_ipaddresses()
+            self.load_vlanviews()
+            self.load_vlans()
+        for obj in ["prefix", "ipaddress", "vlangroup", "vlan"]:
+            if obj in self.dict():
+                self.job.log(message=f"Loaded {len(self.dict()[obj])} {obj} from Infoblox.")
 
     def sync_complete(self, source, diff, flags=DiffSyncFlags.NONE, logger=None):
         """Add tags and custom fields to synced objects."""
