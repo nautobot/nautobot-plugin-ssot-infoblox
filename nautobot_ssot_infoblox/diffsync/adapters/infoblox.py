@@ -125,17 +125,19 @@ class InfobloxAdapter(DiffSync):
 
     def load(self):
         """Load all models by calling other methods."""
-        if "import_objects" in PLUGIN_CFG:
-            if PLUGIN_CFG["import_objects"].get("subnets"):
+        if "infoblox_import_objects" in PLUGIN_CFG:
+            if PLUGIN_CFG["infoblox_import_objects"].get("subnets"):
                 self.load_prefixes()
-            if PLUGIN_CFG["import_objects"].get("ip_addresses"):
+            if PLUGIN_CFG["infoblox_import_objects"].get("ip_addresses"):
                 self.load_ipaddresses()
-            if PLUGIN_CFG["import_objects"].get("vlan_views"):
+            if PLUGIN_CFG["infoblox_import_objects"].get("vlan_views"):
                 self.load_vlanviews()
-            if PLUGIN_CFG["import_objects"].get("vlans"):
+            if PLUGIN_CFG["infoblox_import_objects"].get("vlans"):
                 self.load_vlans()
         else:
-            self.job.log_info(message="The `import_objects` setting was not found so all objects will be imported.")
+            self.job.log_info(
+                message="The `infoblox_import_objects` setting was not found so all objects will be imported."
+            )
             self.load_prefixes()
             self.load_ipaddresses()
             self.load_vlanviews()
