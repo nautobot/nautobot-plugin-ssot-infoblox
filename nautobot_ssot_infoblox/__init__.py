@@ -5,13 +5,11 @@ try:
 except ImportError:
     # Python version < 3.8
     import importlib_metadata as metadata
-
-__version__ = metadata.version(__name__)
-
 from nautobot.core.signals import nautobot_database_ready
 from nautobot.extras.plugins import PluginConfig
-
 from nautobot_ssot_infoblox.signals import nautobot_database_ready_callback
+
+__version__ = metadata.version(__name__)
 
 
 class NautobotSSoTInfobloxConfig(PluginConfig):
