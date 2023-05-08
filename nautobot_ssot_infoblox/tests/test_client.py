@@ -406,7 +406,6 @@ class TestInfobloxTest(unittest.TestCase):
         self.assertEqual(err.value.response.status_code, 404)
 
     def test_create_ptr_record_success(self):
-
         mock_uri = "record:ptr"
         mock_fqdn = "test-device.test-site"
         mock_ip_address = "10.1.1.1"
@@ -434,7 +433,6 @@ class TestInfobloxTest(unittest.TestCase):
         self.assertEqual(err.value.response.status_code, 404)
 
     def test_create_a_record_success(self):
-
         mock_uri = "record:a"
         mock_fqdn = "test-device.test-site"
         mock_ip_address = "10.1.1.1"
@@ -461,7 +459,6 @@ class TestInfobloxTest(unittest.TestCase):
         self.assertEqual(err.value.response.status_code, 404)
 
     def test_create_host_record_success(self):
-
         mock_uri = "record:host"
         mock_fqdn = "test-device.test-site"
         mock_ip_address = "10.1.1.1"
