@@ -38,6 +38,9 @@ See the section below for configuration settings.
 | NAUTOBOT_INFOBLOX_WAPI_VERSION    | v2.12   | The version of the Infoblox API.                                       |
 | enable_sync_to_infoblox           | False   | Add job to sync data from Nautobot into Infoblox.                      |
 | enable_rfc1918_network_containers | False   | Add job to sync network containers to Nautobot (top level aggregates). |
+| default_status                    | active  | Default Status to be assigned to imported objects.                     |
+| infoblox_import_objects           | True    | Dictionary with keys for each import object and the value define import.|
+| infoblox_import_subnets           | N/A     | List of Subnets in CIDR string notation to filter import to.           |
 
 ### Configuration Example
 
@@ -54,6 +57,14 @@ PLUGINS_CONFIG = {
         "NAUTOBOT_INFOBLOX_WAPI_VERSION": os.getenv("NAUTOBOT_INFOBLOX_WAPI_VERSION", "v2.12"),
         "enable_sync_to_infoblox": False,
         "enable_rfc1918_network_containers": False,
+        "default_status": "active",
+        "infoblox_import_objects": {
+            "vlan_views": os.getenv("NAUTOBOT_INFOBLOX_IMPORT_VLAN_VIEWS", True),
+            "vlans": os.getenv("NAUTOBOT_INFOBLOX_IMPORT_VLANS", True),
+            "subnets": os.getenv("NAUTOBOT_INFOBLOX_INFOBLOX_IMPORT_SUBNETS", True),
+            "ip_addresses": os.getenv("NAUTOBOT_INFOBLOX_IMPORT_IP_ADDRESSES", True),
+        },
+        "infoblox_import_subnets": ["10.46.128.0/18", "192.168.1.0/24"],
     }
 }
 ```
