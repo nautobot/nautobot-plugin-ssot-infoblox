@@ -124,3 +124,4 @@ upload_to_release = false
 changelog_file = "CHANGELOG.md"
 build_command = false
 version_source = "tag"
+commit_version_number = true
