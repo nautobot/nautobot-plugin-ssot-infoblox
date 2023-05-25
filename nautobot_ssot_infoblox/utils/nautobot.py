@@ -26,6 +26,10 @@ def get_prefix_vlans(prefix: Prefix) -> list:
     Returns:
         list: List of VLAN objects with RelationshipAssociation to passed Prefix.
     """
+    vlan_list = []
     pf_relations = prefix.get_relationships()
     pf_vlan_relationship = Relationship.objects.get(name="Prefix -> VLAN")
-    return [x.destination for x in pf_relations["source"][pf_vlan_relationship]]
+    if pf_vlan_relationship in pf_relations["source"]:
+        vlan_list = [x.destination for x in pf_relations["source"][pf_vlan_relationship]]
+        vlan_list.sort(key=lambda x: x.vid)
+    return vlan_list
