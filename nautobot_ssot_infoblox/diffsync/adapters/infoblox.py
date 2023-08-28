@@ -76,10 +76,10 @@ class InfobloxAdapter(DiffSync):
             return new_list
         
         """Load InfobloxNetwork DiffSync model."""
-        if PLUGIN_CFG.get("import_subnets"):
+        if PLUGIN_CFG.get("infoblox_import_subnets"):
             subnets = []
             containers = []
-            for prefix in PLUGIN_CFG["import_subnets"]:
+            for prefix in PLUGIN_CFG["infoblox_import_subnets"]:
                 # Get all child containers and subnets
                 cl = get_tree_from_container(prefix)
                 containers.extend(cl)
@@ -92,7 +92,7 @@ class InfobloxAdapter(DiffSync):
                 else:
                     subnets.extend(self.conn.get_all_subnets(prefix=prefix))
             
-            # Remove duplicates if a child subnet is included import_subnets config
+            # Remove duplicates if a child subnet is included infoblox_import_subnets config
             subnets = remove_duplicates(subnets)
             all_networks = remove_duplicates(containers) + subnets
         else:
