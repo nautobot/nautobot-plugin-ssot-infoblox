@@ -48,22 +48,31 @@ class InfobloxAdapter(DiffSync):
             raise PluginImproperlyConfigured
 
     def load_prefixes(self):
-        # Returns the list of all child containers from a given root container
-        def get_tree_from_container(root_container: str) -> list:
+        """Load InfobloxNetwork DiffSync model."""
+
+        def _get_tree_from_container(root_container: str) -> list:
+            """Get child containers from a given root container.
+
+            Args:
+                root_container (str): Prefix representing the root container.
+
+            Returns:
+                list: Child containers
+            """
             flattened_tree = []
             stack = []
             root_containers = self.conn.get_network_containers(prefix=root_container)
             if root_containers:
-                stack =  [root_containers[0]]
-            
+                stack = [root_containers[0]]
+
             while stack:
                 current_node = stack.pop()
                 flattened_tree.append(current_node)
-                children = self.conn.get_child_network_containers(prefix=current_node["network"])
+                children = self.conn.get_network_containers(prefix=current_node["network"])
                 stack.extend(children)
-                
+
             return flattened_tree
-        
+
         # Removes duplicate networks from a list of networks
         def remove_duplicates(network_list: list) -> list:
             seen_networks = set()
@@ -74,24 +83,23 @@ class InfobloxAdapter(DiffSync):
                     seen_networks.add(network["network"])
 
             return new_list
-        
-        """Load InfobloxNetwork DiffSync model."""
+
         if PLUGIN_CFG.get("infoblox_import_subnets"):
             subnets = []
             containers = []
             for prefix in PLUGIN_CFG["infoblox_import_subnets"]:
                 # Get all child containers and subnets
-                cl = get_tree_from_container(prefix)
-                containers.extend(cl)
-                
+                child_containers = _get_tree_from_container(prefix)
+                containers.extend(child_containers)
+
                 # Need to check if the container has children. If it does, we need to get all subnets from the children
                 # If it doesn't, we can just get all subnets from the container
-                if cl:
-                    for subnet in cl:
-                        subnets.extend(self.conn.get_child_subnets_from_container(prefix=subnet["network"]))
+                if child_containers:
+                    for subnet in child_containers:
+                        subnets.extend(self.conn.get_all_subnets(prefix=subnet["network"]))
                 else:
                     subnets.extend(self.conn.get_all_subnets(prefix=prefix))
-            
+
             # Remove duplicates if a child subnet is included infoblox_import_subnets config
             subnets = remove_duplicates(subnets)
             all_networks = remove_duplicates(containers) + subnets

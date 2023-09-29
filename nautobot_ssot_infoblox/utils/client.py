@@ -1248,51 +1248,10 @@ class InfobloxApi:  # pylint: disable=too-many-public-methods,  too-many-instanc
             "_return_fields": "network,comment,network_view,extattrs,rir_organization,rir",
             "_max_results": 100000,
         }
-        
+
         if prefix:
             params.update({"network": prefix})
 
-        response = self._request("GET", url_path, params=params)
-        response = response.json()
-        logger.info(response)
-        results = response.get("result", [])
-        for res in results:
-            res.update({"status": "container"})
-        return results
-    
-    def get_child_network_containers(self, prefix: str):
-        """Get all Child Network Containers for Container.
-
-        Returns:
-            (list) of record dicts
-
-        Return Response:
-        [
-            {
-                "_ref": "networkcontainer/ZG5zLm5ldHdvcmtfY29udGFpbmVyJDE5Mi4xNjguMi4wLzI0LzA:192.168.2.0/23/default",
-                "comment": "Campus LAN",
-                "extattrs": {},
-                "network": "192.168.2.0/24",
-                "network_view": "default",
-                "rir": "NONE",
-            },
-            {
-                "_ref": "networkcontainer/ZG5zLm5ldHdvcmtfY29udGFpbmVyJDE5Mi4xNjguMi4wLzI0LzA:192.168.2.0/23/default",
-                "comment": "Campus LAN 2",
-                "extattrs": {},
-                "network": "192.168.3.0/24",
-                "network_view": "default",
-                "rir": "NONE",
-            }
-        ]
-        """
-        url_path = "networkcontainer"
-        params = {
-            "_return_as_object": 1,
-            "_return_fields": "network,comment,network_view,extattrs,rir_organization,rir",
-            "_max_results": 100000,
-        }
-        params.update({"network_container": prefix})
         response = self._request("GET", url_path, params=params)
         response = response.json()
         logger.info(response)
@@ -1340,7 +1299,7 @@ class InfobloxApi:  # pylint: disable=too-many-public-methods,  too-many-instanc
         }
 
         params.update({"network_container": prefix})
-        
+
         try:
             response = self._request("GET", url_path, params=params)
         except HTTPError as err:
