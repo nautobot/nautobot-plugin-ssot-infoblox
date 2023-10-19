@@ -1,3 +1,5 @@
+# The code in this repository has been migrated to the [Nautobot SSoT Repository](https://github.com/nautobot/nautobot-plugin-ssot) as an integration - read more about it in the [SSoT Docs](https://docs.nautobot.com/projects/ssot/en/latest/admin/install/)! As of August 2023 this repository has been **FROZEN** - all development / issues / discussions for this integration are in the [Nautobot SSoT Repository](https://github.com/nautobot/nautobot-plugin-ssot) going forward.
+
 # Nautobot SSoT Infoblox
 
 Using the [Nautobot SSoT](https://github.com/nautobot/nautobot-plugin-ssot) framework, the SSoT plugin for Infoblox allows for synchronizing of IP network and VLAN data between [Infoblox](https://infoblox.com/) and [Nautobot](https://github.com/nautobot/nautobot).
