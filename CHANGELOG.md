@@ -7,6 +7,19 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 <!--next-version-placeholder-->
 
+## v0.9.0 (2023-10-20)
+### Feature
+
+* ✨ Add ability to select objects to import and specify Prefixes to import. ([`926edc7`](https://github.com/nautobot/nautobot-plugin-ssot-infoblox/commit/926edc7e397ed591a51bfa86798e0cd158b2f13c))
+
+### Fix
+
+* Correct CustomField creation to not slugify name, specify slug. ([`da56cd0`](https://github.com/nautobot/nautobot-plugin-ssot-infoblox/commit/da56cd00707003b6f3390630fc1e448d329c57ab))
+
+### Documentation
+
+* 📝 Updated README with missing settings. ([`37dbadd`](https://github.com/nautobot/nautobot-plugin-ssot-infoblox/commit/37dbadd8b437eefe06eaccc6fe2f350b7b3337de))
+
 ## v0.8.0 (2023-05-08)
 ### Feature
 * ✨ Add ability to select objects to import and specify Prefixes to import. ([`926edc7`](https://github.com/nautobot/nautobot-plugin-ssot-infoblox/commit/926edc7e397ed591a51bfa86798e0cd158b2f13c))
