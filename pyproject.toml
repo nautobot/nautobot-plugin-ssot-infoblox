@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "nautobot-ssot-infoblox"
-version = "0.7.5"
+version = "0.8.0"
 description = "Nautobot SSoT Infoblox"
 authors = ["Network to Code, LLC <info@networktocode.com>"]
 license = "Apache-2.0"
@@ -19,7 +19,7 @@ packages = [
 [tool.poetry.dependencies]
 python = "^3.7"
 dnspython = "^2.1.0"
-nautobot-ssot = "^1.1.0"
+nautobot-ssot = "^1.1.0, <1.4.0"
 nautobot = "^1.4.0"
 
 [tool.poetry.dev-dependencies]
@@ -124,3 +124,4 @@ upload_to_release = false
 changelog_file = "CHANGELOG.md"
 build_command = false
 version_source = "tag"
+commit_version_number = true
